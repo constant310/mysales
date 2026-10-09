@@ -1,61 +1,52 @@
-name: Free AI motion clip test (mySales)
+name: Free mySales AI acting scenes
 on:
   push:
     branches:
       - ai-video/mysales-zerogpu-test-20261009
-  pull_request:
-    branches:
-      - main
 permissions:
   contents: read
 jobs:
   generate_real_motion:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 28
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Attempt open-source LTX real motion on free Hugging Face ZeroGPU
-        shell: bash
+      - name: Generate additional realistic acting with open-weight LTX ZeroGPU
         run: |
           python -m pip install --quiet gradio_client
           mkdir -p ai-motion-output
-          cat >/tmp/generate_motion.py <<'PY'
+          cat >/tmp/gen.py <<'PY'
           from gradio_client import Client
-          import os, shutil, time
-          print('Connecting to open-weight LTX video public demo...',flush=True)
+          import os,shutil,traceback,time
           client=Client("Lightricks/ltx-video-distilled", verbose=True)
-          print('Connected; available endpoints:',flush=True)
-          client.view_api()
-          prompt=("A cinematic handheld close-up in a small busy Nigerian neighborhood provision store, "
-             "a worried Black Nigerian female shop owner in a mustard blouse leans over a counter, "
-             "opens the cash till, counts banknotes quickly with both hands, stops and looks alarmed "
-             "at the low amount, expressive natural facial and hand movement, fluorescent shop lights, "
-             "colorful packaged goods on shelves, authentic documentary-style live-action, "
-             "single continuous scene, highly realistic fluid motion, no dialogue, no subtitles, "
-             "no logos, no text on screen, vertical video")
-          # Public ZeroGPU is best-effort; not necessarily callable without an authenticated account.
-          result=client.predict(
-              prompt,
-              "distorted hands, deformed fingers, motion blur, ugly, jarring jump cuts, captions, watermark",
-              None,None,640,384,"text-to-video",2.5,9,12345,False,1.0,False,
-              api_name="/text_to_video"
-          )
-          print('Prediction result:',str(result)[:800],flush=True)
-          vid=result[0] if isinstance(result,(tuple,list)) else result
-          if isinstance(vid,dict): vid=vid.get("video") or vid.get("path")
-          if not vid or not os.path.exists(vid):
-              raise RuntimeError('Inference did not return a valid video file')
-          shutil.copy2(vid,'ai-motion-output/mysales_first_acting_clip.mp4')
-          print('Saved generated clip',os.path.getsize('ai-motion-output/mysales_first_acting_clip.mp4'),flush=True)
+          shots=[
+           ("02_cashier", "Cinematic single continuous medium shot in a busy Nigerian neighborhood minimart: a 26 year old Black Nigerian male cashier with short cropped hair in a dark green uniform stands behind the counter. He handles a customer's cash, looks down at the sale notebook, hesitates, then glances nervously at the shop owner. Natural expressive arm, shoulder and head gestures, lively grocery shop background, documentary live action, vertical, no cuts, no written captions, no dialogue or watermark."),
+           ("03_customer", "Cinematic candid shot in a busy small Nigerian grocery shop: a young Black Nigerian female customer with long neat braids, black casual T shirt, blue jeans, holding a black grocery bag, smiles and gestures 'I will pay later' with her phone while walking away from checkout. The shop cashier watches worriedly from behind. Warm authentic fluorescent market shop light, expressive natural realistic body and hand motion, vertical 9:16, one continuous take, no captions, no written text."),
+           ("04_stock", "In a busy Nigerian mini supermarket, a Black Nigerian woman owner, mustard yellow buttoned work blouse, dark braided hair, brows furrowed, urgently counts boxes on a grocery shelf, moves two cardboard packages aside, gasps at an empty gap, then turns to the shop cashier. Real camera movement and physical interactions, authentic brightly lit food shop, vertical cinematic 9:16, no text or logos."),
+           ("05_owner_ledger", "Realistic close-up documentary inside a Nigerian convenience store: a Black Nigerian woman owner with neatly braided dark hair and mustard yellow blouse sits at a checkout desk, moves her hands flipping receipts in an accounting notebook, counts cash, then holds her forehead and reacts in distress. Clear natural shoulder and head movements and expressive worried face, warm shop lights, vertical 9:16, no text or logos."),
+           ("06_happy_owner", "A cinematic candid medium shot in a bustling Nigerian neighbourhood retail shop: a Black Nigerian small-business woman with braided hair, mustard blouse and apron joyfully uses a smartphone after reconciling her sales, her face brightens into an authentic relieved smile, she taps on phone screen and shows it to a cashier, fluid gestures and lifelike motion, vertical 9:16, no text, no app logos.")
+          ]
+          for i,(name,prompt) in enumerate(shots):
+           try:
+            print('Starting shot',name,flush=True)
+            r=client.predict(prompt, "warped fingers, mutated hands, grainy, captions, jump cut, fake subtitles, cartoon", None,None,640,384,"text-to-video",2.5,9,233+i,False,1.0,False,api_name="/text_to_video")
+            src=r[0] if isinstance(r,(tuple,list)) else r
+            if isinstance(src,dict):src=src.get('video') or src.get('path')
+            if not src or not os.path.exists(src):raise ValueError(str(r)[:450])
+            dest='ai-motion-output/'+name+'.mp4';shutil.copy2(src,dest)
+            print('SUCCESS',name,os.path.getsize(dest),flush=True)
+           except Exception as e:
+            print('FAILED',name,repr(e),flush=True)
+            with open('ai-motion-output/errors.txt','a') as f:f.write(name+' '+repr(e)+'\n')
           PY
-          python /tmp/generate_motion.py
-      - name: Upload video artifact
-        if: success()
+          python /tmp/gen.py
+      - name: Upload completed video clips
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mysales-actual-ai-motion-test
+          name: mysales-ai-acting-scenes
           path: ai-motion-output/
           retention-days: 7
