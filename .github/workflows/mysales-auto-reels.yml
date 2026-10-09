@@ -1,0 +1,52 @@
+name: mySales Automatic Reels
+
+on:
+  schedule:
+    # 08:00 and 19:00 West Africa Time (UTC+1)
+    - cron: '0 7,18 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'marketing/reel-autopilot/run.py'
+      - '.github/workflows/mysales-auto-reels.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install voice and graphics dependencies
+        run: |
+          python -m pip install --disable-pip-version-check edge-tts==7.2.7 pillow==11.3.0
+          command -v ffmpeg
+          command -v ffprobe
+      - name: Produce a finished video
+        run: python marketing/reel-autopilot/run.py
+      - name: Check MP4 and voice files
+        run: |
+          test -s marketing/reel-autopilot/output/reel.mp4
+          test -s marketing/reel-autopilot/output/voice.mp3
+          ffmpeg -v error -i marketing/reel-autopilot/output/reel.mp4 -f null -
+          ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1 marketing/reel-autopilot/output/reel.mp4
+      - name: Upload files for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: mysales-reel-${{ github.run_number }}
+          path: |
+            marketing/reel-autopilot/output/reel.mp4
+            marketing/reel-autopilot/output/voice.mp3
+            marketing/reel-autopilot/output/subtitles.srt
+            marketing/reel-autopilot/output/cover.png
+            marketing/reel-autopilot/output/script.txt
+            marketing/reel-autopilot/output/caption.txt
+          retention-days: 7
