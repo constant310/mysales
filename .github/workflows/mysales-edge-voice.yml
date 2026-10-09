@@ -20,6 +20,8 @@ jobs:
         shell: bash
         run: |
           python -m pip install --quiet edge-tts pydub
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
           mkdir -p voice-output
           cat > /tmp/mysales_voice.py <<'PY'
           import asyncio, os, subprocess
@@ -66,7 +68,7 @@ jobs:
            narration.export(f'{BASE}/mysales_neural_dialogue.wav',format='wav')
            narration.export(f'{BASE}/mysales_neural_dialogue.mp3',format='mp3',bitrate='192k')
            with open(f'{BASE}/cue_list.txt','w') as f:
-            for i,(at,line,length,voice,backup) in enumerate(lines):
+            for i,(at,line,length,voice_name,backup) in enumerate(lines):
              f.write(f'{i}: {at:.1f}s ({length:.1f}s) | {line}\n')
           asyncio.run(main())
           PY
