@@ -1,0 +1,80 @@
+name: mySales neural-voice preview
+on:
+  push:
+    branches:
+      - ai-audio/mysales-edge-voice-20261009
+  pull_request:
+    branches:
+      - main
+permissions:
+  contents: read
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Generate audio with free Edge neural TTS
+        shell: bash
+        run: |
+          python -m pip install --quiet edge-tts pydub
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          mkdir -p voice-output
+          cat > /tmp/mysales_voice.py <<'PY'
+          import asyncio, os, subprocess
+          import edge_tts
+          from pydub import AudioSegment
+          BASE='voice-output'
+          lines=[
+           (0.4, 'We sold everything today! So where is the money?', 3.3, 'en-NG-EzinneNeural', 'en-US-JennyNeural'),
+           (4.4, 'Madam... I thought you wrote it down!', 3.4, 'en-US-GuyNeural', 'en-US-ChristopherNeural'),
+           (8.7, "I'll transfer later!", 2.0, 'en-US-GuyNeural', 'en-US-ChristopherNeural'),
+           (12.4, 'Wait! Who took those cartons?', 2.8, 'en-NG-EzinneNeural', 'en-US-JennyNeural'),
+           (16.8, 'One forgotten sale. One unpaid debt. Missing stock.', 4.0, 'en-US-ChristopherNeural', 'en-US-GuyNeural'),
+           (21.2, 'Just ten thousand naira a week... could become five hundred and twenty thousand naira a year.', 5.1, 'en-US-ChristopherNeural', 'en-US-GuyNeural'),
+           (27.0, 'There is a smarter way to keep your records.', 3.0, 'en-US-ChristopherNeural', 'en-US-GuyNeural'),
+           (30.5, 'Record sales, monitor stock, and track what customers owe.', 4.1, 'en-US-ChristopherNeural', 'en-US-GuyNeural'),
+           (35.0, 'mySales. Know where your money goes.', 3.6, 'en-US-ChristopherNeural', 'en-US-GuyNeural'),
+          ]
+          async def voice(line,i):
+           t,phrase,dur,preferred,backup=line
+           output=f'{BASE}/voice_{i:02}.mp3'
+           for name in [preferred,backup]:
+            try:
+             speaker=edge_tts.Communicate(phrase,name,rate='+4%' if i<4 else '+9%',volume='+0%')
+             await speaker.save(output)
+             if os.path.getsize(output)>1000:
+              print('Generated',i,name,os.path.getsize(output),flush=True)
+              return output
+            except Exception as e: print('Voice failed, trying fallback',name,str(e)[:200],flush=True)
+           raise RuntimeError('Voice failed: '+str(i))
+          async def main():
+           narration=AudioSegment.silent(duration=39050,frame_rate=44100).set_channels(2)
+           for i,item in enumerate(lines):
+            src=await voice(item,i)
+            clip=AudioSegment.from_mp3(src).set_frame_rate(44100).set_channels(2)
+            target=int(item[2]*1000)
+            if len(clip)>target:
+             ratio=len(clip)/target
+             # Preserve pitch while making a line fit the shot.
+             tmp=f'{BASE}/line_{i:02}_fit.wav'
+             subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-y','-i',src,'-filter:a','atempo='+str(min(1.95,ratio)),tmp],check=True)
+             clip=AudioSegment.from_wav(tmp).set_frame_rate(44100).set_channels(2)
+            clip=clip[:target].fade_in(40).fade_out(min(160,len(clip)//3))
+            narration=narration.overlay(clip,position=round(item[0]*1000))
+           narration.export(f'{BASE}/mysales_neural_dialogue.wav',format='wav')
+           narration.export(f'{BASE}/mysales_neural_dialogue.mp3',format='mp3',bitrate='192k')
+           with open(f'{BASE}/cue_list.txt','w') as f:
+            for i,(at,line,length,voice_name,backup) in enumerate(lines):
+             f.write(f'{i}: {at:.1f}s ({length:.1f}s) | {line}\n')
+          asyncio.run(main())
+          PY
+          python /tmp/mysales_voice.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mysales-github-neural-audio
+          path: voice-output/
+          retention-days: 7
