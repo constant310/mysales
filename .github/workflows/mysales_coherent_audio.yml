@@ -1,0 +1,76 @@
+name: Generate cinematic mySales voice track
+on:
+  push:
+    branches: [audio/coherent-ad-20261009]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  audio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Create new full 39-second voice performance
+        run: |
+          pip install --quiet edge-tts pydub
+          sudo apt-get update -qq >/dev/null 2>&1
+          sudo apt-get install -y ffmpeg >/dev/null 2>&1
+          mkdir -p audio
+          cat > /tmp/voice.py <<'PY'
+          import asyncio, os, subprocess
+          from pydub import AudioSegment
+          import edge_tts
+          shots=[
+           (0.25,3.55,"We sold all day! So why is there no money?",'en-NG-EzinneNeural','en-US-JennyNeural'),
+           (3.95,2.80,"The problem didn't start at closing time.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+           (7.05,3.4,"Madam, I thought you recorded that sale.",'en-US-GuyNeural','en-US-ChristopherNeural'),
+           (10.65,3.25,"I'll transfer when I get home.",'en-US-JennyNeural','en-US-GuyNeural'),
+           (14.2,5.1,"One forgotten sale. One unpaid debt. Stock no one can explain.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+           (19.65,5.55,"If ten thousand naira goes missing every week, that's five hundred and twenty thousand in a year.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+           (25.45,2.05,"You can't fix what you can't see.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+           (27.85,6.15,"mySales helps you record sales, monitor stock, and keep customer balances in one place.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+           (34.55,4.15,"Less guessing. More control. Start using mySales today.",'en-US-ChristopherNeural','en-US-GuyNeural')]
+          def srt(t):
+           ms=int(t*1000); h=ms//3600000;ms%=3600000;mi=ms//60000;ms%=60000;se=ms//1000;ms%=1000
+           return f'{h:02}:{mi:02}:{se:02},{ms:03}'
+          async def synth(i,item):
+           _,_,text,voice,backup=item
+           p=f'audio/line_{i:02}.mp3'
+           for v in [voice,backup]:
+            try:
+             await edge_tts.Communicate(text,v,rate='+12%' if i in (4,5,7) else '+6%').save(p)
+             if os.path.getsize(p)>500:return p
+            except Exception as e:print('Fallback',i,v,str(e)[:90],flush=True)
+           raise RuntimeError(f'Failed line {i}')
+          async def main():
+           out=AudioSegment.silent(duration=39500,frame_rate=44100).set_channels(2)
+           srtfile=open('audio/mysales_newcaptions.srt','w')
+           for i,item in enumerate(shots):
+            start,allow,words,_,_=item
+            fp=await synth(i,item)
+            clip=AudioSegment.from_file(fp).set_channels(2).set_frame_rate(44100)
+            if len(clip)>int(allow*1000):
+             fac=len(clip)/(allow*1000)
+             temp=f'audio/fit_{i:02}.wav'
+             subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-y','-i',fp,'-af',f'atempo={min(1.95,fac+0.03)}',temp],check=True)
+             clip=AudioSegment.from_wav(temp).set_frame_rate(44100).set_channels(2)
+            clip=clip[:int(allow*1000)].fade_in(50).fade_out(90)
+            out=out.overlay(clip,position=int(start*1000))
+            srtfile.write(f'{i+1}\n{srt(start)} --> {srt(start+allow)}\n{words}\n\n')
+            print('DONE',i,words,'duration_ms=',len(clip),flush=True)
+           srtfile.close()
+           out.export('audio/mysales_39s_newvoice.wav',format='wav')
+           out.export('audio/mysales_39s_newvoice.mp3',format='mp3',bitrate='192k')
+          asyncio.run(main())
+          PY
+          python /tmp/voice.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mysales-coherent-voice-and-captions
+          path: audio/
+          retention-days: 7
