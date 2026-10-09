@@ -1,0 +1,61 @@
+name: Render consistent mySales actor footage
+on:
+  push:
+    branches: [video/rebuilt-coherent-ad-20261009]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  run-model:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Generate owner continuity shots with open LTX model
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -u
+          python -m pip install --quiet gradio_client
+          sudo apt-get update -qq >/dev/null 2>&1
+          sudo apt-get install -y ffmpeg >/dev/null 2>&1
+          mkdir -p new-scenes reference
+          gh run download 37993401143 --repo constant310/mysales -n mysales-actual-ai-motion-test -D reference
+          find reference -maxdepth 2 -type f -print
+          ffmpeg -hide_banner -loglevel error -y -ss 0.9 -i reference/mysales_first_acting_clip.mp4 -frames:v 1 reference/owner.jpg
+          cat >/tmp/gen.py <<'PY'
+          import os,shutil
+          from gradio_client import Client,handle_file
+          c=Client("Lightricks/ltx-video-distilled",verbose=False)
+          prompts=[
+            ("owner_shock", "Live-action cinematic close-up continuation of the same Nigerian female owner in mustard yellow shirt in this exact provision shop; she stops counting banknotes, looks up, furrows her eyebrows in disbelief at the cash total and slowly shakes her head. Keep her exact face, braided hairstyle, yellow shirt, shelves and background unchanged, realistic eye and hand motion, single seamless take, no subtitles, no text."),
+            ("owner_ledger", "Cinematic medium close-up, preserve the exact same Nigerian female owner from the first frame, same mustard-yellow shirt, same black braided hairstyle, same minimart setting. She puts down the banknotes and reaches to check a small paper sales notebook with her hands, frowning and examining the numbers, camera gently pushes in, natural physical movement, a single shot with no cuts, no text."),
+            ("owner_relief", "Cinematic natural continuous video, the identical Nigerian woman shop owner in mustard-yellow shirt and same hairstyle, in the same neighborhood grocery shop; she puts banknotes on the counter, picks up a modern mobile phone, taps on it, checks her business records, smiles with visible relief and nods confidently. Preserve exact same face and store as source image. Subtle handheld camera, realistic human motion, no subtitles, no text."),
+            ("owner_concerned", "Live-action handheld close-up of exactly the same Black Nigerian shop owner in the reference image, same yellow blouse, braided hair and store shelves. She reviews money at the counter, raises her head toward a cashier off screen, asks a concerned question through facial expressions, gestures toward a missing receipt, returns to looking at her notes, seamless natural motion, no text, no captions.")
+          ]
+          for i,(name,prompt) in enumerate(prompts):
+            try:
+              print('Rendering',name,flush=True)
+              r=c.predict(prompt, "distorted hands, unnatural faces, other people, watermarks, jump cuts, captions, extra fingers",handle_file("reference/owner.jpg"),None,640,384,"image-to-video",2.5,9,441+i,False,1.0,False,api_name="/image_to_video")
+              p=r[0] if isinstance(r,(tuple,list)) else r
+              if isinstance(p,dict):p=p.get("video") or p.get("path")
+              if not p or not os.path.isfile(p):raise ValueError(str(r)[:150])
+              shutil.copy2(p,"new-scenes/"+name+".mp4")
+              print('COMPLETE',name,os.path.getsize("new-scenes/"+name+".mp4"),flush=True)
+            except Exception as e:
+              print('SKIPPED',name,repr(e),flush=True)
+              with open("new-scenes/errors.txt","a") as fp:fp.write(name+":"+repr(e)+"\n")
+          PY
+          python /tmp/gen.py
+      - name: Upload all successful scenes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coherent-mysales-acting
+          path: new-scenes/
+          retention-days: 7
