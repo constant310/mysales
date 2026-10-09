@@ -53,7 +53,21 @@ def choose():
     index=((now.date()-dt.date(2026,10,9)).days*2+slot)%len(TOPICS)
     phase=((now.date()-dt.date(2026,10,9)).days*2+slot)//len(TOPICS)
     title,hook,problem,advice=TOPICS[index]
-    script=f"{OPENERS[phase%len(OPENERS)]} {hook} {problem} {advice} That's what better business management is about. At mySales, we believe a small business deserves clear records, not guesswork. {CLOSERS[(phase+index)%len(CLOSERS)]} Follow for practical small business lessons."
+    # Start with the conflict immediately; generic introductions raise early-skip risk.
+    script=f"{hook} {problem} {advice} {CLOSERS[(phase+index)%len(CLOSERS)]} Send this to a business owner. Follow for more practical business lessons."
+    # Scheduled ChatGPT editorial review can write a one-off script for this exact slot.
+    plan_path=ROOT/"next_content.json"
+    if plan_path.exists():
+        try:
+            plan=json.loads(plan_path.read_text(encoding="utf-8"))
+            if plan.get("date")==now.strftime("%Y-%m-%d") and plan.get("slot")==("morning" if slot==0 else "evening"):
+                candidate=plan.get("script","").strip()
+                if 55 <= len(candidate.split()) <= 125 and plan.get("business_only",False):
+                    script=candidate
+                    title=str(plan.get("title",title))[:80]
+                    hook=str(plan.get("hook",hook))[:180]
+        except Exception as exc:
+            print(f"Content plan ignored: {type(exc).__name__}")
     return now,slot,title,script,hook
 
 def font(size,bold=False):
@@ -181,5 +195,18 @@ def main():
         frames.append(dest)
     shutil.copyfile(frames[0],DEST/"cover.png")
     video(frames,audio,DEST/"subtitles.srt",DEST/"reel.mp4")
-    print(json.dumps({"title":title,"slot":slot,"duration":length,"video":str(DEST/"reel.mp4")}))
+    metadata={
+        "title":title,
+        "hook":hook,
+        "date":now.strftime("%Y-%m-%d"),
+        "slot":"morning" if slot==0 else "evening",
+        "generated_at":now.isoformat(),
+        "duration_seconds":length,
+        "video_file":"reel.mp4",
+        "account":"_constano_",
+        "category":"business",
+        "automated":True
+    }
+    (DEST/"manifest.json").write_text(json.dumps(metadata,indent=2),encoding="utf-8")
+    print(json.dumps(metadata))
 if __name__=="__main__":main()
