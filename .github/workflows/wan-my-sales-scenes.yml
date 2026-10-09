@@ -1,0 +1,61 @@
+name: Wan 2.1 consistent actor clips
+on:
+  push:
+    branches: [video/wan2-real-people-instagram-20261009]
+  pull_request:
+    branches: [main]
+permissions: {contents: read, actions: read}
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 38
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Genuine AI movement from reusable actor references with Wan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python -m pip install --quiet gradio_client
+          sudo apt-get update -qq >/dev/null 2>&1
+          sudo apt-get install -y ffmpeg >/dev/null 2>&1
+          mkdir -p references wan-clips
+          gh run download 37993401143 --repo constant310/mysales -n mysales-actual-ai-motion-test -D references/owner_source
+          gh run download 37993755120 --repo constant310/mysales -n mysales-ai-acting-scenes -D references/people_source
+          ffmpeg -hide_banner -loglevel error -y -ss 0.75 -i references/owner_source/mysales_first_acting_clip.mp4 -frames:v 1 references/owner.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 0.75 -i references/people_source/02_cashier.mp4 -frames:v 1 references/cashier.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 0.75 -i references/people_source/03_customer.mp4 -frames:v 1 references/customer.jpg
+          cat >/tmp/wan.py <<'PY'
+          from gradio_client import Client, handle_file
+          import os,shutil
+          client=Client('multimodalart/wan2-1-fast',verbose=False)
+          shots=[
+          ("04_cashier_forgets","cashier","Vertical 9:16 photorealistic film. Exact same dark-skinned young Nigerian cashier in teal shirt and same small Nigerian grocery shop. In a continuous medium shot he looks at a handwritten sales notebook, then notices a phone notification, gets distracted by the phone, and closes the notebook before recording the customer's credit sale. Genuine natural movements, emotional expression, no on-screen words."),
+          ("05_customer_leaves","customer","Vertical 9:16 photorealistic film. The exact same Black Nigerian female customer with long braids, dark outfit in a busy colorful Nigerian minimart. She holds a small dark shopping bag containing cartons, smiles at the cashier and exits the store while glancing back toward checkout. Natural smooth walking action, realistic motion and faces, no subtitles, one continuous camera shot."),
+          ("06_owner_at_shelf","owner","Vertical 9:16 dramatic photorealistic film. Exact same Black Nigerian woman store owner with black braids and mustard blouse in her small Nigerian grocery store. She checks an empty slot on a stocked grocery shelf where three cartons should be; she counts with her fingers and looks alarmed. Realistic movement of body, head, hands, facial expression, same character identity, no text."),
+          ("07_owner_searches_book","owner","Vertical 9:16 photorealistic cinematic close-up. Exact same black Nigerian shop owner with braids and yellow blouse at her grocery shop counter. She turns a sales ledger's paper pages with natural fingers and searches carefully for the customer's name, then looks up frustrated when she cannot find it. One continuous handheld shot, genuine human gestures, no text."),
+          ("08_owner_phone","owner","Vertical 9:16 photorealistic cinematic shot. Exact same Nigerian female small-business owner with braided hair and mustard yellow blouse in the same Nigerian grocery shop. She holds a smartphone with both hands and makes a short sequence of tapping motions to save a customer's credit order, looks up and smiles with relief. Precise realistic hand movements, facial expressions, no captions."),
+          ("09_calm_end","owner","Vertical 9:16 bright realistic cinematic film of the same Black Nigerian store owner, braided hairstyle and mustard blouse, standing at checkout in same neighborhood store, holding smartphone and smiling proudly with relief after properly recording a sale. Subtle natural eye, head, arm and shoulder movement, one shot, no logos or text.")
+          ]
+          neg='watermark, cartoon, deformed fingers, extra hands, distorted faces, face switching, grain, background morphing, text, subtitles'
+          for i,(name,role,prompt) in enumerate(shots):
+           try:
+            print('GENERATING',name,flush=True)
+            r=client.predict(handle_file('references/'+role+'.jpg'),prompt,640,384,neg,2.0,1.0,4,998+i,False,api_name='/generate_video')
+            p=r[0] if isinstance(r,(tuple,list)) else r
+            if isinstance(p,dict):p=p.get('video') or p.get('path')
+            if not p or not os.path.isfile(p): raise ValueError(str(r)[:300])
+            dest='wan-clips/'+name+'.mp4';shutil.copy2(p,dest)
+            print('SUCCESS',name,os.path.getsize(dest),flush=True)
+           except Exception as e:
+            print('FAILED',name,repr(e)[:300],flush=True)
+            with open('wan-clips/errors.txt','a') as f:f.write(name+': '+repr(e)+'\n')
+          PY
+          python /tmp/wan.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mysales-wan-acting-clips
+          path: wan-clips/
+          retention-days: 7
