@@ -12,7 +12,7 @@ on:
       - '.github/workflows/mysales-auto-reels.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   render:
@@ -50,3 +50,23 @@ jobs:
             marketing/reel-autopilot/output/script.txt
             marketing/reel-autopilot/output/caption.txt
           retention-days: 7
+
+      - name: Keep a permanent Latest Reel download link
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="latest-mysales-reel"
+          FILES=(
+            "marketing/reel-autopilot/output/reel.mp4"
+            "marketing/reel-autopilot/output/voice.mp3"
+            "marketing/reel-autopilot/output/subtitles.srt"
+            "marketing/reel-autopilot/output/cover.png"
+            "marketing/reel-autopilot/output/caption.txt"
+          )
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${FILES[@]}" --clobber
+            gh release edit "$TAG" --title "Latest automatic mySales Reel" --notes "Automatically generated on $(date -u '+%Y-%m-%d %H:%M UTC'). This release always contains the most recent finished Reel."
+          else
+            gh release create "$TAG" "${FILES[@]}" --target main --title "Latest automatic mySales Reel" --notes "Automatically generated on $(date -u '+%Y-%m-%d %H:%M UTC')."
+          fi
