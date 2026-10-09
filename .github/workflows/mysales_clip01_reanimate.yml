@@ -21,8 +21,8 @@ jobs:
           sudo apt-get update -qq >/dev/null 2>&1
           sudo apt-get install -y ffmpeg >/dev/null 2>&1
           mkdir -p assets clips
-          gh run download 38004873665 --repo constant310/mysales -n mySales-individual-acting-clips -D assets
-          ffmpeg -hide_banner -loglevel error -y -ss 0.2 -i assets/01_owner_counts_cash.mp4 -frames:v 1 assets/owner_start.jpg
+          gh run download 37993401143 --repo constant310/mysales -n mysales-actual-ai-motion-test -D assets
+          ffmpeg -hide_banner -loglevel error -y -ss 0.2 -i assets/mysales_first_acting_clip.mp4 -frames:v 1 assets/owner_start.jpg
           cat >/tmp/render.py <<'PY'
           import os,subprocess,shutil
           from gradio_client import Client,handle_file
