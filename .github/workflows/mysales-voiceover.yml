@@ -1,0 +1,44 @@
+name: Generate mySales Neural Voiceover
+
+on:
+  push:
+    branches:
+      - chatgpt-narration-2026-10-09
+    paths:
+      - marketing/voiceovers/generate_audio.py
+      - .github/workflows/mysales-voiceover.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  voiceover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Check out isolated voiceover branch
+        uses: actions/checkout@v4
+      - name: Python setup
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install neural TTS engine
+        run: python -m pip install --disable-pip-version-check edge-tts==7.2.7
+      - name: Generate two male voiceovers
+        run: python marketing/voiceovers/generate_audio.py
+      - name: Upload downloadable MP3 artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mysales-neural-voiceovers
+          path: marketing/voiceovers/output/
+          retention-days: 7
+      - name: Save audio on this branch for direct linking
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add marketing/voiceovers/output/
+          if ! git diff --cached --quiet; then
+            git commit -m 'Add generated mySales narration MP3 variants'
+            git push
+          fi
