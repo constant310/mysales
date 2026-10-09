@@ -1,0 +1,81 @@
+name: mySales Instagram drama voice
+on:
+  push:
+    branches: [audio/instagram-human-ad-20261009]
+  pull_request:
+    branches: [main]
+permissions: {contents: read}
+jobs:
+  tts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Generate 41-second neural performance
+        run: |
+          pip install --quiet edge-tts pydub
+          sudo apt-get update -qq >/dev/null 2>&1
+          sudo apt-get install -y ffmpeg >/dev/null 2>&1
+          mkdir -p speech
+          cat >/tmp/speech.py <<'PY'
+          import asyncio,subprocess,os
+          from pydub import AudioSegment
+          import edge_tts
+          lines=[
+          (0.10,3.10,"These three cartons are gone. Where is the thirty thousand naira?",'en-NG-EzinneNeural','en-US-JennyNeural'),
+          (3.40,1.70,"Here's what happened.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+          (5.40,2.50,"I'll transfer this evening, please.",'en-US-JennyNeural','en-NG-EzinneNeural'),
+          (8.10,1.55,"No problem, madam.",'en-US-GuyNeural','en-US-ChristopherNeural'),
+          (10.0,3.30,"He handed over the goods... and forgot to record the credit.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+          (13.60,3.35,"At closing, three cartons are gone. But there's no customer record.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+          (17.30,1.85,"So who do I even call?",'en-NG-EzinneNeural','en-US-JennyNeural'),
+          (19.40,4.00,"It isn't just missing stock. It's money the business can't follow up.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+          (23.65,3.05,"Now imagine that same sale... with mySales.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+          (26.95,3.70,"Select the customer. Add three cartons. Record thirty thousand unpaid.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+          (30.90,2.65,"Stock updates. The unpaid balance stays visible.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+          (33.80,3.20,"When the transfer arrives, record the payment.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+          (37.35,3.25,"Less confusion. More control. mySales.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+          ]
+          def clock(t):
+            x=int(round(t*1000));h=x//3600000;x%=3600000;m=x//60000;x%=60000;s=x//1000;ms=x%1000
+            return f'{h:02}:{m:02}:{s:02},{ms:03}'
+          async def make(i,line):
+            start,duration,words,preferred,backup=line
+            out=f'speech/line_{i:02}.mp3'
+            for voice in (preferred,backup):
+             try:
+              await edge_tts.Communicate(words,voice,rate='+12%' if i not in (0,2,3,6) else '+5%').save(out)
+              if os.path.getsize(out)>500:break
+             except Exception as exc: print('Retry',voice,str(exc)[:100],flush=True)
+            else:raise RuntimeError('No audio for '+str(i))
+            seg=AudioSegment.from_mp3(out).set_frame_rate(44100).set_channels(2)
+            target=round(duration*1000)
+            if len(seg)>target:
+              ratio=len(seg)/target
+              if ratio>1.95:print('WARNING long line',i,ratio,flush=True)
+              corrected=f'speech/fit_{i:02}.wav'
+              subprocess.run(['ffmpeg','-loglevel','error','-y','-i',out,'-af',f'atempo={min(1.98,ratio+0.02)}',corrected],check=True)
+              seg=AudioSegment.from_wav(corrected).set_frame_rate(44100).set_channels(2)
+            return seg[:target].fade_in(30).fade_out(110)
+          async def main():
+            audio=AudioSegment.silent(duration=41600,frame_rate=44100).set_channels(2)
+            with open('speech/instagram_captions.srt','w') as caps:
+             for i,line in enumerate(lines):
+              t,d,words,_,_=line
+              segment=await make(i,line)
+              audio=audio.overlay(segment,position=round(t*1000))
+              # short readable subtitles in one-line SRT; overlay editor further splits if necessary
+              caps.write(f'{i+1}\n{clock(t)} --> {clock(t+d)}\n{words}\n\n')
+              print('READY',i,len(segment),words,flush=True)
+            audio.export('speech/mysales_ig_voices.wav',format='wav')
+            audio.export('speech/mysales_ig_voices.mp3',format='mp3',bitrate='192k')
+          asyncio.run(main())
+          PY
+          python /tmp/speech.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mysales-ig-neural-voice
+          path: speech/
+          retention-days: 7
