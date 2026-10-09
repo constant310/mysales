@@ -1,0 +1,62 @@
+name: V10 alternate Wan 2.2 generated acting
+on:
+  push:
+    branches: [video/v10-genuine-new-shots-20261009]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  wan-scenes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Try free open-source Wan video generation for missing shots
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pip install --quiet gradio_client
+          sudo apt-get update -qq >/dev/null 2>&1
+          sudo apt-get install -y ffmpeg >/dev/null 2>&1
+          mkdir -p wan-refs wan-scenes
+          gh run download 37993401143 --repo constant310/mysales -n mysales-actual-ai-motion-test -D wan-refs/owner
+          gh run download 37993755120 --repo constant310/mysales -n mysales-ai-acting-scenes -D wan-refs/people
+          ffmpeg -hide_banner -loglevel error -y -ss 0.5 -i wan-refs/owner/mysales_first_acting_clip.mp4 -frames:v 1 wan-refs/owner.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 0.5 -i wan-refs/people/02_cashier.mp4 -frames:v 1 wan-refs/cashier.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 0.5 -i wan-refs/people/03_customer.mp4 -frames:v 1 wan-refs/customer.jpg
+          cat >/tmp/wan_gen.py <<'PY'
+          from gradio_client import Client,handle_file
+          import os,shutil
+          c=Client('zerogpu-aoti/wan2-2-fp8da-aoti-faster',verbose=False)
+          clips=[
+           ('03_cashier_acknowledges','cashier','Cinematic realistic video of this same male Nigerian cashier at checkout in his grocery store. He nods politely at customer and reaches toward three food cartons on the counter, natural body language, short single shot, no subtitles.'),
+           ('04_cashier_unrecorded','cashier','Realistic natural continuous cinema, this same male cashier in green shirt looks at an open paper notebook and is distracted by a phone call, closes notebook without writing sale, worried expression. Same grocery store, no text.'),
+           ('05_customer_goes','customer','Realistic cinema of the same braided Nigerian customer in her grocery store, she holds shopping bag and smartphone, thanks cashier with smile, then turns and walks away from checkout, no subtitles.'),
+           ('06_owner_stock_gap','owner','Same Black Nigerian female shop owner wearing yellow blouse, inside same provision shop, notices three cartons are missing from the stocked shelves, looks alarmed and scans paper list, fluid natural movements, single shot, no titles.'),
+           ('07_owner_ledger','owner','Same Nigerian woman shop owner in mustard yellow blouse, at same till counter, flips through handwritten sales ledger searching for customer name, frowns and gestures in disbelief, no captions.'),
+           ('08_owner_uses_phone','owner','Same Nigerian female shop owner with braids and yellow blouse, same Nigerian retail shop, she uses smartphone, taps on screen to log a sale, her worried face turns to relieved smile, cinematic realistic motion, no captions.')
+          ]
+          for i,(name,ref,prompt) in enumerate(clips):
+           try:
+            r=c.predict(handle_file('wan-refs/'+ref+'.jpg'),prompt,'distorted hands, text, watermark, morphing, cartoon',2.0,1,1,4,730+i,False,api_name='/generate_video')
+            p=r[0] if isinstance(r,(list,tuple)) else r
+            if isinstance(p,dict): p=p.get('video') or p.get('path')
+            if not p or not os.path.exists(p):raise RuntimeError('No video '+str(r)[:250])
+            dest='wan-scenes/'+name+'.mp4';shutil.copy2(p,dest)
+            print('SUCCESS',name,os.path.getsize(dest),flush=True)
+           except Exception as e:
+            print('FAILED',name,repr(e)[:500],flush=True)
+            with open('wan-scenes/errors.txt','a') as f:f.write(name+': '+repr(e)+'\n')
+          PY
+          python /tmp/wan_gen.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mysales-v10-wan-generated-scenes
+          path: wan-scenes/
+          retention-days: 5
