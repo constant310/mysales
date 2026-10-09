@@ -1,0 +1,44 @@
+name: Generate Ezinne Neural Voice Preview
+
+on:
+  push:
+    branches:
+      - ezinne-voice-preview-2026-10-10
+    paths:
+      - marketing/voiceovers/generate_ezinne_sample.py
+      - .github/workflows/ezinne-voice-preview.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install neural speech client
+        run: python -m pip install --disable-pip-version-check edge-tts==7.2.7
+      - name: Generate the actual Ezinne neural voice
+        run: python marketing/voiceovers/generate_ezinne_sample.py
+      - name: Verify the output file
+        run: |
+          test -s marketing/voiceovers/ezinne_sample.mp3
+          file marketing/voiceovers/ezinne_sample.mp3
+          ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1 marketing/voiceovers/ezinne_sample.mp3
+      - name: Publish audio file to isolated branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f marketing/voiceovers/ezinne_sample.mp3
+          git commit -m "Add actual generated Ezinne sample" || exit 0
+          git push
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mySales-Ezinne-voice-sample
+          path: marketing/voiceovers/ezinne_sample.mp3
+          retention-days: 7
