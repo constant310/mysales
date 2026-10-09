@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - ai-video/mysales-zerogpu-test-20261009
+  pull_request:
+    branches:
+      - main
 permissions:
   contents: read
 jobs:
