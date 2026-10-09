@@ -1,0 +1,62 @@
+name: mySales clip 1 controlled acting regeneration
+on:
+  push:
+    branches: [video/clip1-precision-acting-oct10]
+  pull_request:
+    branches: [main]
+permissions: {contents: read, actions: read}
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Generate connected shopkeeper acting shots with LTX image-to-video
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python -m pip install --quiet gradio_client
+          sudo apt-get update -qq >/dev/null 2>&1
+          sudo apt-get install -y ffmpeg >/dev/null 2>&1
+          mkdir -p assets clips
+          gh run download 38004873665 --repo constant310/mysales -n mySales-individual-acting-clips -D assets
+          ffmpeg -hide_banner -loglevel error -y -ss 0.2 -i assets/01_owner_counts_cash.mp4 -frames:v 1 assets/owner_start.jpg
+          cat >/tmp/render.py <<'PY'
+          import os,subprocess,shutil
+          from gradio_client import Client,handle_file
+          model=Client("Lightricks/ltx-video-distilled",verbose=False)
+          neg="cartoon, anime, unnatural eye movement, strange hands, malformed fingers, extra fingers, faces switching, missing limbs, warped banknotes, background changing, jerk, jump cut, camera whip, random panning, zoom out, top of head cut, plastic skin, giant smile, sudden gestures, subtitles, text, logo"
+          shots=[
+            ("A_recount",
+              "ONE CONTINUOUS TAKE. Same adult Black Nigerian female minimart owner as starting reference image, neatly pulled-back black hair and mustard yellow collared work blouse, grocery shelves behind her, visible paper naira notes at counter. Real human acting at a slow realistic pace: she LOOKS DOWN and deliberately counts the notes with her thumbs, pauses, recounts the small stack, then holds the notes slightly still as if noticing a shortage. Both hands, cash, full face and entire head visible at all times. Chest-up medium-close portrait, eye-level camera on steady tripod with ONLY a very gentle 2-percent forward dolly over shot. Natural overhead shop lighting, DSLR 50 mm portrait feel, shallow yet realistic background focus, no audio, no words, no cuts. DO NOT change actress or clothing.",
+              "assets/owner_start.jpg"),
+            ("B_reaction",
+              "ONE CONTINUOUS TAKE starting EXACTLY from the provided final frame. Same adult Black Nigerian shop owner, exactly same face, yellow collared shirt, cash notes and shelving; keeping hands at chest level she stops counting the notes, slowly raises her gaze towards her cashier just off camera on screen right, her brows knit, eyes widen slightly and lips part in worried realization, then she freezes briefly looking concerned, without speaking. Subtle natural acting, absolutely no sudden motion; cash still visible in hands. Eye-level medium close-up, full head and both hands always inside vertical frame. Camera makes a very subtle steady two-percent push-in, NO angle change, no cuts, no captions or onscreen text.",
+              "clips/A_final_frame.jpg")
+          ]
+          for i,(name,prompt,img) in enumerate(shots):
+            try:
+              print('GENERATE',name,flush=True)
+              r=model.predict(prompt,neg,handle_file(img),None,384,640,"image-to-video",2.5,9,910+i,False,1.0,False,api_name="/image_to_video")
+              p=r[0] if isinstance(r,(tuple,list)) else r
+              if isinstance(p,dict):p=p.get('video') or p.get('path')
+              if not p or not os.path.isfile(p): raise ValueError(str(r)[:250])
+              output=f'clips/{name}.mp4'
+              shutil.copy2(p,output)
+              subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-y','-sseof','-0.05','-i',output,'-frames:v','1','clips/'+name+'_final_frame.jpg'],check=True)
+              if i==0: shutil.copy2('clips/A_recount_final_frame.jpg','clips/A_final_frame.jpg')
+              print('DONE',name,os.path.getsize(output),flush=True)
+            except Exception as exc:
+              print('FAIL',name,repr(exc)[:900],flush=True)
+              with open('clips/error.txt','a') as f:f.write(name+':'+repr(exc)+'\n')
+              if i==0:break
+          PY
+          python /tmp/render.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mysales-clip01-new-human-acting
+          path: clips/
+          retention-days: 7
