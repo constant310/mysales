@@ -3,6 +3,7 @@
 This is isolated marketing tooling. It does not import or modify the web app.
 """
 import asyncio
+import json
 from pathlib import Path
 import edge_tts
 
@@ -30,7 +31,19 @@ async def main():
         target = output / f"mysales_{name}.mp3"
         print(f"Generating {name} ({voice})...", flush=True)
         client = edge_tts.Communicate(SCRIPT, voice, rate=rate, pitch=pitch)
-        await client.save(str(target))
+        word_boundaries = []
+        with target.open("wb") as audio:
+            async for msg in client.stream():
+                if msg["type"] == "audio":
+                    audio.write(msg["data"])
+                elif msg["type"] == "WordBoundary":
+                    word_boundaries.append({
+                        "text": msg["text"],
+                        "start": msg["offset"] / 10_000_000,
+                        "duration": msg["duration"] / 10_000_000,
+                    })
+        (output / f"mysales_{name}_words.json").write_text(json.dumps(word_boundaries, indent=2))
+
         if target.stat().st_size < 5000:
             raise RuntimeError(f"Audio file is unexpectedly small: {target}")
         print(f"SUCCESS: {target} ({target.stat().st_size} bytes)", flush=True)
