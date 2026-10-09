@@ -1,0 +1,58 @@
+name: Generate clear mySales story scenes
+on:
+  push:
+    branches: [video/mysales-clear-story-v9-20261009]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Generate three continuity-controlled actions with LTX
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pip install --quiet gradio_client
+          sudo apt-get update -qq >/dev/null 2>&1
+          sudo apt-get install -y ffmpeg >/dev/null 2>&1
+          mkdir -p ref new-scenes
+          gh run download 37993755120 --repo constant310/mysales -n mysales-ai-acting-scenes -D ref
+          ls ref
+          ffmpeg -hide_banner -loglevel error -y -ss 0.75 -i ref/02_cashier.mp4 -frames:v 1 ref/cashier.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 0.75 -i ref/03_customer.mp4 -frames:v 1 ref/customer.jpg
+          cat >/tmp/gen.py <<'PY'
+          import os,shutil,time
+          from gradio_client import Client,handle_file
+          c=Client('Lightricks/ltx-video-distilled',verbose=False)
+          shots=[
+           ('cashier_cartons','cashier',"Same Nigerian male cashier in dark green apron at exactly same bright neighborhood minimart checkout. His face remains consistent. He lifts three small cartons off the counter with both hands and carefully hands them to a customer whose hands enter frame, natural eye movements, simple one-camera shot, real-life cinematic acting; no text, no titles, no visible application interfaces."),
+           ('cashier_notebook','cashier',"Same Nigerian male shop cashier in green uniform in exactly same shop. He looks at blank sales notebook beside register after customer has left, hesitates, gets distracted by ringing phone, closes the notebook without writing anything, worried expression. Very clear sequence of purposeful natural hand movements, one uninterrupted shot, no floating elements, no captions."),
+           ('customer_departure','customer',"Same young Black Nigerian female shopper with long braids and dark clothes in the same Nigerian minimart, clutching a small black shopping bag and holding her mobile phone, she smiles and walks naturally away from the checkout while gesturing 'I'll transfer tonight'. Realistic cinematic acting, one clean take, no cuts, preserve exact same appearance, no captions.")
+          ]
+          for index,(name,person,prompt) in enumerate(shots):
+           try:
+            r=c.predict(prompt, 'subtitles, watermark, deformed hands, extra people, duplicated objects, visual glitches',handle_file('ref/'+person+'.jpg'),None,640,384,'image-to-video',2.5,9,829+index,False,1.0,False,api_name='/image_to_video')
+            path=r[0] if isinstance(r,(tuple,list)) else r
+            if isinstance(path,dict):path=path.get('video') or path.get('path')
+            if not os.path.isfile(path):raise RuntimeError('No video: '+repr(r)[:200])
+            shutil.copy2(path,'new-scenes/'+name+'.mp4')
+            print('OK',name,os.stat('new-scenes/'+name+'.mp4').st_size,flush=True)
+           except Exception as e:
+            print('FAILED',name,repr(e),flush=True)
+            with open('new-scenes/errors.txt','a') as f:f.write(name+' '+repr(e)+'\n')
+          PY
+          python /tmp/gen.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mysales-coherent-v9-acting
+          path: new-scenes/
+          retention-days: 5
