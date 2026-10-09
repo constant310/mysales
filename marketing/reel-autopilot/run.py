@@ -41,6 +41,42 @@ TOPICS=[
 OPENERS=["One thing every small-business owner should know:","Here's a costly mistake business owners often overlook:","If you run a shop, listen to this:","This simple business lesson could save you headaches:"]
 CLOSERS=["Less confusion. Better decisions. More control.","Don't just work hard. Know your numbers.","A clearer business is easier to grow.","Better records give you better choices."]
 
+# Test distinct, supported neural voices; never attribute retention changes
+# to the voice alone until there is enough comparable Reel performance data.
+VOICE_PRESETS = {
+    "christopher": {"name": "en-US-ChristopherNeural", "rate": "+10%"},
+    "abeo": {"name": "en-NG-AbeoNeural", "rate": "+6%"},
+    "ezinne": {"name": "en-NG-EzinneNeural", "rate": "+6%"},
+    "guy": {"name": "en-US-GuyNeural", "rate": "+9%"},
+}
+
+def select_voice(now, slot):
+    # A reproducible four-voice sequence creates an initial comparison set.
+    # Editorial reviews may override 'voice' and 'voice_rate' via next_content.json.
+    ordinal = (now.date() - dt.date(2026, 10, 10)).days * 2 + slot
+    key = ("christopher", "abeo", "guy", "ezinne")[ordinal % 4]
+    custom_rate = None
+    plan_file = ROOT / "next_content.json"
+    if plan_file.is_file():
+        try:
+            plan = json.loads(plan_file.read_text(encoding="utf-8"))
+            if (plan.get("business_only") is True
+                    and plan.get("date") == now.strftime("%Y-%m-%d")
+                    and plan.get("slot") == ("morning" if slot == 0 else "evening")):
+                candidate = plan.get("voice", key)
+                if candidate in VOICE_PRESETS:
+                    key = candidate
+                r = plan.get("voice_rate")
+                if isinstance(r, int) and 0 <= r <= 15:
+                    custom_rate = f"+{r}%"
+        except (OSError, ValueError, TypeError):
+            pass
+    preset = dict(VOICE_PRESETS[key])
+    if custom_rate is not None:
+        preset["rate"] = custom_rate
+    return key, preset
+
+
 def cmd(*args):
     subprocess.run(args,check=True,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE)
 
@@ -122,14 +158,32 @@ def artwork(dest,title,seed):
     d.text((43,1177),"MYSALES   •   BUSINESS CLARITY",font=font(22,True),fill=CYAN)
     im.save(dest,optimize=True)
 
-async def speech(script,dest):
-    boundaries=[]
+async def speech(script, dest, voice, rate):
+    boundaries = []
     with dest.open("wb") as f:
-        async for piece in edge_tts.Communicate(script,voice="en-US-ChristopherNeural",rate="+10%").stream():
-            if piece["type"]=="audio":f.write(piece["data"])
-            elif piece["type"]=="WordBoundary":boundaries.append((piece["offset"]/10_000_000,piece["duration"]/10_000_000,piece["text"]))
-    if dest.stat().st_size<6000:raise RuntimeError("Audio synthesis failed")
+        async for piece in edge_tts.Communicate(script, voice=voice, rate=rate).stream():
+            if piece["type"] == "audio":
+                f.write(piece["data"])
+            elif piece["type"] == "WordBoundary":
+                boundaries.append((piece["offset"]/10_000_000, piece["duration"]/10_000_000, piece["text"]))
+    if dest.stat().st_size < 6000 or not boundaries:
+        raise RuntimeError("Voiceover empty or missing word timestamps")
     return boundaries
+
+async def speech_with_fallback(script, dest, voice_key, config):
+    # If an experimental regional voice is unavailable, preserve continuity
+    # with the previously verified Christopher voice and note the fallback.
+    try:
+        word_times = await speech(script, dest, config["name"], config["rate"])
+        return word_times, voice_key, config
+    except Exception as e:
+        if voice_key == "christopher":
+            raise
+        print(f"Trial voice {voice_key} unavailable ({type(e).__name__}); retrying baseline voice")
+        dest.unlink(missing_ok=True)
+        baseline = VOICE_PRESETS["christopher"]
+        word_times = await speech(script, dest, baseline["name"], baseline["rate"])
+        return word_times, "christopher", baseline
 
 def timecode(seconds):
     m=round(max(seconds,0)*1000)
@@ -182,7 +236,9 @@ def main():
     DEST.mkdir(parents=True,exist_ok=True)
     (DEST/"script.txt").write_text(script)
     (DEST/"caption.txt").write_text(f"{hook}\n\nBusiness owners need clarity, not guesswork. Follow for practical small-business ideas.\n\n#mySales #SmallBusinessNigeria #BusinessTips #InventoryManagement")
-    audio=DEST/"voice.mp3";boundaries=asyncio.run(speech(script,audio))
+    requested_voice, voice_config = select_voice(now, slot)
+    audio=DEST/"voice.mp3"
+    boundaries, actual_voice, actual_config = asyncio.run(speech_with_fallback(script,audio,requested_voice,voice_config))
     if not boundaries:raise RuntimeError("No timing data returned for captions")
     length=get_duration(audio)
     timed_subtitles(boundaries,script,length,DEST/"subtitles.srt")
@@ -205,6 +261,10 @@ def main():
         "video_file":"reel.mp4",
         "account":"_constano_",
         "category":"business",
+        "voice_preset": actual_voice,
+        "voice_name": actual_config["name"],
+        "voice_rate": actual_config["rate"],
+        "voice_trial_requested": requested_voice,
         "automated":True
     }
     (DEST/"manifest.json").write_text(json.dumps(metadata,indent=2),encoding="utf-8")
