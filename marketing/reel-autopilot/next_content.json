@@ -1,9 +1,9 @@
 {
   "date": "2026-10-10",
   "slot": "morning",
-  "title": "The Perfect Product That Lost a Customer",
-  "hook": "Your product was perfect. You still lost the customer.",
-  "script": "Your product was perfect. You still lost the customer. Imagine a buyer pays on Monday. You promise delivery on Friday, but the date gets buried in a WhatsApp chat. Friday comes. The order isn't ready. The customer doesn't just remember the product; they remember the broken promise. Here's the fix: record every order, payment status, delivery deadline, and the person responsible. Before closing each day, check what must go out tomorrow. Reliability is marketing you don't have to pay for.",
+  "title": "The Perfect Product That Lost Its Customer",
+  "hook": "Your product was perfect. The customer still walked away.",
+  "script": "Your product was perfect. The customer still walked away. Imagine this: a shop owner takes payment on Monday and promises delivery Friday. The order gets buried in messages. Friday arrives. No package. No update. The customer loses trust before seeing the product. Here's the fix: record each order, payment status, deadline, and who's responsible. Every evening, check tomorrow's deliveries. A good product gets attention. Keeping your promise brings people back.",
   "business_only": true,
   "visual_plan": [
     "0-2s: Stark cyan headline 'PERFECT PRODUCT. LOST CUSTOMER.' beside disappointed shop customer",
@@ -19,5 +19,5 @@
     "29-33s: Goods delivered on time; relieved customer",
     "33-36s: Cyan final takeaway 'RELIABILITY IS MARKETING'"
   ],
-  "editorial_notes": "Hypothetical scenario, not a real customer testimonial. The current renderer does not consume visual_plan; storyboard is for future implementation. Default voice rotation remains enabled; voice effect not established."
+  "editorial_notes": "Hypothetical example, not a real customer. The renderer does not consume visual_plan. Voice rotation remains enabled because available data does not identify a winning voice."
 }
