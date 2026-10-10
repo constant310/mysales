@@ -1,9 +1,21 @@
 {
   "date": "2026-10-10",
-  "slot": "morning",
-  "title": "The Customer Who Never Came Back",
-  "hook": "Your customer didn't complain. They just stopped buying.",
-  "script": "Your customer didn't complain. They just stopped buying. That's what makes poor service dangerous: sometimes you never hear the reason. Picture a customer asking for an update on an order. Nobody replies. They wait, then quietly choose another seller. Here's a habit that helps: record every order, assign someone to follow up, and send updates before customers have to chase you. A good product may win the first sale. Clear communication helps earn the next one.",
+  "slot": "evening",
+  "title": "The Discount That Eats Your Profit",
+  "hook": "That discount might be eating your profit.",
+  "script": "That discount might be eating your profit. A customer asks for a price cut. You agree to keep the sale. But your supplier cost, packaging, delivery, and payment fees haven't changed. By the time you subtract everything, there may be nothing left. Here's a simple rule: calculate your full cost and your lowest profitable selling price before offering any discount. If the price falls below that line, change the offer instead. More sales are useless when every extra order loses money.",
   "business_only": true,
-  "editorial_notes": "Hypothetical example. Balanced voice rotation. Renderer uses generic frames, not scene-specific visuals."
+  "visual_plan": [
+    "0–2s: shop owner accepts a discount; red shrinking profit bar and cyan 'DISCOUNT = LOSS?' title",
+    "2–5s: customer asks for price cut; shop owner agrees; two expressive character silhouettes",
+    "5–8s: supplier cost tag remains fixed while selling price drops",
+    "8–11s: packaging, delivery and payment fees stack up beside receipt",
+    "11–15s: profit gauge sinks toward zero; hold on the reveal",
+    "15–19s: total cost calculator; cyan underline under FULL COST",
+    "19–23s: mark minimum profitable price as an uncrossable threshold",
+    "23–27s: compare alternatives: smaller quantity, lower delivery cost or bundle",
+    "27–32s: shop owner protects margin; receipt and price board align",
+    "32–35s: final takeaway 'SELL MORE ≠ EARN MORE' with subtle mySales signature"
+  ],
+  "editorial_notes": "81-word hypothetical business example, no real customer claim. Do not add invented numbers. Voice not overridden; balanced rotation remains active (evening default abeo) because previous 7 mature Reels have only 502 total views and no controlled voice comparison. Average mature 3-second skip rate 81.6% (unweighted), views-weighted approximately 83.2%; mean watch time 7.5 seconds. Oct 9 Reel with 8 views excluded as <24 hours old. Visual plan is editorial guidance only; current run.py DOES NOT implement visual_plan, so do not claim scene-specific visuals are rendered. Current renderer creates 12 generic art scenes and speech-aligned SRT subtitles. Optimize with scene changes and safe captions in future renderer revision."
 }
