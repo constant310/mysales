@@ -227,4 +227,6 @@ function pSaveSettings(){platformData.merchant.name=el('pBusiness').value.trim()
 function pExport(){const data=JSON.stringify({merchantStudio:platformData,checkoutHandoffs:orders},null,2);const blob=new Blob([data],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mysales-merchant-demo.json';a.click();URL.revokeObjectURL(a.href)}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 syncDemoStore();
+// Open the Home dashboard first; the storefront remains accessible through View shop.
+platformPage='overview';openPlatform();
 </script><div id="platform" aria-label="mySales merchant studio"></div></body></html>
