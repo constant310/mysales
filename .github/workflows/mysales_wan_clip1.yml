@@ -2,6 +2,8 @@ name: Wan-only Clip 1 recreation
 on:
   push:
     branches: [video/wan-new-owner-clip1-20261010]
+  pull_request:
+    branches: [main]
 permissions: {contents: read, actions: read}
 jobs:
   create:
