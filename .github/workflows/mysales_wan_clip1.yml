@@ -1,0 +1,93 @@
+name: Wan-only Clip 1 recreation
+on:
+  push:
+    branches: [video/wan-new-owner-clip1-20261010]
+permissions: {contents: read, actions: read}
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    timeout-minutes: 27
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Generate new Clip 1 with Wan not LTX
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pip install -q gradio_client pillow
+          sudo apt-get update -qq >/dev/null 2>&1
+          sudo apt-get install -y ffmpeg >/dev/null 2>&1
+          mkdir -p generated refs
+          # only references, no earlier footage in output
+          gh run download 37993401143 --repo constant310/mysales -n mysales-actual-ai-motion-test -D refs/original
+          ffmpeg -hide_banner -loglevel error -y -ss 0.65 -i refs/original/mysales_first_acting_clip.mp4 -frames:v 1 refs/initial.jpg
+          cat >/tmp/wan.py <<'PY'
+          import os,shutil,json
+          from gradio_client import Client,handle_file
+          prompt=('Single continuous 4 second cinematic portrait video, inside a brightly lit authentic small Nigerian provision shop at closing time. A Black Nigerian female owner with shoulder-length neat braids, dark tailored blouse and waist apron stands behind the checkout counter. A cash drawer, real-looking Nigerian naira notes and handwritten sales ledger clearly visible. She slides the till open, gently counts the notes, checks the ledger, recounts one last note then slowly raises her full face in concerned disbelief because the cash is short. Entire head, hands, open drawer and money visible; smooth eye-level static medium shot, restrained 2 percent camera push-in, natural human movement and expressive acting, highly detailed realistic skin, warm shop lighting, authentic shop shelves, 9:16 vertical, no text or graphics.')
+          neg='cropped face, frame cut, malformed hands, extra fingers, morphing face, cartoon, CGI, text, logos, subtitles, camera whip, jump cuts, duplicate people, unrealistic banknotes, exposure flicker'
+          candidates=[
+            'zerogpu-aoti/Wan2.2-14B-Fast',
+            'r3gm/Wan2.2-14B-Preview',
+            'OpenKing/wan2-video-generation',
+            'multimodalart/wan2-1-fast'
+          ]
+          with open('generated/attempts.txt','w') as log:
+           for space in candidates:
+            print('CONNECT',space,flush=True)
+            try:
+             c=Client(space,verbose=False)
+             api=c.view_api(return_format='dict')
+             endpoints=api.get('named_endpoints',{})
+             print('ENDPOINTS',space,list(endpoints.keys()),flush=True)
+             for en,spec in endpoints.items():
+              if any(t in en for t in ('generate','video','inference')):
+               params=spec.get('parameters',[])
+               print('PARAMETERS',space,en,[(p.get('parameter_name'),p.get('parameter_default')) for p in params],flush=True)
+             if space.startswith('multimodalart/'):
+              r=c.predict(handle_file('refs/initial.jpg'),prompt,640,384,neg,2.0,1.0,4,42,False,api_name='/generate_video')
+             elif space=='OpenKing/wan2-video-generation':
+              # Skip blind invocation: surface available signature if complex.
+              log.write(space+' available API '+str(list(endpoints.keys()))+'\n')
+              continue
+             else:
+              options=[x for x in endpoints if 'generate' in x]
+              if not options:raise RuntimeError('No generate endpoint')
+              for en in options[:1]:
+               ps=endpoints[en]['parameters']
+               # build best-effort input based on Gradio metadata
+               args=[]
+               for p in ps:
+                name=p.get('parameter_name','').lower()
+                if 'image' in name or 'input_img' in name: args.append(handle_file('refs/initial.jpg'))
+                elif 'negative' in name: args.append(neg)
+                elif 'prompt' in name: args.append(prompt)
+                elif 'height' in name: args.append(640)
+                elif 'width' in name: args.append(384)
+                elif 'duration' in name: args.append(3.0)
+                elif 'seed' in name: args.append(42)
+                elif 'guidance' in name: args.append(1.0)
+                elif 'steps' in name: args.append(4)
+                else:args.append(p.get('parameter_default'))
+               print('CALL',en,[(a if not isinstance(a,dict) else 'image') for a in args],flush=True)
+               r=c.predict(*args,api_name=en)
+             p=r[0] if isinstance(r,(tuple,list)) else r
+             if isinstance(p,dict): p=p.get('video') or p.get('path')
+             if p and os.path.isfile(p) and os.path.getsize(p)>12000:
+              shutil.copy2(p,'generated/mysales_wan_only_clip1.mp4')
+              log.write('SUCCESS '+space+' '+str(os.path.getsize(p))+'\n')
+              print('VIDEO CREATED via',space,'bytes',os.path.getsize(p),flush=True)
+              break
+             raise RuntimeError('Response had no video: '+str(r)[:350])
+            except Exception as e:
+             log.write(space+' '+repr(e)[:1000]+'\n')
+             print('FAILED',space,repr(e)[:700],flush=True)
+          PY
+          python /tmp/wan.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mysales-wan-only-clip1
+          path: generated/
+          retention-days: 7
