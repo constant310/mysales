@@ -1,23 +1,9 @@
 {
   "date": "2026-10-10",
   "slot": "morning",
-  "title": "The Perfect Product That Lost Its Customer",
-  "hook": "Your product was perfect. The customer still walked away.",
-  "script": "Your product was perfect. The customer still walked away. Imagine this: a shop owner takes payment on Monday and promises delivery Friday. The order gets buried in messages. Friday arrives. No package. No update. The customer loses trust before seeing the product. Here's the fix: record each order, payment status, deadline, and who's responsible. Every evening, check tomorrow's deliveries. A good product gets attention. Keeping your promise brings people back.",
+  "title": "The Customer Who Never Came Back",
+  "hook": "Your customer didn't complain. They just stopped buying.",
+  "script": "Your customer didn't complain. They just stopped buying. That's what makes poor service dangerous: sometimes you never hear the reason. Picture a customer asking for an update on an order. Nobody replies. They wait, then quietly choose another seller. Here's a habit that helps: record every order, assign someone to follow up, and send updates before customers have to chase you. A good product may win the first sale. Clear communication helps earn the next one.",
   "business_only": true,
-  "visual_plan": [
-    "0-2s: Stark cyan headline 'PERFECT PRODUCT. LOST CUSTOMER.' beside disappointed shop customer",
-    "2-5s: Monday order placed; customer pays; clear calendar overlay",
-    "5-8s: Seller promises Friday delivery; order detail sinks into WhatsApp messages",
-    "8-11s: Friday calendar flips; packed goods still missing",
-    "11-14s: Customer waits beside unread delivery message",
-    "14-17s: Shop owner realizes missed deadline; dramatic cyan calendar alert",
-    "17-20s: Contrast product quality with broken promise",
-    "20-23s: Order tracking board appears with customer, payment, due date, owner",
-    "23-26s: Four key fields highlighted one at a time",
-    "26-29s: End-of-day checklist shows tomorrow's dispatches",
-    "29-33s: Goods delivered on time; relieved customer",
-    "33-36s: Cyan final takeaway 'RELIABILITY IS MARKETING'"
-  ],
-  "editorial_notes": "Hypothetical example, not a real customer. The renderer does not consume visual_plan. Voice rotation remains enabled because available data does not identify a winning voice."
+  "editorial_notes": "Hypothetical example. Balanced voice rotation. Renderer uses generic frames, not scene-specific visuals."
 }
