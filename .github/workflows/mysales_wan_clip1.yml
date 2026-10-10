@@ -18,7 +18,7 @@ jobs:
           pip install -q gradio_client
           mkdir -p output
           cat >/tmp/render.py <<'PY'
-          import os,shutil
+          import os,shutil,time
           from gradio_client import Client
           model=Client("OpenKing/wan2-video-generation",verbose=False)
           prompt=(
@@ -33,7 +33,15 @@ jobs:
           )
           print('Submitted Wan2.2 real model render',flush=True)
           try:
-           r=model.predict(prompt,None,384,672,49,28,4.5,42,api_name='/generate_video')
+           r=None
+           for attempt in range(3):
+            try:
+             r=model.predict(prompt,None,384,672,49,22,4.5,42,api_name='/generate_video')
+             break
+            except Exception as callerr:
+             print('ATTEMPT',attempt+1,repr(callerr)[:300],flush=True)
+             if attempt>=2: raise
+             time.sleep(18)
            print('RETURN',str(r)[:800],flush=True)
            p=r[0] if isinstance(r,(list,tuple)) else r
            if isinstance(p,dict):p=p.get('video') or p.get('path')
