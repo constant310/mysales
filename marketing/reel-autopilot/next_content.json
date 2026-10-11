@@ -1,8 +1,8 @@
 {
   "date": "2026-10-11",
-  "slot": "morning",
-  "title": "Your Bestseller Is Sending Customers Away",
-  "hook": "Your bestseller is sending customers to another shop.",
-  "script": "Your bestseller is sending customers to another shop. It sells out on Tuesday, but nobody notices until Friday. Customers hear, 'Come back tomorrow,' then buy somewhere else. The fix isn't buying more of everything. Identify your five fastest-selling products, check what remains each evening, and note how long suppliers take to deliver. Reorder before you reach zero. Your most popular product should bring customers back, not train them to shop next door. Save this before your next restock.",
+  "slot": "evening",
+  "title": "The Refund Your Records Missed",
+  "hook": "You refunded the customer. But your sales report still says you earned the money.",
+  "script": "You refunded the customer. But your sales report still says you earned the money. Here's how one return can confuse your business. A customer brings back a damaged item. The cashier returns the cash, but nobody records the refund or updates stock. At closing time, sales, cash and inventory no longer agree. The fix: log every return, its reason, the refund amount, and whether the item can be resold. Don't hide returns. Track them. Accurate records protect your profit.",
   "business_only": true
 }
