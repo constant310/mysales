@@ -470,23 +470,7 @@ test('shopping buttons are legible without decorative cart and WhatsApp icons',a
  assert.match(catalogue,/id="home-cart"/);
 });
 
-test('immersive feed keeps product photos fully visible with stable mobile controls',async()=>{
- const page=await read('s/index.html');
- assert.match(page,/\.reel-media \.grid-image\{[^}]*object-fit:contain/);
- assert.match(page,/\.reel-backdrop-image\{/);
- assert.match(page,/\.reel-slide\{[^}]*scroll-snap-align:start/);
- assert.match(page,/html\{scroll-snap-type:y proximity/);
- assert.match(page,/\.site\{overflow:visible;overflow:clip\}/);
- assert.match(page,/\.collection\.feeds-enabled \.powered,\.collection\.feeds-enabled #demo-last-cta\{display:none!important\}/);
- assert.match(page,/class="reel-toolbar"/);
- assert.match(page,/id="reel-search"/);
- assert.match(page,/id="reel-cart"/);
- assert.match(page,/function quickReelAdd/);
- assert.match(page,/reelQtyUpdates\.get\(product\.id\)\?\.\(\)/);
- assert.match(page,/reelQtyUpdates\.values\(\)/);
- assert.match(page,/const REEL_CHECK_ICON=/);
- assert.doesNotMatch(page,/\.reel-media \.grid-image\{[^}]*object-fit:cover/);
-});
+
 
 
 test('official mySales store origin is allowed consistently by proxy and both Edge functions',async()=>{
@@ -519,4 +503,19 @@ test('origin controls accept trusted domains, reject arbitrary sites and keep pr
  assert.equal(trusted.has('https://example.org'),false);
  assert.equal(trusted.has('https://store.mysalesofficial.com.evil.tld'),false);
  assert.equal(trusted.has('http://store.mysalesofficial.com'),false);
+});
+
+test('storefront ends after its product grid and footer without a second fullscreen feed',async()=>{
+ const page=await read('s/index.html');
+ assert.match(page,/id="grid-products"/);
+ assert.match(page,/id="home-search"/);
+ assert.match(page,/id="home-cart"/);
+ assert.match(page,/class="powered">Powered by/);
+ assert.match(page,/function renderProducts/);
+ assert.match(page,/function renderCart/);
+ assert.doesNotMatch(page,/id="reel-experience"/);
+ assert.doesNotMatch(page,/id="reel-feed"/);
+ assert.doesNotMatch(page,/id="reel-search"/);
+ assert.doesNotMatch(page,/reelQuantities|reelQtyUpdates|renderReels|quickReelAdd/);
+ assert.doesNotMatch(page,/scroll-snap-type:y proximity/);
 });
