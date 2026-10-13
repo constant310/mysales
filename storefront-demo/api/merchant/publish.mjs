@@ -1,4 +1,5 @@
-import {Pool} from 'pg';
+import pg from 'pg';
+const {Pool} = pg;
 import {merchantFromRequest,safeOrigin} from '../../server/http-auth.mjs';
 const pool=new Pool({connectionString:process.env.EARLY_STOREFRONT_DATABASE_URL,ssl:{rejectUnauthorized:true}});
 export default async function handler(req,res){
