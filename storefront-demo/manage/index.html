@@ -217,10 +217,7 @@ main{max-width:870px;padding-top:19px}
         <div><small>Selling unit</small><strong id="dialog-unit"></strong></div>
       </div>
       <div class="modal-description"><h3>Description</h3><p id="dialog-description"></p></div>
-      <details class="modal-advanced"><summary>Inventory actions</summary>
-        <p class="hint">To change the current quantity, tap Edit. To record a completed sale and deduct stock, use this form.</p>
-        <form id="dialog-sale-form" class="modal-sale-form"><label for="dialog-sale-qty">Quantity sold</label><div class="modal-sale-row"><input id="dialog-sale-qty" type="number" min="1" max="100000" step="1" value="1" required><button type="submit" class="btn btn-outline btn-small" id="dialog-sale-button">Record sale</button></div></form>
-      </details>
+
     </div>
     <form id="dialog-form" class="modal-form" hidden>
       <label for="dialog-name">Product name</label><input id="dialog-name" name="name" maxlength="150" required>
@@ -233,6 +230,10 @@ main{max-width:870px;padding-top:19px}
       <p id="dialog-error" class="modal-error" role="alert" hidden></p>
       <button id="dialog-remove" type="button" class="modal-remove">Remove this product</button>
     </form>
+      <details class="modal-advanced" id="dialog-advanced" hidden><summary>Inventory actions</summary>
+        <p class="hint">Use this only for a completed sale. Saving a stock quantity edit is a different action.</p>
+        <form id="dialog-sale-form" class="modal-sale-form"><label for="dialog-sale-qty">Quantity sold</label><div class="modal-sale-row"><input id="dialog-sale-qty" type="number" min="1" max="100000" step="1" value="1" required><button type="submit" class="btn btn-outline btn-small" id="dialog-sale-button">Record sale</button></div></form>
+      </details>
   </div>
   <div id="dialog-footer" class="modal-footer" hidden><button type="button" id="dialog-cancel" class="btn btn-outline">Cancel</button><button type="submit" form="dialog-form" id="dialog-save" class="btn" disabled>Save changes</button></div>
 </dialog>
@@ -361,7 +362,7 @@ function populateProductDialog(product){
  showDetailPhoto(product.image_path||'');
  dialogBaseline=snapshotProduct(product);
  for(const [key,id] of Object.entries(detailFieldIds))$(id).value=dialogBaseline[key];
- $('dialog-read').hidden=false;dialogForm.hidden=true;$('dialog-footer').hidden=true;
+ $('dialog-read').hidden=false;dialogForm.hidden=true;$('dialog-footer').hidden=true;$('dialog-advanced').hidden=true;
  $('dialog-photo-picker').hidden=true;$('dialog-edit').hidden=false;
  $('dialog-error').hidden=true;$('dialog-error').textContent='';
  $('dialog-save').textContent='Save changes';dialogSave.disabled=true;
@@ -380,7 +381,7 @@ function enterProductEdit(){
  dialogEditing=true;
  $('dialog-eyebrow').textContent='Editing product';
  $('dialog-edit').hidden=true;$('dialog-read').hidden=true;dialogForm.hidden=false;
- $('dialog-photo-picker').hidden=false;$('dialog-footer').hidden=false;
+ $('dialog-photo-picker').hidden=false;$('dialog-footer').hidden=false;$('dialog-advanced').hidden=false;
  $('dialog-name').focus({preventScroll:true});
  updateDetailSave();
 }
@@ -466,6 +467,11 @@ $('dialog-remove').onclick=async()=>{
 $('dialog-sale-form').onsubmit=async event=>{
  event.preventDefault();
  if(!dialogProduct||dialogBusy)return;
+ if(hasDetailChanges()){
+  $('dialog-error').textContent='Save or discard your unsaved product edits before recording a sale.';
+  $('dialog-error').hidden=false;
+  return;
+ }
  const p=dialogProduct,unit=p.units?.[0],quantity=Number($('dialog-sale-qty').value);
  if(!unit||!Number.isSafeInteger(quantity)||quantity<=0||quantity>100000)return;
  if(!confirm('Record a sale of '+quantity+' × '+p.name+' and deduct stock?'))return;
