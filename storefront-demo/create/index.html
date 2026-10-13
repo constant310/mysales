@@ -47,43 +47,47 @@ input:focus,textarea:focus{border-color:#1c8220;box-shadow:0 0 0 3px #dff6e5}tex
 .primary{background:#1C8220}.primary:hover{background:#15803D}.ghost{color:#15803D;border-color:#BBE7C5}
 input:focus,textarea:focus{border-color:#16A34A;box-shadow:0 0 0 3px #16A34A20}
 @media(max-width:420px){.product-tag{display:none}.logo .mark{width:34px;height:34px}.logo .wordmark{font-size:1.2rem}}
+
+:root{background:#F8FAF8;color:#27372D}
+header{max-width:780px;padding:18px 20px}
+.shell{display:block;max-width:590px;margin:25px auto 60px;padding:0 18px}
+.intro{margin-bottom:23px}.intro h1{font-size:clamp(2.05rem,6vw,2.8rem);margin:8px 0 7px;letter-spacing:-.055em}
+.intro .lead{font-size:.98rem;line-height:1.5;margin:0;max-width:490px}
+.panel{border-radius:17px;box-shadow:0 8px 25px #153a1e0a;padding:27px;border:1px solid #E3EAE4}
+h2{font-size:1.35rem}.sub{margin-bottom:12px!important}
+label{margin-top:15px}input,textarea{min-height:49px;padding:12px;border-radius:10px}
+.optional-details{margin-top:18px;border-top:1px solid #E8EEE9;padding-top:10px}
+.optional-details summary{cursor:pointer;color:#1C8220;font-weight:750;font-size:.85rem;padding:8px 0}
+.optional-details textarea{margin-bottom:5px}.primary{background:#1C8220;margin-top:18px}
+.fine{margin-top:13px}.secret{font-size:.76rem}
+@media(max-width:750px){.shell{margin:20px auto 50px}.panel{padding:20px}.intro h1{font-size:2.15rem}}
 </style></head>
 <body>
 <header><a class="logo" href="/"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span><span class="product-tag">Storefronts</span></a><a class="back" href="/">← Back to mySales</a></header>
-<main class="shell">
-<section class="intro"><div class="eyebrow">Created by mySales · For growing businesses</div>
-<h1>Your own shop. Powered by mySales.</h1>
-<p class="lead">mySales Storefronts makes it easy to show customers what you sell. Add your products, share your shop link and receive WhatsApp enquiries.</p>
-<div class="features">
-<div class="feature"><div class="dot">✓</div><div><strong>Ready in minutes</strong><small>No coding, hosting setup or ERP account.</small></div></div>
-<div class="feature"><div class="dot">✓</div><div><strong>Just your phone</strong><small>Upload product pictures straight from your gallery.</small></div></div>
-<div class="feature"><div class="dot">✓</div><div><strong>Your own shop link</strong><small>Share it on WhatsApp, Instagram or anywhere.</small></div></div>
-<div class="feature"><div class="dot">✓</div><div><strong>You're in control</strong><small>Change prices and products whenever you need.</small></div></div>
-</div></section>
+<main class="shell"><section class="intro"><span class="eyebrow">mySales Storefronts</span><h1>Create your store.</h1><p class="lead">Just your business name and WhatsApp number. Add your first product next.</p></section>
 <div class="panel">
 <div id="start">
-<div class="step">mySales Storefronts · Step 1 of 2</div><h2>Tell us about your business</h2><p class="sub">Only two details are required. You can customize everything later.</p>
+<div class="step">Step 1 of 2</div><h2>Set up your shop</h2><p class="sub">Two details to get started.</p>
 <form id="create">
 <label for="name">What's your business called?</label>
 <input id="name" name="name" type="text" autocomplete="organization" placeholder="e.g. Mariam's Beauty Store" maxlength="100" minlength="2" required>
 <label for="whatsapp">Your business WhatsApp number</label>
 <input id="whatsapp" name="whatsapp" type="tel" autocomplete="tel" inputmode="tel" placeholder="e.g. 0803 123 4567" required>
 <span class="hint">Customers will message this number to order. Nigerian 080… numbers work.</span>
-<label for="description">What do you sell? <span style="font-weight:400;color:#8fa19b">(optional)</span></label>
-<textarea id="description" name="description" maxlength="400" placeholder="Clothes, groceries, beauty products, phones..."></textarea>
+<details class="optional-details"><summary>Add a business description (optional)</summary><label for="description">What do you sell?</label><textarea id="description" name="description" maxlength="400" placeholder="Clothes, groceries, beauty products, phones..."></textarea></details>
 <div class="hp" aria-hidden="true"><label>Leave blank<input name="website" tabindex="-1" autocomplete="off"></label></div>
 <button class="primary" id="submit" type="submit">Create my store →</button>
 <div id="message" class="message" role="status" aria-live="polite"></div>
-</form><p class="fine">mySales free pilot · No ERP account required · Keep your private link safe</p>
+</form><p class="fine">Free pilot · No ERP signup needed</p>
 </div>
 <div id="success" hidden>
-<div class="ready">🎉</div><div class="step" style="margin-top:22px">mySales Storefronts · Step 2 of 2</div>
+<div class="ready">✓</div><div class="step" style="margin-top:16px">Step 2 of 2</div>
 <h2 id="success-title">Your shop is created!</h2><p class="sub">One more step: add your first product and your storefront can go live.</p>
-<p class="warning"><strong>Save your private manager link.</strong> This is how you edit your shop any time. Keep it private — anyone with it could change your products. It cannot be shown again.</p>
+<p class="warning"><strong>Keep this private link.</strong> It is the key to editing your store. Save it safely and never post it publicly.</p>
 <div class="secret" id="secret"></div>
-<div class="sucrow"><button id="copy" type="button" class="ghost">Copy private link</button></div>
+<div class="sucrow"><button id="copy" type="button" class="ghost">Save private link</button></div>
 <button id="continue" type="button" class="primary">Continue to add products →</button>
-<p class="preview">Your future public store address: <span id="public"></span></p>
+<p class="preview">Your shop address: <span id="public"></span></p>
 <div id="done-message" class="message" role="status"></div>
 </div>
 </div>
