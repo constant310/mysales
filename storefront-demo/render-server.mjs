@@ -70,7 +70,8 @@ http.createServer(async(req,res)=>{
    try{
     // Do not buffer full exports or catalogues inside the Render proxy.
     // Streaming preserves back-pressure and keeps memory roughly constant.
-    const response=await fetch(edgeBase+path+url.search,{
+    const upstream=path==='/api/signup'?edgeBase.replace('/early-storefront-backend','/early-storefront-signup'):edgeBase;
+    const response=await fetch(upstream+path+url.search,{
      method:req.method,headers,body,redirect:'error',
      signal:AbortSignal.timeout(path==='/api/merchant/export'?25000:12000)
     });
