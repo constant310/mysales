@@ -293,51 +293,194 @@ async function refresh(){
  for(const p of products)renderProduct(p);
 }
 function renderProduct(p){
- const unit=p.units?.[0],card=node('article','');card.className='product';
- if(p.image_path){const img=document.createElement('img');img.src=p.image_path;img.alt=p.name;img.loading='lazy';img.onerror=()=>{const ph=node('div','📷');ph.className='ph';img.replaceWith(ph);};card.append(img);}
- else{const ph=node('div','📷');ph.className='ph';card.append(ph);}
+ const unit=p.units?.[0];
+ const card=node('article','');card.className='product';
+ const open=node('button','');open.className='product-open';open.type='button';
+ open.setAttribute('aria-label','View details of '+p.name);
+ if(p.image_path){
+  const img=document.createElement('img');img.src=p.image_path;img.alt=p.name;img.loading='lazy';
+  img.onerror=()=>{const fallback=node('div','📷');fallback.className='ph';img.replaceWith(fallback);};
+  open.append(img);
+ }else{const fallback=node('div','📷');fallback.className='ph';open.append(fallback);}
  const content=node('div','');content.className='product-body';
  content.append(node('h3',p.name));
  const price=node('div',unit?currency(unit.price):'Contact for price');price.className='price';content.append(price);
- const meta=node('p',(p.published?'Visible':'Hidden')+(p.image_path?' · Photo saved':' · Add a photo')+' · '+(Number(p.stock)>0?p.stock+' in stock':'Enquiry-only')+(p.category?' · '+p.category:''));
- meta.className='meta';content.append(meta);
- const actions=node('div','');actions.className='p-actions';
- const edit=node('button','Edit');edit.className='btn btn-outline btn-small';edit.type='button';
- const publish=node('button',p.published?'Hide':'Show');publish.className='btn btn-outline btn-small';publish.type='button';
- publish.onclick=async()=>{publish.disabled=true;try{await post('publish',{productId:p.id,published:!p.published});say('Product visibility updated.');await refresh();}catch(e){say(e.message,true);publish.disabled=false;}};
- actions.append(edit,publish);content.append(actions);
- const form=document.createElement('form');form.hidden=true;
- const fields=[['name','Product name',p.name],['price','Price (₦)',unit?.price??0],['category','Category',p.category||''],['description','Description',p.description||'']];
- for(const [key,label,value] of fields){const l=node('label',label);const f=document.createElement(key==='description'?'textarea':'input');f.name=key;f.value=String(value);if(key==='price'){f.type='number';f.min='0';f.step='1';}f.required=key==='name'||key==='price';l.append(f);form.append(l);}
- const save=node('button','Save product changes');save.className='btn btn-small';save.type='submit';form.append(save);
- form.onsubmit=async e=>{e.preventDefault();save.disabled=true;try{const f=Object.fromEntries(new FormData(form));await post('update-product',{productId:p.id,unitId:unit.id,name:f.name,description:f.description,category:f.category,price:Number(f.price)});say('Product saved.');await refresh();}catch(err){say(err.message,true);save.disabled=false;}};
- edit.onclick=()=>{form.hidden=!form.hidden;};if(!unit)edit.disabled=true;
- content.append(form);
- const more=document.createElement('details');more.append(node('summary','More product options'));
- const upload=document.createElement('form');upload.className='inline';
- const photo=document.createElement('input');photo.type='file';photo.accept='image/*';photo.setAttribute('aria-label','Replace product photo');photo.style.maxWidth='230px';photo.required=true;
- const up=node('button',p.image_path?'Change photo':'Add product photo');up.className='btn btn-outline btn-small';upload.append(photo,up);
- upload.onsubmit=async e=>{e.preventDefault();up.disabled=true;try{const f=await preparePhoto(photo.files?.[0]);const fd=new FormData();fd.append('productId',p.id);fd.append('image',f);await api('upload-image',{method:'POST',body:fd});say('Photo updated.');await refresh();}catch(err){say(err.message,true);}finally{up.disabled=false;}};
- content.append(upload);
- const stock=document.createElement('form');stock.className='inline';
- const qty=document.createElement('input');qty.type='number';qty.min='1';qty.step='1';qty.max='10000000';qty.placeholder='Quantity';qty.required=true;qty.setAttribute('aria-label','Quantity to add');
- const restock=node('button','Add stock');restock.className='btn btn-outline btn-small';stock.append(qty,restock);
- stock.onsubmit=async e=>{e.preventDefault();restock.disabled=true;try{await post('restock',{productId:p.id,amount:Number(qty.value)});say('Stock updated.');await refresh();}catch(err){say(err.message,true);}finally{restock.disabled=false;}};
- more.append(node('p','If you track inventory, add newly received quantities here.'),stock);
- if(unit){
-  const sale=document.createElement('form');sale.className='inline';
-  const soldqty=document.createElement('input');soldqty.type='number';soldqty.min='1';soldqty.step='1';soldqty.value='1';soldqty.setAttribute('aria-label','Quantity sold');soldqty.required=true;
-  const sold=node('button','Record sale');sold.className='btn btn-outline btn-small';sale.append(soldqty,sold);
-  let requestKey=null;
-  sale.onsubmit=async e=>{e.preventDefault();if(!confirm('Deduct sold stock?'))return;sold.disabled=true;requestKey||=crypto.randomUUID();try{await post('confirm-sale',{productId:p.id,unitId:unit.id,quantity:Number(soldqty.value),requestKey});requestKey=null;say('Sale recorded.');await refresh();}catch(err){say(err.message,true);sold.disabled=false;}};
-  more.append(node('p','Already sold something? Record it to deduct tracked stock.'),sale);
- }
- const archive=node('button','Remove product');archive.className='btn btn-danger btn-small';archive.onclick=async()=>{
-  if(!confirm('Remove '+p.name+' from your shop?'))return;archive.disabled=true;
-  try{await post('archive-product',{productId:p.id});say('Product removed.');await refresh();}catch(err){say(err.message,true);archive.disabled=false;}
- };
- more.append(archive);content.append(more);card.append(content);list.append(card);
+ const status=node('p',(p.published?'Visible':'Hidden')+' · '+(Number(p.stock)>0?Number(p.stock)+' in stock':'Enquiry-only')+(p.image_path?'':' · No photo'));
+ status.className='meta';content.append(status);
+ open.append(content);
+ const arrow=node('span','›');arrow.className='product-chevron';arrow.setAttribute('aria-hidden','true');open.append(arrow);
+ open.onclick=()=>openProductDialog(p.id);
+ card.append(open);list.append(card);
 }
+
+const productDialog=$('product-dialog'),dialogForm=$('dialog-form'),dialogSave=$('dialog-save');
+let dialogProduct=null,dialogBaseline=null,dialogPhotoFile=null,dialogPhotoUrl=null,dialogEditing=false,dialogBusy=false;
+let saleRequestKey=null;
+const detailFieldIds={name:'dialog-name',price:'dialog-edit-price',category:'dialog-edit-category',
+ description:'dialog-edit-description',stock:'dialog-edit-stock',published:'dialog-edit-published'};
+function detailValues(){
+ const result={};
+ for(const [key,id] of Object.entries(detailFieldIds))result[key]=$(id).value;
+ return result;
+}
+function snapshotProduct(p){
+ return {name:String(p.name||''),price:String(Number(p.units?.[0]?.price??0)),category:String(p.category||''),
+  description:String(p.description||''),stock:String(Number(p.stock||0)),published:String(Boolean(p.published))};
+}
+function hasDetailChanges(){
+ if(!dialogBaseline)return false;
+ const now=detailValues();
+ return Boolean(dialogPhotoFile)||Object.keys(dialogBaseline).some(key=>now[key]!==dialogBaseline[key]);
+}
+function updateDetailSave(){
+ const values=detailValues();
+ const allowed=dialogForm.checkValidity()&&Boolean(values.name.trim())&&
+  /^\d+$/.test(values.price)&&/^\d+$/.test(values.stock);
+ dialogSave.disabled=!dialogEditing||dialogBusy||!hasDetailChanges()||!allowed;
+}
+function clearDialogPhotoUrl(){
+ if(dialogPhotoUrl){URL.revokeObjectURL(dialogPhotoUrl);dialogPhotoUrl=null;}
+}
+function showDetailPhoto(url){
+ const photo=$('dialog-image'),placeholder=$('dialog-image-fallback');
+ photo.onerror=()=>{photo.hidden=true;placeholder.hidden=false;};
+ if(url){photo.src=url;photo.hidden=false;placeholder.hidden=true;}
+ else{photo.removeAttribute('src');photo.hidden=true;placeholder.hidden=false;}
+}
+function populateProductDialog(product){
+ dialogProduct=product;
+ dialogEditing=false;dialogBusy=false;dialogPhotoFile=null;clearDialogPhotoUrl();
+ $('dialog-photo').value='';$('dialog-photo-label').textContent=product.image_path?'Change photo':'Add a photo';
+ $('dialog-title').textContent=product.name;$('dialog-eyebrow').textContent='Product details';
+ $('dialog-price').textContent=product.units?.[0]?currency(product.units[0].price):'Contact for price';
+ $('dialog-category').textContent=product.category||'Uncategorized';
+ $('dialog-stock').textContent=Number(product.stock)>0?Number(product.stock)+' available':'0 · Enquiry-only';
+ $('dialog-visibility').textContent=product.published?'Visible to customers':'Hidden from customers';
+ $('dialog-unit').textContent=(product.units||[]).map(u=>u.name).join(', ')||'Piece';
+ $('dialog-description').textContent=product.description||'No description added.';
+ showDetailPhoto(product.image_path||'');
+ dialogBaseline=snapshotProduct(product);
+ for(const [key,id] of Object.entries(detailFieldIds))$(id).value=dialogBaseline[key];
+ $('dialog-read').hidden=false;dialogForm.hidden=true;$('dialog-footer').hidden=true;
+ $('dialog-photo-picker').hidden=true;$('dialog-edit').hidden=false;
+ $('dialog-error').hidden=true;$('dialog-error').textContent='';
+ $('dialog-save').textContent='Save changes';dialogSave.disabled=true;
+ $('dialog-sale-form').reset();saleRequestKey=null;
+ $('dialog-sale-form').hidden=!product.units?.length;
+}
+function openProductDialog(productId){
+ const product=products.find(p=>p.id===productId);
+ if(!product)return say('Product not found. Refresh your store.',true);
+ populateProductDialog(product);
+ if(!productDialog.open)productDialog.showModal();
+}
+function enterProductEdit(){
+ if(!dialogProduct)return;
+ if(!dialogProduct.units?.[0])return say('This product has no active selling unit to edit.',true);
+ dialogEditing=true;
+ $('dialog-eyebrow').textContent='Editing product';
+ $('dialog-edit').hidden=true;$('dialog-read').hidden=true;dialogForm.hidden=false;
+ $('dialog-photo-picker').hidden=false;$('dialog-footer').hidden=false;
+ $('dialog-name').focus({preventScroll:true});
+ updateDetailSave();
+}
+$('dialog-edit').onclick=enterProductEdit;
+for(const id of Object.values(detailFieldIds)){
+ $(id).addEventListener('input',updateDetailSave);
+ $(id).addEventListener('change',updateDetailSave);
+}
+$('dialog-photo').addEventListener('change',event=>{
+ const file=event.target.files?.[0]||null;
+ clearDialogPhotoUrl();dialogPhotoFile=file;
+ if(file){dialogPhotoUrl=URL.createObjectURL(file);showDetailPhoto(dialogPhotoUrl);
+  $('dialog-photo-label').textContent=file.name||'New photo selected';
+ }else{showDetailPhoto(dialogProduct?.image_path||'');
+  $('dialog-photo-label').textContent=dialogProduct?.image_path?'Change photo':'Add a photo';
+ }
+ updateDetailSave();
+});
+function cancelProductEdit(){
+ if(!dialogProduct||dialogBusy)return;
+ populateProductDialog(dialogProduct);
+}
+$('dialog-cancel').onclick=cancelProductEdit;
+function requestCloseProductDialog(){
+ if(dialogBusy)return;
+ if(dialogEditing&&hasDetailChanges()&&!confirm('Discard unsaved product changes?'))return;
+ productDialog.close();
+}
+$('dialog-close').onclick=requestCloseProductDialog;
+productDialog.addEventListener('cancel',event=>{
+ if(dialogBusy||(dialogEditing&&hasDetailChanges()&&!confirm('Discard unsaved product changes?')))event.preventDefault();
+});
+productDialog.addEventListener('click',event=>{if(event.target===productDialog)requestCloseProductDialog();});
+productDialog.addEventListener('close',()=>{
+ clearDialogPhotoUrl();dialogPhotoFile=null;dialogProduct=null;dialogEditing=false;dialogBusy=false;
+});
+dialogForm.onsubmit=async event=>{
+ event.preventDefault();
+ if(!dialogEditing||dialogBusy||!hasDetailChanges()||!dialogForm.checkValidity())return;
+ const values=detailValues();
+ if(!values.name.trim()||!/^\d+$/.test(values.price)||!/^\d+$/.test(values.stock)){updateDetailSave();return;}
+ const p=dialogProduct,unit=p?.units?.[0];
+ if(!p||!unit)return;
+ dialogBusy=true;dialogSave.disabled=true;dialogSave.textContent='Saving…';
+ $('dialog-error').hidden=true;
+ try{
+  // Upload before product metadata so an invalid photo cannot update other fields.
+  if(dialogPhotoFile){
+   const photo=await preparePhoto(dialogPhotoFile);
+   const fd=new FormData();fd.append('productId',p.id);fd.append('image',photo);
+   const uploaded=await api('upload-image',{method:'POST',body:fd});
+   if(!uploaded.imageUrl)throw Error('Product photo was not saved. Please retry.');
+   dialogPhotoFile=null;clearDialogPhotoUrl();$('dialog-photo').value='';
+  }
+  await post('update-product',{productId:p.id,unitId:unit.id,
+   name:values.name.trim(),price:Number(values.price),category:values.category,
+   description:values.description,stock:Number(values.stock),published:values.published==='true'});
+  await refresh();
+  const updated=products.find(row=>row.id===p.id);
+  if(updated)populateProductDialog(updated);else productDialog.close();
+  say('Product changes saved.');showManagerToast('Product updated');
+ }catch(error){
+  $('dialog-error').textContent='Unable to save all changes: '+error.message;
+  $('dialog-error').hidden=false;
+  say('Could not finish saving: '+error.message,true);
+ }finally{
+  dialogBusy=false;dialogSave.textContent='Save changes';updateDetailSave();
+ }
+};
+$('dialog-remove').onclick=async()=>{
+ if(!dialogProduct||dialogBusy)return;
+ const p=dialogProduct;
+ if(!confirm('Remove '+p.name+' from your store? This cannot be undone from the manager.'))return;
+ dialogBusy=true;dialogSave.disabled=true;
+ try{
+  await post('archive-product',{productId:p.id});productDialog.close();
+  await refresh();say('Product removed.');showManagerToast('Product removed');
+ }catch(error){
+  $('dialog-error').textContent=error.message;$('dialog-error').hidden=false;
+  dialogBusy=false;updateDetailSave();
+ }
+};
+$('dialog-sale-form').onsubmit=async event=>{
+ event.preventDefault();
+ if(!dialogProduct||dialogBusy)return;
+ const p=dialogProduct,unit=p.units?.[0],quantity=Number($('dialog-sale-qty').value);
+ if(!unit||!Number.isSafeInteger(quantity)||quantity<=0||quantity>100000)return;
+ if(!confirm('Record a sale of '+quantity+' × '+p.name+' and deduct stock?'))return;
+ const button=$('dialog-sale-button');button.disabled=true;dialogBusy=true;
+ saleRequestKey||=crypto.randomUUID();
+ try{
+  await post('confirm-sale',{productId:p.id,unitId:unit.id,quantity,requestKey:saleRequestKey});
+  saleRequestKey=null;await refresh();
+  const updated=products.find(row=>row.id===p.id);
+  if(updated)populateProductDialog(updated);
+  say('Sale recorded and inventory updated.');showManagerToast('Sale recorded');
+ }catch(error){say(error.message,true);}
+ finally{dialogBusy=false;button.disabled=false;}
+};
+
 async function preparePhoto(file){
  if(!file)throw Error('Choose a product photo first.');
  if(file.size>18000000)throw Error('This photo is too large. Choose one smaller than 18 MB.');
