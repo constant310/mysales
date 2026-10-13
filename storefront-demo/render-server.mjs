@@ -36,7 +36,30 @@ http.createServer(async(req,res)=>{
    res.setHeader('Cache-Control','no-store');
    if(!healthPool)return res.status(503).json({ok:false,databaseConnected:false});
    try{await healthPool.query('select 1 from early_storefront.stores limit 0');return res.status(200).json({ok:true,databaseConnected:true,schemaReady:true});}
-   catch(error){console.error('Database readiness failed',error?.code||error?.message);return res.status(503).json({ok:false,databaseConnected:false});}
+   catch(error){console.error('Database readiness failed',error?.code||error?.message);return res.status(503).json({ok:false,databaseConnected:false,code:error?.code||'UNKNOWN',reason:error?.code==='28P01'?'The Render PostgreSQL username or password is incorrect':'PostgreSQL connection failed'});}
+  }
+  if(url.pathname==='/health/edge'){
+   res.setHeader('Cache-Control','no-store');
+   const publicAnonKey=process.env.EARLY_STOREFRONT_SUPABASE_ANON_KEY;
+   if(!publicAnonKey)return res.status(503).json({ok:false,edgeConfigured:false,route:'supabase-edge'});
+   try{
+    const response=await fetch('https://wsxszbdvvtowmrnxdsrp.supabase.co/functions/v1/early-storefront-db-probe',{
+     method:'GET',
+     headers:{'Authorization':'Bearer '+publicAnonKey,'apikey':publicAnonKey},
+     signal:AbortSignal.timeout(10000)
+    });
+    const data=await response.json();
+    return res.status(response.ok&&data?.schemaReady===true?200:503).json({
+     ok:response.ok&&data?.schemaReady===true,
+     databaseConnected:response.ok&&data?.databaseConnected===true,
+     schemaReady:response.ok&&data?.schemaReady===true,
+     route:'supabase-edge',
+     renderDirectDatabaseConnectionNotTested:true
+    });
+   }catch(error){
+    console.error('Independent Supabase probe failed',error?.code||error?.message);
+    return res.status(503).json({ok:false,route:'supabase-edge',databaseConnected:false});
+   }
   }
   if(routes[url.pathname]){
    if(!configured)return res.status(503).json({error:'Store database is not configured'});
