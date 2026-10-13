@@ -1,7 +1,8 @@
 // Server-only merchant session repository. Use with a privileged, server-side
 // PostgreSQL client; never expose the connection string to browsers.
 // npm install pg argon2
-import { Pool } from 'pg';
+import pg from 'pg';
+const {Pool} = pg;
 import { createHash } from 'node:crypto';
 import {
   verifyAccessCode, generateSessionToken, hashSessionToken,
