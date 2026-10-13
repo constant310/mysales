@@ -304,3 +304,31 @@ test('bottom navigation is physically nested inside Home and absent from Explore
  assert.match(catalogue,/#home-view #bottom-nav\{position:relative/);
  assert.match(catalogue,/id="explore-back"/);
 });
+
+test('merchant settings display as three individual responsive cards',async()=>{
+ const manager=await read('manage/index.html');
+ assert.match(manager,/id="settings-heading"/);
+ assert.match(manager,/id="settings-panel" class="settings-card"/);
+ assert.match(manager,/id="whatsapp-panel" class="settings-card"/);
+ assert.match(manager,/id="access-panel" class="settings-card"/);
+ assert.match(manager,/class="settings-form-grid"/);
+ assert.match(manager,/for="business-name"/);
+ assert.match(manager,/for="business-whatsapp"/);
+ assert.match(manager,/for="business-description"/);
+ assert.match(manager,/for="business-status"/);
+ assert.match(manager,/@media\(max-width:700px\)\{\.settings-form-grid\{grid-template-columns:1fr/);
+ assert.match(manager,/\.settings-field input,\.settings-field textarea,\.settings-field select\{display:block!important;width:100%!important/);
+});
+
+test('business and WhatsApp settings save only when edited',async()=>{
+ const manager=await read('manage/index.html');
+ assert.match(manager,/id="business-save" type="submit" disabled/);
+ assert.match(manager,/id="whatsapp-save" type="submit" disabled/);
+ assert.match(manager,/function updateBusinessSave\(\)/);
+ assert.match(manager,/function updateWhatsAppSave\(\)/);
+ assert.match(manager,/businessFields\.some\(key=>values\[key\]!==businessBaseline\[key\]\)/);
+ assert.match(manager,/whatsappBaseline!==null&&value!==whatsappBaseline/);
+ assert.match(manager,/businessBaseline=businessValues\(\)/);
+ assert.match(manager,/whatsappBaseline=\$\('whatsapp-template'\)\.value/);
+ assert.match(manager,/settingsForm\.checkValidity\(\)/);
+});
