@@ -100,17 +100,17 @@ test('First product flow is photo-first and does not expose unit conversion jarg
 test('signup uses its isolated backend and enforces request limits at both layers',async()=>{
  const server=await read('render-server.mjs');
  const signup=await read('supabase/functions/early-storefront-signup/index.ts');
- assert.match(server,/const upstream=path==='\\/api\\/signup'/);
- assert.match(server,/early-storefront-signup/);
- assert.match(server,/path==='\\/api\\/signup'\\?6000:65536/);
- assert.match(signup,/used>cap/);
- assert.match(signup,/response\\(413/);
- assert.match(signup,/pg_advisory_xact_lock/);
+ assert.ok(server.includes("const upstream=path==='/api/signup'"));
+ assert.ok(server.includes('early-storefront-signup'));
+ assert.ok(server.includes("path==='/api/signup'?6000:65536"));
+ assert.ok(signup.includes('used>cap'));
+ assert.ok(signup.includes('response(413'));
+ assert.ok(signup.includes('pg_advisory_xact_lock'));
 });
 
 test('both public and management endpoints are scoped to merchant stores',async()=>{
  const edge=await read('supabase/functions/early-storefront-backend/index.ts');
- assert.match(edge,/where p\\.store_id=\\$\\{storeId\\}/);
- assert.match(edge,/where store_id=\\$\\{id\\}/);
- assert.match(edge,/l\\.revoked_at is null/);
+ assert.ok(edge.includes('where p.store_id=${storeId}'));
+ assert.ok(edge.includes('where store_id=${id}'));
+ assert.ok(edge.includes('l.revoked_at is null'));
 });
