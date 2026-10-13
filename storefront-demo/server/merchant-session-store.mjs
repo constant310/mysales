@@ -1,4 +1,4 @@
-// Passwordless merchant sessions. A private, single-use management link
+// Passwordless merchant sessions. A permanent, revocable private link
 // creates a time-limited HttpOnly browser session for its own store.
 // No merchant password, login code, or credential fallback is supported.
 import pg from 'pg';
