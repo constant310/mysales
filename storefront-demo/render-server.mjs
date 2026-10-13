@@ -92,6 +92,12 @@ http.createServer(async(req,res)=>{
     return json(res,503,{error:'Storefront temporarily unavailable'});
    }
   }
+  // Browsers often request /favicon.ico automatically; missing it is not a server failure.
+  if(path==='/favicon.ico'){
+   res.statusCode=204;
+   res.setHeader('Cache-Control','public, max-age=86400');
+   return res.end();
+  }
   let staticPath=path;
   if(path==='/')staticPath='/index.html';
   if(path==='/discover'||path==='/discover/')staticPath='/discover/index.html';
@@ -105,7 +111,12 @@ http.createServer(async(req,res)=>{
   const file=resolve(root,'.'+staticPath);
   if(!file.startsWith(root+sep))return json(res,403,{error:'Forbidden'});
   if(!Object.hasOwn(mime,extname(file)))return json(res,404,{error:'Not found'});
-  const bytes=await readFile(file);
+  let bytes;
+  try{bytes=await readFile(file);}
+  catch(error){
+   if(error?.code==='ENOENT'||error?.code==='ENOTDIR')return json(res,404,{error:'Not found'});
+   throw error;
+  }
   res.setHeader('Content-Type',mime[extname(file)]);
   if(path.startsWith('/manage')||path.startsWith('/operator'))res.setHeader('Cache-Control','no-store');
   return res.end(bytes);
