@@ -1,17 +1,24 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="referrer" content="no-referrer"><title>Open private operator portal · mySales</title>
-<style>body{font-family:system-ui;background:#f3f6f8;color:#182c35;margin:0;min-height:100vh;display:grid;place-items:center;padding:16px}
-main{background:white;padding:28px;border:1px solid #dbe5e8;border-radius:16px;max-width:410px;width:100%}button{background:#087a7d;color:white;padding:13px;border:0;border-radius:8px;width:100%;cursor:pointer}</style>
-</head><body><main><h1>mySales · Operator portal</h1><p id="status">Checking secure link…</p><button hidden id="enter">Open operator dashboard</button></main>
+<meta name="referrer" content="no-referrer"><title>Open private operator portal | mySales</title>
+<style>body{font-family:system-ui;background:#f3f6f8;color:#182c35;margin:0;min-height:100vh;display:grid;place-items:center;padding:16px}main{background:white;padding:28px;border:1px solid #dbe5e8;border-radius:16px;max-width:410px;width:100%}button{background:#087a7d;color:white;padding:13px;border:0;border-radius:8px;width:100%;cursor:pointer}</style></head>
+<body><main><h1>mySales · Operator portal</h1><p id="status">Checking private operator link…</p>
+<button hidden id="enter">Open operator dashboard</button><small>Keep this link private. It stays usable until revoked.</small></main>
 <script type="module">
 const token=new URLSearchParams(location.hash.slice(1)).get('token');
 history.replaceState(null,'',location.pathname);
 const status=document.getElementById('status'),btn=document.getElementById('enter');
-if(!/^[A-Za-z0-9_-]{43}$/.test(token||'')){status.textContent='Invalid private operator link.';}
-else{status.textContent='Private operator link ready. Keep it safe and reuse it whenever needed.';btn.hidden=false;
-btn.addEventListener('click',async()=>{
- btn.disabled=true;try{const r=await fetch('/api/operator/claim',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
- if(!r.ok)throw Error('Link revoked or invalid');location.replace('/operator/');}
- catch(e){status.textContent=e.message;btn.disabled=false;}
-});}
+if(!/^[A-Za-z0-9_-]{43}$/.test(token||'')){status.textContent='Invalid or missing private operator link.';}
+else{
+ status.textContent='Private operator link ready. Reuse this link whenever you need to onboard a business.';
+ btn.hidden=false;
+ btn.addEventListener('click',async()=>{
+  btn.disabled=true;
+  try{
+   const r=await fetch('/api/operator/me',{headers:{Authorization:'Bearer '+token},cache:'no-store'});
+   if(!r.ok)throw Error('Operator link invalid or revoked.');
+   sessionStorage.setItem('mysales_private_operator_token',token);
+   location.replace('/operator/');
+  }catch(e){status.textContent=e.message;btn.disabled=false;}
+ });
+}
 </script></body></html>
