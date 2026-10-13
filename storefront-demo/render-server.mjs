@@ -27,53 +27,73 @@ const routes={
  '/api/operator/logout':'./api/operator/logout.mjs',
  '/api/operator/stores':'./api/operator/stores.mjs',
 };
-const configured=Boolean(process.env.EARLY_STOREFRONT_DATABASE_URL);
-const healthPool=configured?new Pool({connectionString:process.env.EARLY_STOREFRONT_DATABASE_URL,ssl:{rejectUnauthorized:true},connectionTimeoutMillis:5000,max:1}):null;
+// All storefront data access is handled by Supabase Edge Functions. Database
+// credentials remain inside Supabase and are not needed on Render.
+const edgeBase='https://wsxszbdvvtowmrnxdsrp.supabase.co/functions/v1/early-storefront-gateway';
+const edgeRoutes=new Set([...Object.keys(routes),'/api/merchant/update-product','/api/merchant/update-price']);
+async function edgeReady(){
+ const result=await fetch(edgeBase+'/api/discover',{signal:AbortSignal.timeout(12000)});
+ if(!result.ok)return false;
+ const data=await result.json();
+ return data?.source==='live'&&Array.isArray(data.stores);
+}
+async function proxyToEdge(req,res,url){
+ if(!edgeRoutes.has(url.pathname))return res.status(404).json({error:'Not found'});
+ const method=req.method||'GET';
+ if(!['GET','POST'].includes(method))return res.status(405).json({error:'Method not allowed'});
+ const headers={};
+ if(req.headers.origin)headers.origin=req.headers.origin;
+ if(req.headers.cookie)headers.cookie=req.headers.cookie;
+ if(req.headers['content-type'])headers['content-type']=req.headers['content-type'];
+ let body;
+ if(method==='POST'){
+  const chunks=[];let size=0;
+  for await(const chunk of req){
+   size+=chunk.length;
+   if(size>65536)return res.status(413).json({error:'Request too large'});
+   chunks.push(chunk);
+  }
+  body=Buffer.concat(chunks);
+ }
+ let upstream;
+ try{
+  upstream=await fetch(edgeBase+url.pathname+url.search,{
+   method,headers,body,redirect:'manual',signal:AbortSignal.timeout(15000)
+  });
+ }catch(err){
+  console.error('Storefront gateway unavailable',err?.code||err?.message);
+  return res.status(503).json({error:'Store service temporarily unavailable'});
+ }
+ res.statusCode=upstream.status;
+ for(const name of ['content-type','cache-control','content-disposition','set-cookie','referrer-policy']){
+  const value=upstream.headers.get(name);
+  if(value)res.setHeader(name,value);
+ }
+ res.setHeader('X-Content-Type-Options','nosniff');
+ res.setHeader('X-Storefront-Database','supabase-edge');
+ res.end(Buffer.from(await upstream.arrayBuffer()));
+}
 http.createServer(async(req,res)=>{
  const url=new URL(req.url,'http://localhost');
  res.status=(code)=>{res.statusCode=code;return res;};
  res.json=(value)=>{res.setHeader('Content-Type','application/json');res.end(JSON.stringify(value));return res;};
  try{
-  if(url.pathname==='/health')return res.status(200).json({ok:true,databaseConfigured:configured});
-  if(url.pathname==='/health/db'){
+  if(url.pathname==='/health')
+   return res.status(200).json({ok:true,backend:'supabase-edge'});
+  if(url.pathname==='/health/db'||url.pathname==='/health/edge'){
    res.setHeader('Cache-Control','no-store');
-   if(!healthPool)return res.status(503).json({ok:false,databaseConnected:false});
-   try{await healthPool.query('select 1 from early_storefront.stores limit 0');return res.status(200).json({ok:true,databaseConnected:true,schemaReady:true});}
-   catch(error){console.error('Database readiness failed',error?.code||error?.message);return res.status(503).json({ok:false,databaseConnected:false,code:error?.code||'UNKNOWN',reason:error?.code==='28P01'?'The Render PostgreSQL username or password is incorrect':'PostgreSQL connection failed'});}
-  }
-  if(url.pathname==='/health/edge'){
-   res.setHeader('Cache-Control','no-store');
-   const publicAnonKey=process.env.EARLY_STOREFRONT_SUPABASE_ANON_KEY;
-   if(!publicAnonKey)return res.status(503).json({ok:false,edgeConfigured:false,route:'supabase-edge'});
    try{
-    const response=await fetch('https://wsxszbdvvtowmrnxdsrp.supabase.co/functions/v1/early-storefront-db-probe',{
-     method:'GET',
-     headers:{'Authorization':'Bearer '+publicAnonKey,'apikey':publicAnonKey},
-     signal:AbortSignal.timeout(10000)
+    const ok=await edgeReady();
+    return res.status(ok?200:503).json({
+     ok,databaseConnected:ok,schemaReady:ok,
+     via:'supabase-edge',renderDirectPostgresConnection:false
     });
-    const data=await response.json();
-    return res.status(response.ok&&data?.schemaReady===true?200:503).json({
-     ok:response.ok&&data?.schemaReady===true,
-     databaseConnected:response.ok&&data?.databaseConnected===true,
-     schemaReady:response.ok&&data?.schemaReady===true,
-     route:'supabase-edge',
-     renderDirectDatabaseConnectionNotTested:true
-    });
-   }catch(error){
-    console.error('Independent Supabase probe failed',error?.code||error?.message);
-    return res.status(503).json({ok:false,route:'supabase-edge',databaseConnected:false});
+   }catch(err){
+    console.error('Edge gateway health check failed',err?.message);
+    return res.status(503).json({ok:false,databaseConnected:false,schemaReady:false,via:'supabase-edge'});
    }
   }
-  if(routes[url.pathname]){
-   if(!configured)return res.status(503).json({error:'Store database is not configured'});
-   req.query=Object.fromEntries(url.searchParams);
-   if(['POST','PUT','PATCH'].includes(req.method)){
-    const chunks=[];let size=0;
-    for await(const chunk of req){size+=chunk.length;if(size>32768)return res.status(413).json({error:'Request too large'});chunks.push(chunk);}
-    try{req.body=JSON.parse(Buffer.concat(chunks).toString('utf8')||'{}');}catch{return res.status(400).json({error:'Invalid JSON'});}
-   }
-   const module=await import(routes[url.pathname]);return await module.default(req,res);
-  }
+  if(url.pathname.startsWith('/api/'))return proxyToEdge(req,res,url);
   let path=url.pathname;
   if(path==='/')path='/index.html';
   if(path==='/discover'||path==='/discover/')path='/discover/index.html';
@@ -95,10 +115,7 @@ http.createServer(async(req,res)=>{
   res.end(bytes);
  }catch(error){console.error('Request error',error?.message);if(!res.headersSent)res.status(500).end('Server error');}
 }).listen(Number(process.env.PORT)||10000,'0.0.0.0',()=>{
- console.log('Early Storefront server ready');
- if(healthPool){
-  healthPool.query('select 1 from early_storefront.stores limit 0')
-   .then(()=>console.log('Early Storefront PostgreSQL schema connection verified'))
-   .catch(error=>console.error('Early Storefront PostgreSQL schema connection failed',error?.code||error?.message));
- }
+ console.log('Early Storefront server ready (Supabase Edge backend)');
+ edgeReady().then(ok=>console.log('Early Storefront Edge gateway readiness',ok?'CONNECTED':'FAILED'))
+  .catch(err=>console.error('Early Storefront Edge gateway readiness error',err?.message));
 });
