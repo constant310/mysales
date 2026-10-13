@@ -167,12 +167,13 @@ button{-webkit-tap-highlight-color:transparent}a{color:inherit;text-decoration:n
 .overlay{z-index:45}.drawer{z-index:46}
 @media(min-width:600px){#explore-view .reel{height:calc(95dvh - 73px);min-height:calc(95dvh - 73px)}.home-head{padding-top:17px}}
 @media(max-width:370px){.home-tools{gap:4px}.home-filter select{width:75px}.home-filter{padding:0 3px}.grid-content{padding:9px}.category-select{padding:0 4px}.category-select select{width:59px}.sheet-actions button{font-size:.75rem}.business-hero{padding:24px 20px}}
+.business-whatsapp{display:inline-block;margin-top:13px;font-size:.79rem;color:#E8FAED;border:1px solid #ffffff6e;background:#ffffff13;border-radius:9px;padding:9px 12px;font-weight:800}
 </style></head>
 <body>
 <div class="site" id="site">
 
 <section id="home-view" class="home-view" aria-label="Business homepage"><header class="home-head"><a class="home-logo" href="/"><span class="mark">mS</span>mySales</a><small>Online store</small></header>
-<section class="business-hero"><div class="kicker">Welcome to our store</div><h1 id="business-name">Our business</h1><p id="business-description">Explore our products and prices.</p>
+<section class="business-hero"><div class="kicker">Welcome to our store</div><h1 id="business-name">Our business</h1><p id="business-description">Explore our products and prices.</p><a id="business-whatsapp" class="business-whatsapp" href="#" target="_blank" rel="noopener noreferrer" hidden>WhatsApp: <span id="business-number"></span> ↗</a>
 <div class="hero-actions"><button id="explore-cta" type="button">Explore products →</button><small id="business-count"></small></div><a href="/create/" id="home-demo" hidden>Create your free storefront →</a></section>
 <section class="collection"><div class="collection-head"><div><h2>Our collection</h2><small id="grid-count">All products</small></div><button type="button" id="see-explore">See all →</button></div>
 <div class="home-tools"><label class="home-search"><span aria-hidden="true">⌕</span><input id="home-search" type="search" aria-label="Search products" placeholder="Search products"></label>
@@ -509,6 +510,12 @@ $('send').onclick=()=>{
   $('business-name').textContent=store.name;
   $('business-description').textContent=store.description||'Browse our products, see prices and contact us directly.';
   $('business-count').textContent=products.length+' listed products';
+  const whatsappDigits=String(store.whatsapp||'').replace(/\D/g,'');
+  if(!isDemo&&/^[1-9]\d{7,14}$/.test(whatsappDigits)){
+   $('business-whatsapp').href='https://wa.me/'+whatsappDigits+'?text='+encodeURIComponent('Hello '+store.name+', I found your mySales storefront and would like to ask a question.');
+   $('business-number').textContent=store.whatsapp;
+   $('business-whatsapp').hidden=false;
+  }
   $('home-demo').hidden=!isDemo;
   const categories=[...new Set(products.map(p=>p.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
   for(const id of ['category','category-home']){
