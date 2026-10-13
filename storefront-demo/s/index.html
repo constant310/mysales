@@ -1,32 +1,43 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Store catalogue | mySales</title>
 <style>body{font-family:system-ui;background:#f4f7f7;color:#172d32;margin:0}header{padding:24px;background:#087a7d;color:white}main{max-width:1000px;margin:auto;padding:18px}.toolbar{display:flex;gap:10px;margin:16px 0}input,select{padding:12px;border:1px solid #ccd5d8;border-radius:9px;max-width:100%}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}.item{background:white;border:1px solid #e1e7e9;border-radius:13px;padding:17px}button{background:#087a7d;color:white;padding:10px 14px;border:0;border-radius:9px;cursor:pointer}button:disabled{opacity:.5}aside{background:white;padding:20px;border-radius:13px;margin-top:20px}small{color:#64767a}</style></head><body><header><h1 id="name">Store catalogue</h1><p id="description"></p></header><main><p id="notice" role="status">Loading products…</p><div class="toolbar"><input id="search" placeholder="Search products" aria-label="Search products"><select id="category" aria-label="Category"><option value="">All categories</option></select></div><div id="products" class="grid"></div><aside><h2>Your enquiry <span id="count">0</span></h2><div id="cart"></div><button id="send" disabled>Send order on WhatsApp</button><p><small>Sending an enquiry does not reserve or deduct stock. The merchant confirms availability and sales.</small></p></aside></main>
 <script type="module">
-const $=id=>document.getElementById(id),cart=new Map();let data=[];
+const $=id=>document.getElementById(id),cart=new Map();let data=[],isDemo=false;
 const slug=new URLSearchParams(location.search).get('slug')||location.pathname.split('/').filter(Boolean)[1]||'';
 const add=(tag,text)=>{const e=document.createElement(tag);e.textContent=String(text);return e;};
 function renderCart(){
  $('cart').replaceChildren();let count=0;
  for(const v of cart.values()){count+=v.quantity;$('cart').append(add('p',v.quantity+' × '+v.name+' ('+v.unit+') — ₦'+(v.price*v.quantity).toLocaleString()));}
- $('count').textContent=count;$('send').disabled=!count;
+ $('count').textContent=count;$('send').disabled=!count||isDemo;
 }
 function render(){
  const q=$('search').value.toLowerCase(),cat=$('category').value;$('products').replaceChildren();
  for(const p of data.filter(p=>(!cat||p.category===cat)&&p.name.toLowerCase().includes(q))){
   const card=add('div','');card.className='item';
   if(p.image_path){const photo=document.createElement('img');photo.src=p.image_path;photo.alt=p.name;photo.loading='lazy';photo.style.cssText='width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;margin-bottom:8px';card.append(photo);}
-  card.append(add('h3',p.name),add('p',p.description||''),add('small',p.category||'General'));
-  for(const u of p.units){const row=document.createElement('p');row.append(add('span',u.name+' — ₦'+Number(u.price).toLocaleString()+' '));const b=add('button','Add');b.disabled=Number(p.stock)<Number(u.factor);b.onclick=()=>{const key=p.id+':'+u.name;const v=cart.get(key)||{name:p.name,unit:u.name,price:Number(u.price),quantity:0};v.quantity++;cart.set(key,v);renderCart();};row.append(b);card.append(row);}
+  card.append(add('h3',p.name),add('p',p.description||''),add('small',(p.category||'General')+' · '+Number(p.stock)+' '+(p.base_unit||'piece')+' in stock'));
+  for(const u of p.units){
+   const row=document.createElement('p');row.append(add('span',u.name+' — ₦'+Number(u.price).toLocaleString()+' '));
+   const key=p.id+':'+u.name, used=()=>Array.from(cart.values()).filter(v=>v.productId===p.id).reduce((n,v)=>n+v.quantity*v.factor,0);
+   const b=add('button','Add');b.disabled=used()+Number(u.factor)>Number(p.stock);
+   b.onclick=()=>{
+    if(used()+Number(u.factor)>Number(p.stock)){$('notice').textContent='Only '+p.stock+' '+p.base_unit+' currently available.';return;}
+    const v=cart.get(key)||{productId:p.id,factor:Number(u.factor),name:p.name,unit:u.name,price:Number(u.price),quantity:0};
+    v.quantity++;cart.set(key,v);renderCart();render();
+   };
+   row.append(b);card.append(row);
+  }
   $('products').append(card);
  }
 }
 try{
  if(!/^[a-z0-9-]{2,80}$/.test(slug))throw Error('Invalid store link');
  const r=await fetch('/api/store?slug='+encodeURIComponent(slug));if(!r.ok)throw Error('Store unavailable');
- const j=await r.json();data=j.products;$('name').textContent=j.store.name;$('description').textContent=j.store.description||'';document.title=j.store.name+' | mySales';
+ const j=await r.json();data=j.products;isDemo=/demo/i.test(slug)||/TEST STORE/i.test(j.store.description||'');$('send').textContent=isDemo?'Demo catalogue — ordering disabled':'Send order on WhatsApp';$('name').textContent=j.store.name;$('description').textContent=j.store.description||'';document.title=j.store.name+' | mySales';
  const cats=[...new Set(data.map(p=>p.category).filter(Boolean))];for(const c of cats){const o=add('option',c);o.value=c;$('category').append(o);}
- $('notice').textContent=data.length?'Browse products and send an enquiry.':'No published products yet.';
+ $('notice').textContent=isDemo?'DEMO ONLY — fictional products and sample prices. Do not place real orders.':data.length?'Browse products and send an enquiry.':'No published products yet.';
  $('search').oninput=render;$('category').onchange=render;
  $('send').onclick=()=>{
+  if(isDemo)return;
   const phone=String(j.store.whatsapp||'').replace(/\D/g,'');if(!/^[1-9]\d{7,14}$/.test(phone)){$('notice').textContent='Merchant WhatsApp number is unavailable.';return;}
   const lines=['Hello, I would like to enquire about these products from '+j.store.name+':',...Array.from(cart.values()).map(v=>v.quantity+' × '+v.name+' ('+v.unit+') — ₦'+(v.price*v.quantity).toLocaleString()),'Please confirm availability and total.'];
   location.href='https://wa.me/'+phone+'?text='+encodeURIComponent(lines.join('\n'));
