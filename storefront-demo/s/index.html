@@ -114,7 +114,7 @@ button{-webkit-tap-highlight-color:transparent}a{color:inherit;text-decoration:n
 <div class="basket-total"><span>Estimated subtotal</span><strong id="cart-total">₦0</strong></div>
 <label class="drawer-label" for="customer-note">Message to seller (optional)</label><textarea id="customer-note" maxlength="300" placeholder="Any delivery details or questions?"></textarea>
 <button class="checkout" type="button" id="send">
-<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.2 7.4L3 21l2.1-5.8A8.4 8.4 0 1 1 21 11.5Z"/><path d="M8.7 8.8c.4 3 3 5.6 6 6"/></svg>Send WhatsApp enquiry</button>
+<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.2 7.4L3 21l2.1-5.8A8.4 8.4 0 1 1 21 11.5Z"/><path d="M8.7 8.8c.4 3 3 5.6 6 6"/></svg><span id="send-label">Send WhatsApp enquiry</span></button>
 <p class="help" id="checkout-help">Your merchant confirms availability and final prices. No payment is collected here.</p>
 <a href="/create/" id="demo-signup" hidden style="display:block;margin-top:14px;color:#16823d;font-weight:900;text-align:center">Create your own free store →</a>
 </div></aside>
@@ -208,7 +208,7 @@ function renderCart(){
  $('cart-title-count').textContent=items?'('+items+')':'';
  $('cart-total').textContent=cash(amount);
  $('send').disabled=!items||isDemo;
- $('send').textContent=isDemo?'Demo only · No real orders':'Send WhatsApp enquiry';
+ $('send-label').textContent=isDemo?'Demo only · No real orders':'Send WhatsApp enquiry';
  $('demo-signup').hidden=!isDemo;
  // The demo gives an interactive basket, but never contacts a fictional store.
  $('checkout-help').textContent=isDemo?'This is a product demonstration; enquiries cannot be sent. Create your own store to try it.':'Your merchant confirms availability and final prices. No payment is collected here.';
