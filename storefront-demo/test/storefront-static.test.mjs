@@ -345,3 +345,50 @@ test('merchant manager separates top action buttons from product cards and uses 
  assert.match(manager,/product-chevron/);
  assert.match(manager,/arrow\.innerHTML=/);
 });
+
+test('customer share link is the business-name path, not a visible slug or query string',async()=>{
+ const manager=await read('manage/index.html');
+ const catalogue=await read('s/index.html');
+ const signup=await read('supabase/functions/early-storefront-signup/index.ts');
+ const directory=await read('discover/index.html');
+ const operator=await read('operator/index.html');
+ const landing=await read('index.html');
+ assert.match(manager,/function publicUrl\(\)\{return location\.origin\+'\/'\+encodeURIComponent\(currentStore\.public_handle/);
+ assert.match(signup,/publicUrl:'\/'\+encodeURIComponent\(result\.store\.public_handle\)/);
+ assert.match(directory,/link\.href='\/'\+encodeURIComponent\(store\.public_handle/);
+ assert.match(operator,/a\.href='\/'\+encodeURIComponent\(s\.public_handle/);
+ assert.match(catalogue,/const lookupParam=legacyRoute\?'slug':'handle'/);
+ assert.match(landing,/href="\/demo-warri-pantry"/);
+ assert.doesNotMatch(manager,/\/s\/\?slug=/);
+});
+
+test('clean /business-name routes and old shared links both reach storefronts',async()=>{
+ const server=await read('render-server.mjs');
+ const edge=await read('supabase/functions/early-storefront-backend/index.ts');
+ const catalogue=await read('s/index.html');
+ assert.match(server,/Clean customer storefronts:/);
+ assert.match(server,/staticPath='\/s\/index\.html'/);
+ assert.match(server,/staticPath===path/);
+ assert.match(server,/if\(path==='\/s'/);
+ assert.match(catalogue,/const legacyRoute=routeParts\[0\]==='s'/);
+ assert.match(catalogue,/const slug=legacyRoute\?/);
+ assert.match(edge,/const handle=query\.get\('handle'\)/);
+ assert.match(edge,/where slug=\$\{slug\} and status='published'/);
+ assert.match(edge,/s\.public_handle=\$\{handle\}/);
+ assert.match(edge,/early_storefront\.public_handle_aliases/);
+ assert.match(edge,/s\.status='published'/);
+});
+
+test('business name handles are unique, alias old URLs, and keep internal slugs separate',async()=>{
+ const handleMigration=await read('sql/20261013_public_store_handles.sql');
+ const aliasMigration=await read('sql/20261013_public_store_rename_aliases.sql');
+ const edge=await read('supabase/functions/early-storefront-backend/index.ts');
+ assert.match(handleMigration,/CREATE UNIQUE INDEX IF NOT EXISTS early_storefront_public_handle_unique/);
+ assert.match(handleMigration,/pg_advisory_xact_lock/);
+ assert.match(handleMigration,/ALTER COLUMN public_handle SET NOT NULL/);
+ assert.match(aliasMigration,/public_handle_aliases/);
+ assert.match(aliasMigration,/BEFORE UPDATE OF name/);
+ assert.match(aliasMigration,/ON CONFLICT\(handle\) DO NOTHING/);
+ assert.match(edge,/returning slug,public_handle,name,description,whatsapp,status,whatsapp_template/);
+ assert.match(edge,/store:\{slug:actor\.slug,public_handle:actor\.public_handle/);
+});
