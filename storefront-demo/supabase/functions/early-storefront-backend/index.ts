@@ -129,12 +129,72 @@ Deno.serve(async (request: Request) => {
       const products=await productQuery(id,true);
       return out(200,{store,products},{'cache-control':'public, max-age=6, stale-while-revalidate=15'});
     }
+    // Capture anonymous store activity. One browser-tab session per event per UTC day.
+    if(pathname==='/api/activity' && request.method==='POST'){
+      const requestedOrigin=request.headers.get('origin');
+      if(!requestedOrigin || !trustedOrigins.has(requestedOrigin))return out(403,{error:'Invalid origin'});
+      const b=await bodyJson(request);
+      const handle=String(b.handle||''),eventType=String(b.eventType||''),sessionId=String(b.sessionId||'');
+      if(!/^[a-z0-9-]{2,80}$/.test(handle) ||
+         !['store_view','cart_add','whatsapp_click'].includes(eventType) ||
+         !uuid.test(sessionId))return out(400,{error:'Invalid tracking event'});
+      const found=await sql`select id from early_storefront.stores where public_handle=${handle} and status='published' limit 1`;
+      if(!found.length)return out(404,{error:'Store not found'});
+      await sql`insert into early_storefront.activity_events(store_id,event_type,session_id)
+        values(${found[0].id},${eventType},${sessionId})
+        on conflict(store_id,event_day,event_type,session_id) do nothing`;
+      return out(202,{ok:true});
+    }
     if(pathname.startsWith('/api/operator/')) {
       const requestedOrigin=request.headers.get('origin');
       if(request.method!=='GET' && requestedOrigin && !trustedOrigins.has(requestedOrigin)) return out(403,{error:'Invalid origin'});
       if(!(await operator(request)))return out(401,{error:'Private operator link required'});
       if(pathname==='/api/operator/me' && request.method==='GET')
         return out(200,{authenticated:true});
+      if(pathname==='/api/operator/analytics' && request.method==='GET') {
+        const days=query.get('days')==='7'?7:30;
+        const since=days-1;
+        const summary=await sql`select
+          (select count(*)::int from early_storefront.stores) as total_stores,
+          (select count(*)::int from early_storefront.stores where status='published') as published_stores,
+          (select count(*)::int from early_storefront.stores where created_at >= now()-(${days}::int || ' days')::interval) as new_stores,
+          (select count(distinct store_id)::int from early_storefront.products where archived_at is null) as stores_with_products,
+          (select count(*)::int from early_storefront.products where archived_at is null) as total_products,
+          (select count(*)::int from early_storefront.products where archived_at is null and published) as published_products,
+          (select count(*)::int from early_storefront.sales) as recorded_sales,
+          (select count(*)::int from early_storefront.sales where created_at >= now()-(${days}::int || ' days')::interval) as sales_period`;
+        const signups=await sql`select (created_at at time zone 'UTC')::date as day,count(*)::int as new_stores
+          from early_storefront.stores where created_at >= now()-(${days}::int || ' days')::interval
+          group by 1 order by 1`;
+        const dailyEvents=await sql`select event_day as day,event_type,count(*)::int as sessions
+          from early_storefront.activity_events where event_day >= current_date - ${since}
+          group by event_day,event_type order by event_day`;
+        const stores=await sql`select s.id,s.name,s.public_handle,s.whatsapp,s.status,s.created_at,
+          coalesce(p.product_count,0)::int as product_count,
+          coalesce(p.published_count,0)::int as published_count,
+          coalesce(ev.visits,0)::int as visits,
+          coalesce(ev.cart_sessions,0)::int as cart_sessions,
+          coalesce(ev.whatsapp_sessions,0)::int as whatsapp_sessions
+          from early_storefront.stores s
+          left join (select store_id,count(*)::int as product_count,
+                     count(*) filter(where published)::int as published_count
+                     from early_storefront.products where archived_at is null group by store_id) p on p.store_id=s.id
+          left join (select store_id,
+                      count(*) filter(where event_type='store_view')::int as visits,
+                      count(*) filter(where event_type='cart_add')::int as cart_sessions,
+                      count(*) filter(where event_type='whatsapp_click')::int as whatsapp_sessions
+                     from early_storefront.activity_events where event_day>=current_date-${since}
+                     group by store_id) ev on ev.store_id=s.id
+          order by s.created_at desc limit 250`;
+        const totals=dailyEvents.reduce((a,r)=>{
+          if(r.event_type==='store_view')a.visits+=r.sessions;
+          if(r.event_type==='cart_add')a.cartSessions+=r.sessions;
+          if(r.event_type==='whatsapp_click')a.whatsappSessions+=r.sessions;
+          return a;
+        },{visits:0,cartSessions:0,whatsappSessions:0});
+        return out(200,{days,generatedAt:new Date().toISOString(),summary:summary[0],totals,
+          signups,dailyEvents,stores,visitDefinition:'Browser-tab sessions per store per UTC day. Tracking starts after deployment.'});
+      }
       if(pathname==='/api/operator/stores' && request.method==='GET') {
         const stores=await sql`select s.id,s.slug,s.public_handle,s.name,s.description,s.whatsapp,s.status,s.created_at,
           (select count(*)::int from early_storefront.products p where p.store_id=s.id and p.archived_at is null) as product_count
