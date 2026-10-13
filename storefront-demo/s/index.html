@@ -168,6 +168,49 @@ button{-webkit-tap-highlight-color:transparent}a{color:inherit;text-decoration:n
 @media(min-width:600px){#explore-view .reel{height:calc(95dvh - 73px);min-height:calc(95dvh - 73px)}.home-head{padding-top:17px}}
 @media(max-width:370px){.home-tools{gap:4px}.home-filter select{width:75px}.home-filter{padding:0 3px}.grid-content{padding:9px}.category-select{padding:0 4px}.category-select select{width:59px}.sheet-actions button{font-size:.75rem}.business-hero{padding:24px 20px}}
 .business-whatsapp{display:inline-block;margin-top:13px;font-size:.79rem;color:#E8FAED;border:1px solid #ffffff6e;background:#ffffff13;border-radius:9px;padding:9px 12px;font-weight:800}
+
+/* Explore is immersive; Home owns the bottom tabs. */
+#explore-view .feed{top:0;bottom:0}
+#explore-view .reel{height:100dvh;min-height:100dvh}
+#explore-view .reel-copy{bottom:35px}
+#explore-view .rail{bottom:51px}
+#explore-view .product-index{bottom:17px;pointer-events:none}
+#explore-view .top-search{left:11px;right:11px;gap:7px}
+.explore-back,.filter-trigger{display:grid;place-items:center;flex:none;border:0;color:#fff;background:#163a2ec9;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 3px 16px #04180c35}
+.explore-back{width:40px;height:47px;border-radius:13px}
+.explore-back svg{width:23px;height:23px}
+.filter-trigger{width:45px;height:47px;position:relative;border-radius:14px}
+.filter-trigger svg{width:22px;height:22px}
+.filter-trigger[aria-pressed="true"]{color:#fff;background:#16873F}
+.filter-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;background:#55ed88;border-radius:50%;border:1px solid #133e26}
+.home-filter-button{height:45px;width:45px;color:#1b703b;background:#fff;border:1px solid #dce8df;box-shadow:none;border-radius:11px}
+.home-filter-button[aria-pressed="true"]{background:#e9f8ee;color:#126936;border-color:#a9dab9}
+.home-filter-button .filter-dot{background:#16873F}
+#explore-view .search-wrap{flex:1;min-width:0}
+#explore-view #search{min-width:0;width:100%;font-size:.82rem}
+#explore-view .cart-top{flex:none;width:46px;height:47px}
+#explore-view .cart-top svg{height:23px;width:23px}
+#bottom-nav[hidden]{display:none!important}
+.filter-dialog{position:fixed;inset:auto 0 0;width:min(560px,100vw);max-width:100%;max-height:82dvh;padding:0;border:0;background:#fff;color:#253b2c;border-radius:22px 22px 0 0;margin:0 auto;box-shadow:0 -15px 44px #05190a59;overflow:hidden}
+.filter-dialog[open]{display:block}
+.filter-dialog::backdrop{background:#06180ab8;backdrop-filter:blur(3px)}
+.filter-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px 20px 16px;border-bottom:1px solid #e5eee6}
+.filter-eyebrow{font-size:.69rem;font-weight:850;text-transform:uppercase;letter-spacing:.09em;color:#198844}
+.filter-head h2{margin:3px 0 0;font-size:1.32rem;letter-spacing:-.05em;color:#1d3727}
+.filter-close{border:0;background:#eff5f0;border-radius:50%;color:#3e5644;width:36px;height:36px;font-size:1.4rem}
+.filter-content{padding:18px 20px calc(20px + env(safe-area-inset-bottom));overflow-y:auto;max-height:calc(82dvh - 89px)}
+.filter-section-title{font-size:.77rem;font-weight:900;letter-spacing:.03em;color:#516b56;margin-bottom:10px}
+.filter-options{display:grid;gap:9px;max-height:45dvh;overflow-y:auto}
+.filter-option{border:1px solid #e0ebe2;background:#fff;border-radius:12px;min-height:51px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:#263c2c;font-size:.9rem;font-weight:750;cursor:pointer}
+.filter-option:has(input:checked){border-color:#62b982;background:#eef9f1;color:#176b37}
+.filter-option input{appearance:none;width:18px;height:18px;border:2px solid #a6baaa;border-radius:50%;padding:0;margin:0;min-height:0;flex:none}
+.filter-option input:checked{border:5px solid #168a42}
+.filter-actions{display:grid;grid-template-columns:1fr 1.3fr;gap:10px;margin-top:20px}
+.filter-actions button{padding:13px 12px;border-radius:12px;font-weight:900;font-size:.86rem;min-height:49px}
+.filter-clear{border:1px solid #d5e6d8;background:#fff;color:#266940}
+.filter-apply{border:0;background:#168a42;color:#fff}
+@media(min-width:600px){#explore-view .reel{height:95dvh;min-height:95dvh}}
+@media(max-width:370px){#explore-view .top-search{left:8px;right:8px;gap:5px}.explore-back{width:36px}.filter-trigger{width:39px}.home-filter-button{width:41px}#explore-view .cart-top{width:43px}#explore-view .search-wrap{padding:0 8px}}
 </style></head>
 <body>
 <div class="site" id="site">
@@ -177,15 +220,15 @@ button{-webkit-tap-highlight-color:transparent}a{color:inherit;text-decoration:n
 <div class="hero-actions"><button id="explore-cta" type="button">Explore products →</button><small id="business-count"></small></div><a href="/create/" id="home-demo" hidden>Create your free storefront →</a></section>
 <section class="collection"><div class="collection-head"><div><h2>Our collection</h2><small id="grid-count">All products</small></div><button type="button" id="see-explore">See all →</button></div>
 <div class="home-tools"><label class="home-search"><span aria-hidden="true">⌕</span><input id="home-search" type="search" aria-label="Search products" placeholder="Search products"></label>
-<label class="home-filter"><span aria-hidden="true">☷</span><select id="category-home" aria-label="Filter by category"><option value="">All categories</option></select></label>
+<button class="filter-trigger home-filter-button" type="button" id="filter-home" aria-label="Filter products by category" aria-haspopup="dialog" aria-controls="filter-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M7 12h10m-7 5h4"/><path d="M16 5v4M10 10v4M15 15v4"/></svg><span class="filter-dot" hidden></span></button>
 <button type="button" id="home-cart" class="home-cart" aria-label="Open basket">🛒<span id="home-count" class="cart-count">0</span></button></div>
 <div id="grid-products" class="grid-products"></div><p class="home-footer">Powered by <strong>mySales Storefronts</strong></p>
 </section></section><section id="explore-view" hidden>
 <div id="feed" class="feed" tabindex="0" aria-label="Scroll vertically through products"><div class="loading"><div><strong>Opening this storefront…</strong><p>Loading products and pictures.</p></div></div></div>
-<div class="top-search"><label class="search-wrap" for="search">
+<div class="top-search"><button id="explore-back" class="explore-back" type="button" aria-label="Back to previous view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><label class="search-wrap" for="search">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16.3 16.3 4.6 4.6"/></svg>
 <input id="search" type="search" aria-label="Search products" placeholder="Search products…" autocomplete="off">
-</label><label class="category-select"><span aria-hidden="true">☷</span><select id="category" aria-label="Filter by category"><option value="">All categories</option></select></label><button id="open-cart" class="cart-top" type="button" aria-label="Open enquiry basket">
+</label><button class="filter-trigger explore-filter-button" id="filter-explore" type="button" aria-label="Filter products by category" aria-haspopup="dialog" aria-controls="filter-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M7 12h10m-7 5h4"/><path d="M16 5v4M10 10v4M15 15v4"/></svg><span class="filter-dot" hidden></span></button><button id="open-cart" class="cart-top" type="button" aria-label="Open enquiry basket">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.6 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg><span id="cart-count" class="cart-count">0</span></button></div>
 <div class="demo-chip" id="demo-chip" hidden>Sample storefront · <a href="/create/">Create yours free</a></div>
 <div class="store-credit">Powered by mySales</div>
@@ -200,7 +243,13 @@ button{-webkit-tap-highlight-color:transparent}a{color:inherit;text-decoration:n
 <div class="sheet-line"><strong>Quantity</strong>
 <div class="qty-control" aria-label="Quantity selector"><button type="button" id="minus" aria-label="Decrease quantity">−</button><span id="qty" aria-live="polite">1</span><button type="button" id="plus" aria-label="Increase quantity">+</button></div></div><div class="sheet-line"><strong>Price</strong><div class="bottom-price"><strong id="price">₦0</strong><small id="unit-label">/ piece</small></div></div>
 <div class="sheet-actions"><button class="add-bottom" type="button" id="add-main"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="20" r="1"/><circle cx="19" cy="20" r="1"/><path d="M1 2h3l3 13h13l2-9H6"/><path d="M17 2v8m-4-4h8"/></svg>Add to cart</button><button class="sheet-enquire" type="button" id="sheet-enquire"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 1-11.4 7.2L3 20l1.8-5.6A8 8 0 1 1 20 11Z"/><path d="M8 9c.4 3 2 4.5 5 5.4"/></svg>Enquire now</button></div><p class="sheet-hint">The seller confirms availability before payment.</p>
-</div><nav class="bottom-nav" aria-label="Store navigation"><button id="nav-home" class="nav-item active" type="button" aria-current="page"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10h-6v-6H9v6H3V10Z"/></svg><span>Home</span></button><button id="nav-explore" class="nav-item" type="button"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg><span>Explore</span></button></nav>
+</div><nav id="bottom-nav" class="bottom-nav" aria-label="Store navigation"><button id="nav-home" class="nav-item active" type="button" aria-current="page"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10h-6v-6H9v6H3V10Z"/></svg><span>Home</span></button><button id="nav-explore" class="nav-item" type="button"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg><span>Explore</span></button></nav>
+
+<dialog id="filter-dialog" class="filter-dialog" aria-labelledby="filter-heading">
+ <div class="filter-head"><div><span class="filter-eyebrow">Explore products</span><h2 id="filter-heading">Filter products</h2></div><button type="button" class="filter-close" id="filter-close" aria-label="Close filters">×</button></div>
+ <form id="filter-form" class="filter-content"><div class="filter-section-title">Category</div><div id="filter-options" class="filter-options" role="group" aria-label="Choose category"></div>
+ <div class="filter-actions"><button type="button" id="filter-clear" class="filter-clear">Clear filters</button><button type="submit" id="filter-apply" class="filter-apply">Show products</button></div></form>
+</dialog>
 <div class="status" id="status" role="alert"></div>
 <div class="overlay" id="overlay"></div>
 <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Enquiry basket" aria-hidden="true">
