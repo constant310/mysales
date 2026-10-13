@@ -64,6 +64,16 @@ footer{padding:26px 0;color:#758777;font-size:.8rem}
 @media(max-width:850px){.hero{grid-template-columns:1fr;gap:33px;padding:53px 0 59px}.preview{max-width:400px}.step-grid{gap:13px}.step{padding:22px 17px}}
 @media(max-width:600px){.wrap{width:min(100% - 34px,1090px)}.nav{min-height:66px}.logo{font-size:1.1rem;gap:7px}.logo-mark{width:33px;height:33px;font-size:.99rem}.logo small{font-size:.58rem}.nav-links>a:first-child{display:none}.nav .primary{font-size:.75rem;min-height:40px;padding:10px 12px}.hero{padding:42px 0 58px;gap:29px}h1{font-size:clamp(2.6rem,10.6vw,3.8rem)}.lead{margin-bottom:21px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.actions a{font-size:.82rem;padding:12px 8px;min-height:49px}.reassurance{gap:9px 13px;font-size:.74rem}.preview{max-width:360px}.preview-tag{margin-bottom:11px}.steps{padding:59px 0}.section-title{text-align:left;margin-bottom:23px}.step-grid{grid-template-columns:1fr;gap:10px}.step{padding:19px 20px}.step h3{margin-top:12px}.convince-content{padding:34px 0;display:grid;gap:22px}.convince .primary{width:100%}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.primary{transition:none}}
+
+/* Conversion-first illustration: it is an invitation, not a competing sample. */
+.preview-convert{margin-top:17px;text-align:center;max-width:401px;width:100%}
+.preview-convert p{color:#597761;font-size:.84rem;font-weight:850;margin:0 0 12px}
+.preview-create{display:flex;min-height:49px;align-items:center;justify-content:center;text-align:center;background:#168541;color:white;border-radius:12px;font-size:.9rem;font-weight:900;padding:12px 19px}
+.preview-create:hover{background:#106c31}
+.preview-example{display:inline-block;color:#527b5c;margin:13px auto 0;font-size:.75rem;font-weight:780;text-decoration:underline;text-underline-offset:3px}
+.preview-bottom{padding:1px 13px 16px}
+.preview-tag{background:#e7f6eb}
+@media(max-width:600px){.preview-convert{max-width:360px;margin-top:15px}.preview-convert p{font-size:.8rem}}
 </style></head><body>
 <header><div class="wrap nav">
 <a class="logo" href="/" aria-label="mySales Storefronts"><span class="logo-mark" aria-hidden="true">mS</span>mySales<small>Storefronts</small></a>
@@ -73,19 +83,20 @@ footer{padding:26px 0;color:#758777;font-size:.8rem}
 <div class="hero-shell"><section class="hero wrap" aria-labelledby="main-title">
 <div><span class="eyebrow">For everyday business owners</span><h1 id="main-title">Your business deserves its <span>own store link.</span></h1>
 <p class="lead">Stop sending product photos and prices one by one. Give customers one link to browse everything you sell—and let them enquire directly on WhatsApp.</p>
-<div class="actions"><a class="primary" href="/create/">Create my free store</a><a class="secondary" href="#how-it-works">See how it works</a></div>
+<div class="actions"><a class="primary" href="/create/">Create my free store</a><a class="secondary" href="#how-it-works">How it works</a></div>
 <ul class="reassurance"><li>No website skills</li><li>No login needed</li><li>WhatsApp enquiries</li></ul>
 </div>
 <div class="preview-area" aria-label="Illustration of a storefront you can create">
-<span class="preview-tag">This could be your store</span>
-<div class="preview"><div class="preview-top"><span class="preview-dot" aria-hidden="true"></span><span class="preview-url">mysales storefront / your-business</span></div>
-<div class="mock-hero"><small>Your online shop</small><strong>Your Business Name</strong><p>Customers can see what you sell, anytime.</p></div>
+<span class="preview-tag">Preview your future storefront</span>
+<div class="preview"><div class="preview-top"><span class="preview-dot" aria-hidden="true"></span><span class="preview-url">mysales / your-business</span></div>
+<div class="mock-hero"><small>YOUR BRAND · YOUR PRODUCTS</small><strong>Your Business Name</strong><p>Show customers your products and prices in one place.</p></div>
 <div class="mock-products">
 <div class="mock-product"><img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=450&q=75" loading="lazy" alt="Illustrative headphones product"><div class="mock-detail"><b>Headphones</b><strong>₦24,500</strong><span class="mock-add">Add to cart</span></div></div>
 <div class="mock-product"><img src="https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=450&q=75" loading="lazy" alt="Illustrative watch product"><div class="mock-detail"><b>Classic watch</b><strong>₦32,500</strong><span class="mock-add">Add to cart</span></div></div>
 </div>
-<div class="preview-bottom">Your products. Your prices. <strong>Your store.</strong></div>
+<div class="preview-bottom"><strong>Your own store, ready to share.</strong></div>
 </div>
+<div class="preview-convert"><p>Like what you see? Put your own products here.</p><a class="preview-create" href="/create/">Create my store for free</a><a class="preview-example" href="/demo-warri-pantry">See a working example</a></div>
 </div></section></div>
 <section class="steps wrap" id="how-it-works"><div class="section-title"><span class="eyebrow">Three simple steps</span><h2>Start sharing your store today.</h2><p>You only need your business details and a few product pictures. No complex setup or technical knowledge.</p></div>
 <div class="step-grid">
