@@ -6,7 +6,7 @@
 <section class="card"><h1>Create a merchant storefront</h1><p class="muted">The owner will receive a permanent, revocable private link. No merchant signup or password.</p>
 <form id="create">
 <label>Business name<input name="name" required maxlength="150" placeholder="e.g. Ada Beauty Store"></label>
-<label>Store URL slug<input name="slug" required maxlength="80" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="e.g. ada-beauty-store"></label>
+<label>Internal store ID (legacy slug)<input name="slug" required maxlength="80" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="e.g. ada-beauty-store"></label>
 <label>WhatsApp number (international format)<input name="whatsapp" required placeholder="+2348012345678"></label>
 <label>About this business<textarea name="description" maxlength="2000"></textarea></label>
 <button>Create store & private link</button></form>
@@ -26,7 +26,7 @@ function showLink(link){$('newlink').hidden=false;$('private').href=link;$('priv
 async function action(body){return api('stores',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});}
 async function refresh(){const {stores}=await api('stores');list.replaceChildren();if(!stores.length)list.append(text('p','No stores yet.'));
 for(const s of stores){const box=text('div','');box.className='row';box.append(text('strong',s.name+' · '+s.slug),text('p',s.product_count+' products · '+s.status+' · '+s.whatsapp));
-const a=text('a','Open public store');a.href='/s/?slug='+encodeURIComponent(s.slug);a.target='_blank';box.append(a);
+const a=text('a','Open public store');a.href='/'+encodeURIComponent(s.public_handle||s.slug);a.target='_blank';box.append(a);
 const actions=text('div','');actions.className='actions';
 const rotate=text('button','Replace private management link');rotate.onclick=async()=>{if(!confirm('Replace private link? All previous links and merchant sessions will stop working.'))return;rotate.disabled=true;try{const r=await action({action:'rotate',storeId:s.id});showLink(r.managementLink);status.textContent='A new private management link was issued.';}catch(e){status.textContent=e.message;}finally{rotate.disabled=false;}};
 const pub=text('button',s.status==='published'?'Unpublish store':'Publish store');pub.onclick=async()=>{pub.disabled=true;try{await action({action:'publish-store',storeId:s.id,published:s.status!=='published'});await refresh();}catch(e){status.textContent=e.message;pub.disabled=false;}};
