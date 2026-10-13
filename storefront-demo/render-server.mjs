@@ -82,6 +82,7 @@ http.createServer(async(req,res)=>{
   if(path==='/manage/claim')staticPath='/manage/claim.html';
   if(path==='/operator'||path==='/operator/')staticPath='/operator/index.html';
   if(path==='/operator/claim')staticPath='/operator/claim.html';
+  if(path==='/operator/setup')staticPath='/operator/setup.html';
   if(path==='/s'||path==='/s/'||/^\/s\/[a-z0-9-]+\/?$/.test(path))staticPath='/s/index.html';
   const file=resolve(root,'.'+staticPath);
   if(!file.startsWith(root+sep))return json(res,403,{error:'Forbidden'});
