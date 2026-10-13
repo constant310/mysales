@@ -138,6 +138,65 @@ main{max-width:870px;padding-top:19px}
 .modal-footer #dialog-save:disabled{background:#cedbd1;color:#6c8471;opacity:1;cursor:not-allowed}
 @media(max-width:500px){.product-dialog{max-height:95dvh;width:calc(100vw - 18px);border-radius:17px}.modal-header,.modal-scroll{padding-left:15px;padding-right:15px}.modal-header{padding-top:14px}.modal-photo{height:185px}.modal-footer{padding-left:15px;padding-right:15px}.product-open img,.product-open .ph{width:69px;height:69px}.modal-field-grid{gap:9px}}
 @media(prefers-reduced-motion:reduce){.product{transition:none}}
+
+/* mySales settings: separate, calm cards rather than a crowded form stack. */
+.settings-hub{max-width:760px;margin:27px auto 0;display:grid;gap:13px}
+.settings-intro{padding:5px 3px 8px}
+.settings-overline{font-size:.66rem;letter-spacing:.13em;font-weight:900;color:#15803D}
+.settings-intro h2{font-size:1.55rem;letter-spacing:-.05em;color:#243b2b;margin:7px 0}
+.settings-intro p{color:#718274;font-size:.84rem;line-height:1.55;margin:0;max-width:520px}
+.settings-card{background:#fff;border:1px solid #E2EAE4;border-radius:17px;box-shadow:0 2px 12px #183e2209;overflow:hidden;min-width:0}
+.settings-card[open]{border-color:#D7E6DA;box-shadow:0 6px 22px #1E532610}
+.settings-summary{display:flex;align-items:center;gap:14px;padding:19px 19px;cursor:pointer;list-style:none;color:#263E2E}
+.settings-summary::-webkit-details-marker{display:none}
+.settings-summary::marker{display:none}
+.settings-summary::after{content:none!important;display:none!important}
+.settings-summary:hover{background:#FBFDFB}
+.settings-icon{width:45px;height:45px;border-radius:13px;background:#EAF8EF;color:#16823F;display:grid;place-items:center;flex:none}
+.settings-icon svg{width:23px;height:23px}
+.settings-title{flex:1;min-width:0;display:block}
+.settings-title strong{font-size:.93rem;letter-spacing:-.014em;display:block;color:#283C2D}
+.settings-title small{display:block;color:#829084;font-size:.76rem;font-weight:500;line-height:1.45;margin-top:4px}
+.settings-chevron{font-size:1.5rem;line-height:1;color:#78907B;transition:transform .2s ease;flex:none;align-self:center;margin:0 2px}
+.settings-card[open] .settings-chevron{transform:rotate(180deg)}
+.settings-content{border-top:1px solid #EDF0ED;margin:0 19px;padding:19px 0 21px}
+.settings-field{min-width:0;margin-bottom:17px}
+.settings-field label{display:block!important;font-size:.81rem;line-height:1.4;color:#334b39;font-weight:850;margin:0 0 8px}
+.settings-field input,.settings-field textarea,.settings-field select{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;border:1px solid #D8E4DB;border-radius:11px;background:#fff;color:#2D4031;box-shadow:none;box-sizing:border-box;padding:12px 14px;min-height:48px;font-size:.91rem;line-height:1.48}
+.settings-field textarea{resize:vertical;min-height:110px}
+.settings-field input:focus,.settings-field textarea:focus,.settings-field select:focus{border-color:#16A34A;box-shadow:0 0 0 3px #16A34A1B;outline:0}
+.settings-field input::placeholder,.settings-field textarea::placeholder{color:#A1AEA3}
+.settings-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.field-hint{font-size:.73rem;line-height:1.45;color:#829385;margin:7px 0 0}
+.settings-action-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px}
+.settings-primary{background:#1C8220;border:0;border-radius:11px;color:#fff;padding:12px 20px;min-height:46px;font-size:.86rem;font-weight:900}
+.settings-primary:hover:not(:disabled){background:#166B1B}
+.settings-primary:disabled{background:#D9E8DD!important;color:#70947B!important;cursor:not-allowed;opacity:1}
+.save-feedback{font-size:.74rem;color:#829183;line-height:1.35;margin:5px 0}
+.settings-secondary{border:1px solid #D6E7D9!important;background:#fff!important;color:#18743B!important;border-radius:11px;font-size:.83rem;min-height:44px;font-weight:850}
+.settings-secondary:hover{background:#F4FBF5!important}
+.settings-text-button{border:0;background:transparent;color:#637E68;font-size:.82rem;font-weight:800;padding:9px 0;text-decoration:underline;text-underline-offset:3px}
+.message-tips{background:#F5FAF6;border:1px solid #E6F0E8;border-radius:12px;padding:14px 14px 12px}
+.message-tips strong{display:block;font-size:.75rem;color:#56725E;margin-bottom:10px}
+.message-tips small{display:block;font-size:.72rem;color:#708575;line-height:1.5;margin-top:10px}
+.placeholder-chips{display:flex;flex-wrap:wrap;gap:7px}
+.placeholder-chips code{display:inline-flex;background:#fff;color:#187B41;border:1px solid #D7EBDB;border-radius:8px;padding:7px 9px;font-size:.74rem;font-weight:750}
+.message-tips small code{background:transparent;color:#137940;font-weight:850;padding:0}
+#whatsapp-template{min-height:175px;line-height:1.65}
+.whatsapp-actions{gap:9px;margin-top:16px}
+#whatsapp-preview{white-space:pre-wrap;overflow-wrap:anywhere;background:#F7FAF8;border:1px solid #DEEDE2;border-radius:12px;color:#324A38;font-size:.79rem;line-height:1.6;font-family:inherit;padding:15px;margin:14px 0 0;max-width:100%}
+#whatsapp-preview[hidden]{display:none}
+#whatsapp-feedback{margin-top:12px}
+.settings-security-note{display:flex;align-items:start;gap:12px;background:#F4F8F5;border:1px solid #E4EFE7;border-radius:12px;padding:14px}
+.settings-security-note>span{font-size:1.1rem;flex:none}
+.settings-security-note p{margin:0;font-size:.79rem;line-height:1.65;color:#5D7461}
+.settings-security-note strong{color:#2B4531}
+.settings-access-actions{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:16px}
+.settings-access-actions button{display:flex;align-items:center;justify-content:center;gap:8px;white-space:normal;line-height:1.35;min-height:49px;padding:11px 12px}
+.settings-access-actions svg{width:17px;height:17px;flex:none}
+@media(max-width:700px){.settings-form-grid{grid-template-columns:1fr;gap:0}}
+@media(max-width:500px){.settings-hub{margin-top:22px;gap:11px}.settings-intro{padding:1px 3px 5px}.settings-intro h2{font-size:1.41rem}.settings-summary{padding:15px 14px;gap:11px}.settings-icon{width:41px;height:41px;border-radius:11px}.settings-title strong{font-size:.89rem}.settings-title small{font-size:.73rem}.settings-content{margin:0 14px;padding:17px 0 18px}.settings-access-actions{grid-template-columns:1fr;gap:9px}.settings-action-row .settings-primary{min-width:150px}.whatsapp-actions{display:grid;grid-template-columns:1fr 1fr}.whatsapp-actions #whatsapp-save{grid-column:1/-1}.whatsapp-actions #reset-whatsapp{grid-column:auto;justify-self:center}.whatsapp-actions #preview-whatsapp{grid-column:1}.settings-card{border-radius:14px}}
+@media(prefers-reduced-motion:reduce){.settings-chevron{transition:none}}
 </style></head><body>
 <header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Storefront Manager</span>
 <button id="exit" class="head-btn">Close private access</button></header>
@@ -169,33 +228,64 @@ main{max-width:870px;padding-top:19px}
 <div><h2>Your products <span id="total" style="font-size:.84rem;color:#789589"></span></h2></div><button class="btn btn-outline btn-small" id="add-more" type="button">+ Add</button></div>
 <div id="products" class="product-list"></div></section>
 </div>
-<section class="panel footer-panel">
-<details id="whatsapp-panel">
-<summary>WhatsApp enquiry message</summary>
-<p class="muted">Personalise the message customers send when they enquire about your products.</p>
-<form id="whatsapp-form">
-<label for="whatsapp-template">Your message</label>
-<textarea id="whatsapp-template" name="whatsapp_template" rows="7" maxlength="1500" spellcheck="true" aria-describedby="template-help" style="min-height:165px;line-height:1.6"></textarea>
-<p id="template-help" class="hint">Use <code>{store_name}</code>, <code>{items}</code>, <code>{subtotal}</code>, and <code>{customer_note}</code>. Include <code>{items}</code> so customers send the products they chose.</p>
-<div class="inline" style="gap:9px;margin-top:12px">
-<button class="btn btn-small" type="submit">Save WhatsApp message</button>
-<button class="btn btn-outline btn-small" id="preview-whatsapp" type="button">Preview</button>
-<button class="btn btn-outline btn-small" id="reset-whatsapp" type="button">Use default</button>
-</div>
-<pre class="message-preview" id="whatsapp-preview" hidden></pre>
-</form>
-</details>
-<details id="settings-panel"><summary>⚙️ Change business details</summary>
-<form id="settings"><div class="inline" style="gap:14px">
-<div style="flex:1;min-width:180px"><label>Business name<input name="name" maxlength="150" required></label></div>
-<div style="flex:1;min-width:180px"><label>WhatsApp number<input name="whatsapp" maxlength="16" required></label></div></div>
-<label>About your business<textarea name="description" maxlength="2000"></textarea></label>
-<label>Store visibility<select name="status"><option value="published">Public — customers can view</option><option value="draft">Private — hidden from customers</option></select></label>
-<button class="btn btn-small" type="submit">Save changes</button></form></details>
-<details><summary>🔐 Private access &amp; backup</summary>
-<p class="muted">Anyone with your management link can edit this shop. Only send it to people you trust. You can keep using the same link unless it is revoked by the operator.</p>
-<div class="actions"><button class="btn btn-outline btn-small" id="copy-manager" type="button">Copy my private manager link</button><button id="export" class="btn btn-outline btn-small" type="button">Download my store backup</button></div>
-</details></section>
+<section class="settings-hub" aria-labelledby="settings-heading">
+  <div class="settings-intro"><span class="settings-overline">STORE MANAGEMENT</span><h2 id="settings-heading">Store settings</h2><p>Keep your shop details, customer messages and private access in one place.</p></div>
+
+  <details id="settings-panel" class="settings-card">
+    <summary class="settings-summary">
+      <span class="settings-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/><path d="m15 16 4-4 2 2-4 4-3 1 1-3Z"/></svg></span>
+      <span class="settings-title"><strong>Business details</strong><small>Store name, WhatsApp, description and visibility</small></span>
+      <span class="settings-chevron" aria-hidden="true">⌄</span>
+    </summary>
+    <div class="settings-content">
+      <form id="settings">
+        <div class="settings-form-grid">
+          <div class="settings-field"><label for="business-name">Business name</label><input id="business-name" name="name" type="text" maxlength="150" autocomplete="organization" placeholder="Your business name" required></div>
+          <div class="settings-field"><label for="business-whatsapp">WhatsApp number</label><input id="business-whatsapp" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" maxlength="16" placeholder="+234 800 000 0000" required></div>
+        </div>
+        <div class="settings-field"><label for="business-description">About your business</label><textarea id="business-description" name="description" maxlength="2000" rows="3" placeholder="Tell customers what you sell and why they should shop with you."></textarea><p class="field-hint">This description appears on your storefront Home.</p></div>
+        <div class="settings-field"><label for="business-status">Store visibility</label><select id="business-status" name="status"><option value="published">Public — customers can view your store</option><option value="draft">Private — only you can manage it</option></select><p class="field-hint">Choose Private to temporarily hide the storefront from customers.</p></div>
+        <div class="settings-action-row"><button class="btn settings-primary" id="business-save" type="submit" disabled>Save changes</button><span id="business-feedback" class="save-feedback" role="status" aria-live="polite">No changes yet</span></div>
+      </form>
+    </div>
+  </details>
+
+  <details id="whatsapp-panel" class="settings-card">
+    <summary class="settings-summary">
+      <span class="settings-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5a8 8 0 0 1-11.7 7L3 20.5l2-5.2A8 8 0 1 1 20 11.5Z"/><path d="M8.4 8.8c.6 2.9 2.2 4.6 5.2 5.5"/></svg></span>
+      <span class="settings-title"><strong>WhatsApp enquiry message</strong><small>Personalise the message customers send you</small></span>
+      <span class="settings-chevron" aria-hidden="true">⌄</span>
+    </summary>
+    <div class="settings-content">
+      <form id="whatsapp-form">
+        <div class="settings-field"><label for="whatsapp-template">Your enquiry message</label><textarea id="whatsapp-template" name="whatsapp_template" rows="7" maxlength="1500" spellcheck="true" aria-describedby="template-help" placeholder="Write the message your customers will send…"></textarea></div>
+        <div class="message-tips" id="template-help"><strong>Personalise with these placeholders</strong><div class="placeholder-chips"><code>{store_name}</code><code>{items}</code><code>{subtotal}</code><code>{customer_note}</code></div><small>Keep <code>{items}</code> so the enquiry includes the products selected.</small></div>
+        <pre class="message-preview" id="whatsapp-preview" hidden></pre>
+        <div class="settings-action-row whatsapp-actions">
+          <button class="btn settings-primary" id="whatsapp-save" type="submit" disabled>Save message</button>
+          <button class="btn settings-secondary" id="preview-whatsapp" type="button">Preview</button>
+          <button class="settings-text-button" id="reset-whatsapp" type="button">Use default</button>
+        </div>
+        <p id="whatsapp-feedback" class="save-feedback" role="status" aria-live="polite">No changes yet</p>
+      </form>
+    </div>
+  </details>
+
+  <details id="access-panel" class="settings-card">
+    <summary class="settings-summary">
+      <span class="settings-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v3"/></svg></span>
+      <span class="settings-title"><strong>Private access &amp; backup</strong><small>Secure your editing link and save a copy</small></span>
+      <span class="settings-chevron" aria-hidden="true">⌄</span>
+    </summary>
+    <div class="settings-content">
+      <div class="settings-security-note"><span aria-hidden="true">🔒</span><p><strong>Keep your management link private.</strong> Anyone who has it can edit your products and store details. Only share it with someone you trust.</p></div>
+      <div class="settings-access-actions">
+        <button class="btn settings-secondary" id="copy-manager" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy private manager link</button>
+        <button class="btn settings-secondary" id="export" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4"/><path d="M5 17v3h14v-3"/></svg>Download store backup</button>
+      </div>
+    </div>
+  </details>
+</section>
 </div></main>
 <dialog id="product-dialog" class="product-dialog" aria-labelledby="dialog-title">
   <div class="modal-header">
