@@ -71,10 +71,16 @@ http.createServer(async(req,res)=>{
     // Do not buffer full exports or catalogues inside the Render proxy.
     // Streaming preserves back-pressure and keeps memory roughly constant.
     const upstream=path==='/api/signup'?edgeBase.replace('/early-storefront-backend','/early-storefront-signup'):edgeBase;
+    const upstreamStarted=performance.now();
     const response=await fetch(upstream+path+url.search,{
      method:req.method,headers,body,redirect:'error',
      signal:AbortSignal.timeout(path==='/api/merchant/export'?25000:12000)
     });
+    const upstreamDurationMs=Math.round(performance.now()-upstreamStarted);
+    // Keep credentials out of logs; log only slow or failed upstream responses.
+    if(response.status>=500||upstreamDurationMs>1500)
+     console.warn('Storefront upstream issue',path,'status='+response.status,'duration_ms='+upstreamDurationMs);
+    res.setHeader('Server-Timing','supabase;dur='+upstreamDurationMs);
     res.statusCode=response.status;
     res.setHeader('Content-Type',response.headers.get('content-type')||'application/json; charset=utf-8');
     if(publicRead){
