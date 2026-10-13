@@ -55,6 +55,6 @@ document.getElementById('new').addEventListener('submit',async e=>{
  catch(err){notice.textContent=err.message;}finally{b.disabled=false;}
 });
 document.getElementById('logout').addEventListener('click',async()=>{try{await api('logout',{method:'POST'});location.reload();}catch(e){notice.textContent=e.message;}});
-try{await api('me');app.hidden=false;notice.textContent='Your private management link has granted access to this store.';await refresh();}
+try{await api('me');app.hidden=false;notice.textContent='Your reusable private management link has granted access. You can use the same link on future visits.';await refresh();}
 catch(e){notice.textContent='Cannot open your dashboard: '+e.message;}
 </script></body></html>
