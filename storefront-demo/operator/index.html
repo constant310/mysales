@@ -15,7 +15,13 @@
 <script type="module">
 const $=id=>document.getElementById(id),status=$('status'),list=$('stores');
 const text=(tag,t)=>{const e=document.createElement(tag);e.textContent=String(t);return e;};
-async function api(path,options={}){const r=await fetch('/api/operator/'+path,{cache:'no-store',credentials:'same-origin',...options});const j=await r.json();if(!r.ok)throw Error(j.error||'Request failed');return j;}
+const operatorToken=sessionStorage.getItem('mysales_private_operator_token')||'';
+async function api(path,options={}){
+ if(!/^[A-Za-z0-9_-]{43}$/.test(operatorToken))throw Error('Open your private operator link again.');
+ const headers=new Headers(options.headers||{});headers.set('Authorization','Bearer '+operatorToken);
+ const r=await fetch('/api/operator/'+path,{cache:'no-store',...options,headers});
+ const j=await r.json();if(!r.ok)throw Error(j.error||'Request failed');return j;
+}
 function showLink(link){$('newlink').hidden=false;$('private').href=link;$('private').textContent=link;$('copy').onclick=async()=>{try{await navigator.clipboard.writeText(link);status.textContent='Link copied. Send privately.';}catch{status.textContent='Copy the private link shown above.';}};}
 async function action(body){return api('stores',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});}
 async function refresh(){const {stores}=await api('stores');list.replaceChildren();if(!stores.length)list.append(text('p','No stores yet.'));
@@ -27,6 +33,6 @@ const pub=text('button',s.status==='published'?'Unpublish store':'Publish store'
 actions.append(rotate,pub);box.append(actions);list.append(box);
 }}
 $('create').onsubmit=async e=>{e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');b.disabled=true;const details=Object.fromEntries(new FormData(f));try{const r=await action({action:'create',...details});showLink(r.managementLink);f.reset();status.textContent='Store created. Private link ready to send.';await refresh();}catch(err){status.textContent=err.message;}finally{b.disabled=false;}};
-$('logout').onclick=async()=>{try{await api('logout',{method:'POST'});location.reload();}catch(e){status.textContent=e.message;}};
+$('logout').onclick=()=>{sessionStorage.removeItem('mysales_private_operator_token');location.replace('/operator/claim');};
 (async()=>{try{await api('me');$('main').hidden=false;status.textContent='Secure operator access enabled.';await refresh();}catch(e){status.textContent='Private operator access required. Open your saved operator link.';}})();
 </script></body></html>
