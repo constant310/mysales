@@ -22,6 +22,10 @@ const routes={
  '/api/merchant/restock':'./api/merchant/restock.mjs',
  '/api/merchant/publish':'./api/merchant/publish.mjs',
  '/api/merchant/confirm-sale':'./api/merchant/confirm-sale.mjs',
+ '/api/operator/claim':'./api/operator/claim.mjs',
+ '/api/operator/me':'./api/operator/me.mjs',
+ '/api/operator/logout':'./api/operator/logout.mjs',
+ '/api/operator/stores':'./api/operator/stores.mjs',
 };
 const configured=Boolean(process.env.EARLY_STOREFRONT_DATABASE_URL);
 const healthPool=configured?new Pool({connectionString:process.env.EARLY_STOREFRONT_DATABASE_URL,ssl:{rejectUnauthorized:true},connectionTimeoutMillis:5000,max:1}):null;
@@ -75,6 +79,8 @@ http.createServer(async(req,res)=>{
   if(path==='/discover'||path==='/discover/')path='/discover/index.html';
   if(path==='/manage'||path==='/manage/')path='/manage/index.html';
   if(path==='/manage/claim')path='/manage/claim.html';
+  if(path==='/operator'||path==='/operator/')path='/operator/index.html';
+  if(path==='/operator/claim')path='/operator/claim.html';
   if(path==='/s'||path==='/s/'||/^\/s\/[a-z0-9-]+\/?$/.test(path))path='/s/index.html';
   const file=resolve(root,'.'+path);
   if(!file.startsWith(root+sep))return res.status(403).end('Forbidden');
@@ -83,7 +89,7 @@ http.createServer(async(req,res)=>{
   res.setHeader('Content-Type',mime[extname(file)]||'application/octet-stream');
   res.setHeader('X-Content-Type-Options','nosniff');
   res.setHeader('Referrer-Policy','no-referrer');
-  if(path.startsWith('/manage'))res.setHeader('Cache-Control','no-store');
+  if(path.startsWith('/manage')||path.startsWith('/operator'))res.setHeader('Cache-Control','no-store');
   res.setHeader('Content-Security-Policy',"frame-ancestors 'none'; base-uri 'self'; object-src 'none'");
   res.setHeader('X-Frame-Options','DENY');
   res.end(bytes);
