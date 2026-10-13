@@ -31,7 +31,7 @@ test('Render streams large exports with backpressure and does not cache merchant
 test('Operator POST calls reject cross-site origins',async()=>{
  const edge=await read('supabase/functions/early-storefront-backend/index.ts');
  assert.match(edge,/pathname\.startsWith\('\/api\/operator\/'\)/);
- assert.match(edge,/request\.method!=='GET' && requestedOrigin && requestedOrigin!==origin/);
+ assert.match(edge,/request\.method!=='GET' && requestedOrigin && !trustedOrigins\.has\(requestedOrigin\)/);
  assert.match(edge,/Private operator link required/);
 });
 test('Migration handoff stays read-only and preserves exact historic source keys',async()=>{
