@@ -135,32 +135,52 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 .sheet-actions #sheet-add{background:#16833f}
 .checkout svg,#sheet-enquire svg{width:19px;height:19px;stroke-width:1.85}
 @media(max-width:490px){.grid-add{font-size:.82rem;min-height:44px}.hero-whatsapp{font-size:.8rem}}
+
+/* Demo storefront is a conversion preview, real merchants stay uncluttered. */
+.demo-promo{max-width:1075px;margin:4px auto 20px;padding:18px 21px;border:1px solid #cbe6d3;background:#f0faf3;border-radius:15px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.demo-promo[hidden],.demo-last-cta[hidden]{display:none!important}
+.demo-promo-copy{min-width:0}
+.demo-overline{font-size:.66rem;font-weight:950;letter-spacing:.09em;color:#14803a;display:block;margin-bottom:6px}
+.demo-promo strong{color:#173b28;font-size:1.02rem;line-height:1.28;letter-spacing:-.02em;display:block}
+.demo-promo p{font-size:.77rem;line-height:1.55;color:#647f6b;margin:5px 0 0}
+.demo-promo-cta,.demo-last-cta>a{display:inline-flex;align-items:center;justify-content:center;text-align:center;flex:none;background:#168441;color:#fff;border-radius:10px;padding:13px 17px;min-height:45px;font-size:.83rem;font-weight:900}
+.demo-last-cta{margin:32px auto 0;padding:25px 17px;border:1px solid #c9e8d3;background:#f2faf4;border-radius:16px;text-align:center}
+.demo-last-cta p{font-size:1.14rem;font-weight:950;letter-spacing:-.035em;color:#173c27;margin:0 0 15px}
+.demo-last-cta small{display:block;font-size:.74rem;color:#6b806f;margin-top:10px}
+.hero-whatsapp{gap:0}
+.search-field svg,.icon-control svg{width:21px;height:21px}
+.icon-control{transition:border-color .15s,background .15s}
+@media(max-width:600px){.demo-promo{margin:0 15px 15px;flex-direction:column;align-items:stretch;padding:17px}.demo-promo-cta{width:100%}.demo-promo strong{font-size:.96rem}.demo-promo p{font-size:.76rem}}
 </style></head><body><div class="site">
 <header class="brandbar"><a class="brand" href="/" aria-label="mySales home"><span class="brand-mark" aria-hidden="true">mS</span><span>mySales</span></a><span class="brand-note">Online storefront</span></header>
+<aside id="demo-promo" class="demo-promo" aria-label="Create your own store" hidden>
+ <div class="demo-promo-copy"><span class="demo-overline">SEE WHAT YOU CAN BUILD</span><strong>Your products. Your prices. Your own store link.</strong><p>Create a free storefront and share it with customers on WhatsApp.</p></div>
+ <a href="/create/" class="demo-promo-cta">Create my free store</a>
+</aside>
 <main>
 <section class="business-hero" aria-labelledby="business-name"><div class="hero-inner">
 <div class="kicker">Welcome to our store</div><h1 id="business-name">Our business</h1>
 <p id="business-description">Browse our products and prices.</p>
-<a id="business-whatsapp" class="hero-whatsapp" target="_blank" rel="noopener noreferrer" href="#" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 11.5a8.4 8.4 0 0 1-12.1 7.2L3 21l2-5.4a8.4 8.4 0 1 1 15.4-4.1Z"/><path d="M8.4 9.1c.8 2.6 2.4 4.3 5.3 5"/></svg><span id="business-number"></span></a>
+<a id="business-whatsapp" class="hero-whatsapp" target="_blank" rel="noopener noreferrer" href="#" hidden><span id="business-number"></span></a>
 <div class="hero-actions"><a class="shop-cta" href="#products">Browse products</a><span id="business-count" class="product-stat"></span></div>
-<a id="home-demo" href="/create/" hidden>Create your own storefront free →</a>
+<a id="home-demo" href="/create/" hidden>Create my free store</a>
 </div></section>
 <section id="products" class="collection" aria-labelledby="products-title">
 <div class="collection-head"><div><h2 id="products-title">Our collection</h2><p id="grid-count">Browse what’s available</p></div></div>
 <div class="home-tools">
-<label class="search-field"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.2"/><path d="m16.1 16.1 4.5 4.5"/></svg><input id="home-search" type="search" aria-label="Search products" placeholder="Search products…" autocomplete="off"></label>
-<button id="filter-home" class="icon-control" type="button" aria-label="Filter products by category" aria-haspopup="dialog" aria-controls="filter-dialog"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 17h16M4 12h16"/><circle cx="9" cy="7" r="2.4" fill="white"/><circle cx="16" cy="17" r="2.4" fill="white"/><circle cx="12" cy="12" r="2.4" fill="white"/></svg><span id="filter-dot" class="filter-dot" hidden></span></button>
-<button type="button" id="home-cart" class="icon-control" aria-label="Open enquiry basket"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 8.5h15L21 21H3L4.5 8.5Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg><span id="home-count" class="cart-count">0</span></button>
+<label class="search-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m20.5 20.5-4.1-4.1"/></svg><input id="home-search" type="search" aria-label="Search products" placeholder="Search products…" autocomplete="off"></label>
+<button id="filter-home" class="icon-control" type="button" aria-label="Filter products by category" aria-haspopup="dialog" aria-controls="filter-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h9m4 0h3M4 17h3m4 0h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg><span id="filter-dot" class="filter-dot" hidden></span></button>
+<button type="button" id="home-cart" class="icon-control" aria-label="Open enquiry basket"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h16l-1 12H5L4 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg><span id="home-count" class="cart-count">0</span></button>
 </div>
 <div id="grid-products" class="grid-products" aria-live="polite"></div>
-<p class="powered">Powered by <strong>mySales Storefronts</strong></p>
+<div id="demo-last-cta" class="demo-last-cta" hidden><p>Imagine your products in a store like this.</p><a href="/create/">Create my free store</a><small>Upload your product photos and prices in minutes.</small></div><p class="powered">Powered by <strong>mySales Storefronts</strong></p>
 </section></main></div>
 <div id="overlay" class="overlay"></div>
 <aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="drawer-title">
 <div class="drawer-header"><h2 id="drawer-title">Your enquiry basket <span id="cart-title-count"></span></h2><button id="close-cart" class="close-button" type="button" aria-label="Close basket">×</button></div>
 <div class="drawer-body"><div id="cart-lines"></div><div class="total"><span>Estimated subtotal</span><strong id="cart-total">₦0</strong></div>
 <label class="drawer-label" for="customer-note">Message to seller (optional)</label><textarea id="customer-note" maxlength="300" placeholder="Questions or delivery details…"></textarea>
-<button type="button" id="send" class="checkout"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 11.5a8.4 8.4 0 0 1-12.1 7.2L3 21l2-5.4a8.4 8.4 0 1 1 15.4-4.1Z"/><path d="M8.4 9.1c.8 2.6 2.4 4.3 5.3 5"/></svg><span id="send-label">Send WhatsApp enquiry</span></button>
+<button type="button" id="send" class="checkout"><span id="send-label">Send WhatsApp enquiry</span></button>
 <p id="checkout-help" class="help">The seller confirms availability and final prices. No payment is collected here.</p><a id="demo-signup" href="/create/" hidden>Create your own free store →</a>
 </div></aside>
 <div id="sheet-backdrop" class="sheet-backdrop"></div>
@@ -168,7 +188,7 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 <div class="sheet-head"><img id="sheet-thumb" class="sheet-thumb" alt="Selected product photo"><div class="sheet-title"><small id="sheet-category">Product</small><h2 id="sheet-name">Product</h2><strong id="sheet-price">₦0</strong></div><button id="sheet-close" class="close-button" type="button" aria-label="Close product options">×</button></div>
 <p id="sheet-description" class="sheet-description" hidden></p>
 <div class="qty-row"><label>Quantity</label><div class="counter"><button id="minus" type="button" aria-label="Decrease quantity">−</button><span id="qty" aria-live="polite">1</span><button id="plus" type="button" aria-label="Increase quantity">+</button></div></div>
-<div class="sheet-actions"><button id="sheet-add" type="button">Add to cart</button><button id="sheet-enquire" type="button"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 11.5a8.4 8.4 0 0 1-12.1 7.2L3 21l2-5.4a8.4 8.4 0 1 1 15.4-4.1Z"/><path d="M8.4 9.1c.8 2.6 2.4 4.3 5.3 5"/></svg>Enquire now</button></div>
+<div class="sheet-actions"><button id="sheet-add" type="button">Add to cart</button><button id="sheet-enquire" type="button">Enquire now</button></div>
 <p class="sheet-help">This is an enquiry, not an online payment. The seller confirms availability.</p>
 </section>
 <dialog id="filter-dialog" class="filter-dialog" aria-labelledby="filter-title">
@@ -216,7 +236,6 @@ const slug=legacyRoute?(new URLSearchParams(location.search).get('slug')||routeP
 const lookupParam=legacyRoute?'slug':'handle';
 const currency=n=>'₦'+Number(n||0).toLocaleString('en-NG');
 const defaultWhatsApp='Hello {store_name}, I would like to enquire about:\n\n{items}\n\nEstimated subtotal: {subtotal}\nPlease confirm availability and final price.\n{customer_note}';
-const CART_SVG="<svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4.5 8.5h15L21 21H3L4.5 8.5Z\"/><path d=\"M9 9V6a3 3 0 0 1 6 0v3\"/></svg>";
 const PHOTO_SVG="<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"2.5\" y=\"3.5\" width=\"19\" height=\"17\" rx=\"2\"/><circle cx=\"8\" cy=\"9\" r=\"2\"/><path d=\"m4.5 18 5.5-6 4.5 3 3.2-4 3.3 4\"/></svg>";
 let store=null,products=[],visible=[],isDemo=false,categoryFilter='',searchText='',selectedProduct=null,selectedQuantity=1,lastSheetButton=null,toastTimeout=null,statusTimeout=null;
 const cart=new Map();
@@ -414,6 +433,8 @@ $('send').onclick=()=>{
   $('business-description').textContent=store.description||'Browse our products and ask questions directly on WhatsApp.';
   $('business-count').textContent=products.length+' listed product'+(products.length===1?'':'s');
   $('home-demo').hidden=!isDemo;
+  $('demo-promo').hidden=!isDemo;
+  $('demo-last-cta').hidden=!isDemo;
   const digits=String(store.whatsapp||'').replace(/\D/g,'');
   if(!isDemo&&/^[1-9]\d{7,14}$/.test(digits)){
    $('business-whatsapp').href='https://wa.me/'+digits+'?text='+encodeURIComponent('Hello '+store.name+', I found your storefront and have a question.');
