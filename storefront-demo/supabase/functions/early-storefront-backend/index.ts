@@ -11,7 +11,10 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const link = /^[A-Za-z0-9_-]{43}$/;
 const toHex = (bytes: Uint8Array) => [...bytes].map(x => x.toString(16).padStart(2,'0')).join('');
 const hash = async (s: string) => toHex(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s))));
-const goodInt = (v: unknown, min: number, max: number) => Number.isSafeInteger(Number(v)) && Number(v) >= min && Number(v) <= max;
+const goodInt = (v: unknown, min: number, max: number) => {
+  const n = typeof v === 'number' ? v : (typeof v === 'string' && /^\d+$/.test(v) ? Number(v) : NaN);
+  return Number.isSafeInteger(n) && n >= min && n <= max;
+};
 const textVal = (v: unknown, max: number, required = false) =>
   typeof v === 'string' && v.length <= max && (!required || !!v.trim());
 const bodyJson = async (req: Request): Promise<Record<string,unknown>> => {
@@ -299,6 +302,7 @@ Deno.serve(async (request: Request) => {
     }
     if (pathname === '/api/merchant/export' && request.method==='GET') {
       const data=await sql.begin(async tx => {
+        await tx`set transaction isolation level repeatable read read only`;
         const stores=await tx`select * from early_storefront.stores where id=${id}`;
         const products=await tx`select * from early_storefront.products where store_id=${id}`;
         const units=await tx`select * from early_storefront.units where store_id=${id}`;
@@ -313,7 +317,7 @@ Deno.serve(async (request: Request) => {
     return out(404,{error:'Not found'});
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    if (/Insufficient stock|Selling unit not found|Invalid sale request|Product not found/.test(message))
+    if (/Insufficient stock|Selling unit not found|Invalid sale request|Product not found|Idempotency key reused for a different sale/.test(message))
       return out(409,{error:message});
     if(message==='Request too large')return out(413,{error:'Request body must be 64 KB or smaller'});
     if (/Invalid JSON|JSON required|Unexpected token|not valid JSON/.test(message))
