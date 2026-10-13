@@ -59,6 +59,8 @@ footer{font-size:.75rem;text-align:center;color:#779087;margin:30px 0}
 <script type="module">
 const $=id=>document.getElementById(id),cart=new Map();let data=[],isDemo=false;
 const slug=new URLSearchParams(location.search).get('slug')||location.pathname.split('/').filter(Boolean)[1]||'';
+// Show the demo-to-store invitation before waiting for a cold-started API.
+if(/demo/i.test(slug)){$('demo-banner').classList.add('visible');$('demo-foot').style.display='block';$('floating').classList.add('visible');document.body.classList.add('demo');}
 const elem=(tag,text)=>{const e=document.createElement(tag);e.textContent=String(text);return e;};
 const cash=v=>'₦'+Number(v||0).toLocaleString('en-NG');
 function renderCart(){
