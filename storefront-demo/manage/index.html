@@ -28,7 +28,23 @@ async function refresh(){
   const publish=el('button',p.published?'Hide from customers':'Publish to customers');
   publish.type='button';publish.style.marginLeft='8px';
   publish.addEventListener('click',async()=>{publish.disabled=true;try{await api('publish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productId:p.id,published:!p.published})});notice.textContent='Visibility updated';await refresh();}catch(err){notice.textContent=err.message;publish.disabled=false;}});
-  box.append(publish);list.append(box);
+  box.append(publish);
+  if(p.units.length){
+   const saleForm=document.createElement('form');saleForm.className='flex';
+   const select=document.createElement('select');select.setAttribute('aria-label','Selling unit');
+   for(const u of p.units){const o=el('option',u.name+' — ₦'+Number(u.price).toLocaleString());o.value=u.id;select.append(o);}
+   const qty=document.createElement('input');qty.type='number';qty.min='1';qty.step='1';qty.value='1';qty.required=true;qty.setAttribute('aria-label','Quantity sold');
+   const confirm=el('button','Confirm sale');confirm.type='submit';saleForm.append(select,qty,confirm);
+   let pendingKey=null;
+   saleForm.addEventListener('submit',async e=>{
+    e.preventDefault();if(!window.confirm('Confirm this sale and deduct stock?'))return;
+    confirm.disabled=true;pendingKey ||= crypto.randomUUID();
+    try{await api('confirm-sale',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productId:p.id,unitId:select.value,quantity:Number(qty.value),requestKey:pendingKey})});pendingKey=null;notice.textContent='Sale confirmed and stock updated';await refresh();}
+    catch(err){notice.textContent=err.message;confirm.disabled=false;}
+   });
+   box.append(saleForm);
+  }
+  list.append(box);
  }
 }
 document.getElementById('new').addEventListener('submit',async e=>{
