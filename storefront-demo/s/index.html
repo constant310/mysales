@@ -84,14 +84,107 @@ button{-webkit-tap-highlight-color:transparent}a{color:inherit;text-decoration:n
 @media(max-width:380px){.bottom-bar{gap:6px;padding-left:11px;padding-right:11px;grid-template-columns:minmax(98px,1fr) auto minmax(113px,1.1fr)}.bottom-price strong{font-size:1.1rem}.qty-control button{width:27px}.rail{right:11px}.rail-circle{width:53px;height:53px}.reel-copy{right:83px;left:14px}.reel-copy h1{font-size:1.68rem}.add-bottom{padding:8px;font-size:.76rem}}
 @media(min-width:600px){.site{margin:2.5vh auto;height:95vh;height:95dvh;border-radius:26px;border:6px solid #153924;box-shadow:0 20px 65px #0c2c1944}.reel{height:95vh;height:95dvh;min-height:95vh}.top-search{top:20px}.demo-chip{top:85px}.store-credit{top:92px}.reel-copy{bottom:142px}.rail{bottom:176px}.product-index{bottom:120px}.toast{bottom:120px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+[hidden]{display:none!important}
+.home-view{position:absolute;inset:0;overflow-y:auto;background:#fafcfa;color:#23382b;padding-bottom:calc(95px + env(safe-area-inset-bottom))}
+.home-head{padding:calc(17px + env(safe-area-inset-top)) 18px 15px;background:#fff;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e9efe9}
+.home-logo{font-size:1.2rem;letter-spacing:-.05em;font-weight:950;display:flex;align-items:center;gap:9px}
+.home-logo .mark{background:#16A34A;color:#fff;height:36px;width:36px;border-radius:10px;display:grid;place-items:center;letter-spacing:-.12em;padding-right:3px}
+.home-head small{color:#849286;font-size:.72rem;font-weight:700}
+.business-hero{margin:16px;background:linear-gradient(120deg,#123d25,#188240);color:#fff;padding:28px 23px;border-radius:20px}
+.business-hero .kicker{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;font-weight:900;color:#cff4d9}
+.business-hero h1{font-size:clamp(1.9rem,7vw,2.8rem);margin:13px 0;line-height:1.12;letter-spacing:-.05em;overflow-wrap:anywhere}
+.business-hero p{font-size:.9rem;line-height:1.6;color:#e1f2e5;margin:0;max-width:390px}
+.hero-actions{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-top:24px}
+.hero-actions button{border:0;background:#fff;color:#17693a;font-size:.86rem;font-weight:900;padding:13px 18px;border-radius:11px}
+.hero-actions small{color:#d9f1df;font-size:.77rem;font-weight:800}
+#home-demo{display:block;margin-top:17px;color:#dcffe5;font-size:.75rem;text-decoration:underline;text-underline-offset:3px;font-weight:850}
+.collection{padding:4px 16px 15px}.collection-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 13px}
+.collection h2{font-size:1.27rem;letter-spacing:-.035em;margin:0}.collection-head small{color:#849286;font-size:.74rem}
+.collection-head button{border:0;background:transparent;color:#16823d;font-weight:900;font-size:.76rem}
+.home-tools{display:flex;align-items:center;gap:7px;margin-bottom:14px}
+.home-search{display:flex;align-items:center;gap:6px;padding:0 10px;min-width:0;flex:1;height:45px;border:1px solid #dde9df;border-radius:10px;background:#fff}
+.home-search input{width:100%;min-width:0;border:0;outline:0;color:#25472e;font-size:.81rem}
+.home-filter{display:flex;align-items:center;gap:2px;padding:0 6px;height:45px;background:#fff;border:1px solid #dde9df;border-radius:10px;color:#16823d}
+.home-filter select{width:88px;max-width:88px;outline:0;border:0;background:transparent;font-size:.73rem;color:#21663b;font-weight:850}
+.home-cart{width:44px;height:45px;position:relative;border:1px solid #dde9df;background:#fff;border-radius:10px;color:#20643a}
+.home-cart .cart-count{top:-7px;right:-5px}
+.grid-products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid-item{min-width:0;border:1px solid #e4ede6;background:#fff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.grid-image,.grid-fallback{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#e5efe6;cursor:pointer}
+.grid-fallback{display:grid;place-items:center;font-size:2rem;color:#689175}
+.grid-content{padding:11px;flex:1;display:flex;flex-direction:column}
+.grid-content h3{font-size:.87rem;margin:0 0 5px;line-height:1.35;min-height:35px;color:#263d2e;overflow-wrap:anywhere;cursor:pointer}
+.grid-content small{font-size:.69rem;color:#829486;margin-bottom:9px}
+.grid-bottom{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:auto}
+.grid-bottom strong{color:#15803d;font-size:.91rem;font-weight:950;letter-spacing:-.035em}
+.grid-add{border:1px solid #cee7d2;border-radius:8px;background:#eff9f1;color:#166a39;font-size:.76rem;font-weight:900;padding:8px}
+.grid-empty{grid-column:1/-1;text-align:center;padding:24px;color:#6c846f}
+.home-footer{text-align:center;color:#839886;font-size:.74rem;margin:24px 0 4px}
+#explore-view{position:absolute;inset:0}
+.bottom-nav{position:absolute;z-index:12;bottom:0;left:0;right:0;background:#fff;color:#879a8a;border-top:1px solid #e1e9e1;min-height:calc(73px + env(safe-area-inset-bottom));padding:8px 14px calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:70px;box-shadow:0 -5px 22px #07170d25}
+.nav-item{width:105px;border:0;background:transparent;display:grid;gap:3px;justify-items:center;color:#86998b;font-size:.73rem;font-weight:850}
+.nav-item svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+.nav-item.active{color:#168341}.nav-item.active svg{stroke-width:2.5}
+#explore-view .feed{bottom:calc(73px + env(safe-area-inset-bottom))}
+#explore-view .reel{height:calc(100dvh - 73px - env(safe-area-inset-bottom));min-height:calc(100dvh - 73px - env(safe-area-inset-bottom))}
+#explore-view .reel-copy{bottom:34px;right:107px}
+#explore-view .rail{bottom:43px;right:11px;gap:12px}
+#explore-view .rail-circle{background:#fff;color:#16763c;width:54px;height:54px;border:0;border-radius:16px;box-shadow:0 5px 20px #00180860}
+#explore-view .rail-circle.dark{background:#153b28e8;border:1px solid #ffffff9c;color:#fff}
+#explore-view .rail-circle svg{height:24px;width:24px}
+#explore-view .rail-item{min-width:76px}
+#explore-view .rail-item small{font-size:.71rem}
+#explore-view .product-index{bottom:calc(85px + env(safe-area-inset-bottom))}
+#explore-view .top-search{left:10px;right:10px;gap:6px;top:calc(14px + env(safe-area-inset-top))}
+#explore-view .search-wrap{height:47px;padding:0 10px}
+#explore-view .cart-top{width:47px;height:47px}
+.category-select{height:47px;display:flex;align-items:center;gap:2px;background:#142f22c8;color:#fff;border:1px solid #ffffff80;border-radius:24px;padding:0 7px}
+.category-select select{width:68px;max-width:68px;outline:0;background:transparent;color:#fff;border:0;font-weight:800;font-size:.72rem}
+.category-select option{color:#285334;background:#fff}
+#explore-view .demo-chip{top:calc(77px + env(safe-area-inset-top))}
+#explore-view .store-credit{top:calc(77px + env(safe-area-inset-top))}
+.bottom-bar{display:block!important;position:absolute;z-index:35;left:0;right:0;bottom:0;top:auto;min-height:auto;padding:18px 19px calc(25px + env(safe-area-inset-bottom));border-radius:24px 24px 0 0;background:#fff;box-shadow:0 -12px 42px #03140852;transform:translateY(120%);transition:transform .25s}
+.bottom-bar.open{transform:translateY(0)}
+.sheet-backdrop{position:absolute;z-index:34;inset:0;background:#00170b9e;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
+.sheet-backdrop.open{opacity:1;visibility:visible}
+.sheet-header{display:flex;gap:13px;align-items:center;margin-bottom:17px}
+.sheet-thumb{height:67px;width:67px;object-fit:cover;border-radius:12px;background:#e6f0e7;flex:none}
+.sheet-product{flex:1;min-width:0}.sheet-product h2{font-size:.99rem;line-height:1.3;color:#243c2a;margin:0 0 7px}.sheet-product small{font-size:.72rem;color:#7f8e80}
+.sheet-close{height:34px;width:34px;border-radius:50%;border:0;background:#eef4ef;color:#2f5635;font-size:1.3rem}
+.sheet-line{display:flex;align-items:center;justify-content:space-between;gap:11px;margin:13px 0}
+.sheet-line strong{font-size:.84rem;color:#334737}
+.sheet-line .bottom-price{margin-left:auto;text-align:right}
+.sheet-line .bottom-price strong{color:#15803d;font-size:1.3rem}
+.sheet-line .qty-control{height:44px}
+.sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:17px}
+.sheet-actions button{height:51px;border-radius:11px;display:flex;justify-content:center;align-items:center;gap:6px;font-size:.81rem;font-weight:900;padding:10px}
+.sheet-actions svg{height:19px;width:19px}
+#add-main{background:#188640;border:0;color:white}
+#sheet-enquire{background:#EFF9F1;border:1px solid #C7E5CF;color:#147239}
+.sheet-hint{font-size:.71rem;color:#859285;text-align:center;margin:12px 0 0;line-height:1.4}
+.toast{z-index:42;bottom:calc(91px + env(safe-area-inset-bottom))}
+.overlay{z-index:45}.drawer{z-index:46}
+@media(min-width:600px){#explore-view .reel{height:calc(95dvh - 73px);min-height:calc(95dvh - 73px)}.home-head{padding-top:17px}}
+@media(max-width:370px){.home-tools{gap:4px}.home-filter select{width:75px}.home-filter{padding:0 3px}.grid-content{padding:9px}.category-select{padding:0 4px}.category-select select{width:59px}.sheet-actions button{font-size:.75rem}.business-hero{padding:24px 20px}}
 </style></head>
 <body>
 <div class="site" id="site">
+
+<section id="home-view" class="home-view" aria-label="Business homepage"><header class="home-head"><a class="home-logo" href="/"><span class="mark">mS</span>mySales</a><small>Online store</small></header>
+<section class="business-hero"><div class="kicker">Welcome to our store</div><h1 id="business-name">Our business</h1><p id="business-description">Explore our products and prices.</p>
+<div class="hero-actions"><button id="explore-cta" type="button">Explore products →</button><small id="business-count"></small></div><a href="/create/" id="home-demo" hidden>Create your free storefront →</a></section>
+<section class="collection"><div class="collection-head"><div><h2>Our collection</h2><small id="grid-count">All products</small></div><button type="button" id="see-explore">See all →</button></div>
+<div class="home-tools"><label class="home-search"><span aria-hidden="true">⌕</span><input id="home-search" type="search" aria-label="Search products" placeholder="Search products"></label>
+<label class="home-filter"><span aria-hidden="true">☷</span><select id="category-home" aria-label="Filter by category"><option value="">All categories</option></select></label>
+<button type="button" id="home-cart" class="home-cart" aria-label="Open basket">🛒<span id="home-count" class="cart-count">0</span></button></div>
+<div id="grid-products" class="grid-products"></div><p class="home-footer">Powered by <strong>mySales Storefronts</strong></p>
+</section></section><section id="explore-view" hidden>
 <div id="feed" class="feed" tabindex="0" aria-label="Scroll vertically through products"><div class="loading"><div><strong>Opening this storefront…</strong><p>Loading products and pictures.</p></div></div></div>
 <div class="top-search"><label class="search-wrap" for="search">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16.3 16.3 4.6 4.6"/></svg>
 <input id="search" type="search" aria-label="Search products" placeholder="Search products…" autocomplete="off">
-</label><button id="open-cart" class="cart-top" type="button" aria-label="Open enquiry basket">
+</label><label class="category-select"><span aria-hidden="true">☷</span><select id="category" aria-label="Filter by category"><option value="">All categories</option></select></label><button id="open-cart" class="cart-top" type="button" aria-label="Open enquiry basket">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.6 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg><span id="cart-count" class="cart-count">0</span></button></div>
 <div class="demo-chip" id="demo-chip" hidden>Sample storefront · <a href="/create/">Create yours free</a></div>
 <div class="store-credit">Powered by mySales</div>
@@ -100,12 +193,13 @@ button{-webkit-tap-highlight-color:transparent}a{color:inherit;text-decoration:n
 <span class="rail-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="20" r="1"/><circle cx="19" cy="20" r="1"/><path d="M1 2h3l3 13h13l2-9H6"/><path d="M17 2v8m-4-4h8"/></svg></span><small>Add to cart</small></button>
 <button class="rail-item" type="button" id="rail-enquire" aria-label="Enquire about current product">
 <span class="rail-circle dark"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m13.5 1.7-9.4 12a1.1 1.1 0 0 0 .9 1.8h6l-.7 6.7c-.1 1.1 1.1 1.5 1.8.7l8.6-12.5a1.1 1.1 0 0 0-.9-1.7h-5.5l.9-6.3c.2-1.1-1.1-1.6-1.7-.7Z"/></svg></span><small>Enquire now</small></button></div>
-<div id="reel-index" class="product-index" hidden>1 / 1 · Swipe up</div>
-<div class="bottom-bar" id="bottom-bar">
-<div class="bottom-price"><strong id="price">₦0</strong><small id="unit-label">/ piece</small></div>
-<div class="qty-control" aria-label="Quantity selector"><button type="button" id="minus" aria-label="Decrease quantity">−</button><span id="qty" aria-live="polite">1</span><button type="button" id="plus" aria-label="Increase quantity">+</button></div>
-<button class="add-bottom" type="button" id="add-main"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="20" r="1"/><circle cx="19" cy="20" r="1"/><path d="M1 2h3l3 13h13l2-9H6"/><path d="M17 2v8m-4-4h8"/></svg>Add to Cart</button>
-</div>
+<div id="reel-index" class="product-index" hidden>1 / 1 · Swipe up</div></section>
+<div id="sheet-backdrop" class="sheet-backdrop"></div><div class="bottom-bar" id="bottom-bar" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Choose product quantity">
+<div class="sheet-header"><img id="sheet-thumb" class="sheet-thumb" alt="Selected product"><div class="sheet-product"><h2 id="sheet-name">Product</h2><small id="sheet-category">Product</small></div><button id="sheet-close" class="sheet-close" type="button" aria-label="Close product options">×</button></div>
+<div class="sheet-line"><strong>Quantity</strong>
+<div class="qty-control" aria-label="Quantity selector"><button type="button" id="minus" aria-label="Decrease quantity">−</button><span id="qty" aria-live="polite">1</span><button type="button" id="plus" aria-label="Increase quantity">+</button></div></div><div class="sheet-line"><strong>Price</strong><div class="bottom-price"><strong id="price">₦0</strong><small id="unit-label">/ piece</small></div></div>
+<div class="sheet-actions"><button class="add-bottom" type="button" id="add-main"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="20" r="1"/><circle cx="19" cy="20" r="1"/><path d="M1 2h3l3 13h13l2-9H6"/><path d="M17 2v8m-4-4h8"/></svg>Add to cart</button><button class="sheet-enquire" type="button" id="sheet-enquire"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 1-11.4 7.2L3 20l1.8-5.6A8 8 0 1 1 20 11Z"/><path d="M8 9c.4 3 2 4.5 5 5.4"/></svg>Enquire now</button></div><p class="sheet-hint">The seller confirms availability before payment.</p>
+</div><nav class="bottom-nav" aria-label="Store navigation"><button id="nav-home" class="nav-item active" type="button" aria-current="page"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10h-6v-6H9v6H3V10Z"/></svg><span>Home</span></button><button id="nav-explore" class="nav-item" type="button"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg><span>Explore</span></button></nav>
 <div class="status" id="status" role="alert"></div>
 <div class="overlay" id="overlay"></div>
 <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Enquiry basket" aria-hidden="true">
