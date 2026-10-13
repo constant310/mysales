@@ -75,11 +75,12 @@ export async function loginMerchant({ phone, code, ip }) {
 export async function requireMerchantSession(token) {
   if (typeof token !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(token)) return null;
   const result = await pool.query(
-    `SELECT c.store_id, c.id AS credential_id
+    `SELECT COALESCE(s.store_id,c.store_id) AS store_id, c.id AS credential_id
      FROM early_storefront.sessions s
-     JOIN early_storefront.credentials c ON c.id=s.credential_id
+     LEFT JOIN early_storefront.credentials c ON c.id=s.credential_id
      WHERE s.token_hash=$1 AND s.revoked_at IS NULL AND s.expires_at>now()
-       AND c.revoked_at IS NULL LIMIT 1`,
+       AND (s.store_id IS NOT NULL OR (c.id IS NOT NULL AND c.revoked_at IS NULL))
+     LIMIT 1`,
     [hashSessionToken(token)],
   );
   return result.rows[0] ?? null;
