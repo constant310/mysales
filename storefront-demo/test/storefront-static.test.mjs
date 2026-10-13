@@ -95,3 +95,22 @@ test('First product flow is photo-first and does not expose unit conversion jarg
  assert.match(manager,/post\('store-settings'/);
  assert.doesNotMatch(manager,/Pieces per selling unit/);
 });
+
+
+test('signup uses its isolated backend and enforces request limits at both layers',async()=>{
+ const server=await read('render-server.mjs');
+ const signup=await read('supabase/functions/early-storefront-signup/index.ts');
+ assert.match(server,/const upstream=path==='\\/api\\/signup'/);
+ assert.match(server,/early-storefront-signup/);
+ assert.match(server,/path==='\\/api\\/signup'\\?6000:65536/);
+ assert.match(signup,/used>cap/);
+ assert.match(signup,/response\\(413/);
+ assert.match(signup,/pg_advisory_xact_lock/);
+});
+
+test('both public and management endpoints are scoped to merchant stores',async()=>{
+ const edge=await read('supabase/functions/early-storefront-backend/index.ts');
+ assert.match(edge,/where p\\.store_id=\\$\\{storeId\\}/);
+ assert.match(edge,/where store_id=\\$\\{id\\}/);
+ assert.match(edge,/l\\.revoked_at is null/);
+});
