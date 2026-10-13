@@ -143,7 +143,7 @@ test('focused landing and demo do not show competing marketing messages',async()
  const home=await read('index.html');
  const signup=await read('create/index.html');
  const catalogue=await read('s/index.html');
- assert.match(home,/One link for/);
+ assert.match(home,/Your business deserves its/);
  assert.match(home,/href="\/create\/"/);
  assert.match(signup,/optional-details/);
  assert.doesNotMatch(home,/faq/);
@@ -468,4 +468,22 @@ test('shopping buttons are legible without decorative cart and WhatsApp icons',a
  assert.match(catalogue,/id="send-label">Send WhatsApp enquiry<\/span>/);
  assert.match(catalogue,/id="filter-home"/);
  assert.match(catalogue,/id="home-cart"/);
+});
+
+test('immersive feed keeps product photos fully visible with stable mobile controls',async()=>{
+ const page=await read('s/index.html');
+ assert.match(page,/\.reel-media \.grid-image\{[^}]*object-fit:contain/);
+ assert.match(page,/\.reel-backdrop-image\{/);
+ assert.match(page,/\.reel-slide\{[^}]*scroll-snap-align:start/);
+ assert.match(page,/html\{scroll-snap-type:y proximity/);
+ assert.match(page,/\.site\{overflow:visible;overflow:clip\}/);
+ assert.match(page,/\.collection\.feeds-enabled \.powered\{display:none!important\}/);
+ assert.match(page,/class="reel-toolbar"/);
+ assert.match(page,/id="reel-search"/);
+ assert.match(page,/id="reel-cart"/);
+ assert.match(page,/function quickReelAdd/);
+ assert.match(page,/reelQtyUpdates\.get\(product\.id\)\?\.\(\)/);
+ assert.match(page,/reelQtyUpdates\.values\(\)/);
+ assert.match(page,/const REEL_CHECK_ICON=/);
+ assert.doesNotMatch(page,/\.reel-media \.grid-image\{[^}]*object-fit:cover/);
 });
