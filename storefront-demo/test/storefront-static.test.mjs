@@ -292,7 +292,7 @@ test('storefront is a single grid-only shopping experience with no Explore or bo
 test('product cards use full-width Add to cart buttons with proper SVG icons',async()=>{
  const catalogue=await read('s/index.html');
  assert.match(catalogue,/\.grid-add\{display:flex;gap:8px;align-items:center;justify-content:center;width:100%/);
- assert.match(catalogue,/add\.innerHTML=CART_SVG\+'<span>Add to cart<\/span>'/);
+ assert.match(catalogue,/add\.textContent='Add to cart'/);
  assert.match(catalogue,/add\.onclick=\(\)=>openSheet\(p,add\)/);
  assert.match(catalogue,/grid-media/);
  assert.match(catalogue,/grid-title/);
@@ -343,7 +343,7 @@ test('merchant manager separates top action buttons from product cards and uses 
  assert.match(manager,/\.settings-icon svg\{width:21px;height:21px;display:block\}/);
  assert.match(manager,/\.settings-chevron svg\{width:20px;height:20px/);
  assert.match(manager,/product-chevron/);
- assert.match(manager,/arrow\.innerHTML=/);
+ assert.match(manager,/view\.className='product-view'/);
 });
 
 test('customer share link is the business-name path, not a visible slug or query string',async()=>{
@@ -358,7 +358,7 @@ test('customer share link is the business-name path, not a visible slug or query
  assert.match(directory,/link\.href='\/'\+encodeURIComponent\(store\.public_handle/);
  assert.match(operator,/a\.href='\/'\+encodeURIComponent\(s\.public_handle/);
  assert.match(catalogue,/const lookupParam=legacyRoute\?'slug':'handle'/);
- assert.match(landing,/href="\/demo-warri-pantry"/);
+ assert.doesNotMatch(landing,/href="\/demo-warri-pantry"/);
  assert.doesNotMatch(manager,/\/s\/\?slug=/);
 });
 
@@ -402,4 +402,43 @@ test('operator only enters a business name and never needs a manual slug',async(
  assert.match(edge,/const internalSlug=base\+'-'\+crypto\.randomUUID/);
  assert.match(edge,/values\(\$\{internalSlug\}/);
  assert.doesNotMatch(edge,/String\(b\.slug/);
+});
+
+test('marketing homepage puts merchant creation before examples and uses a conversion-first message',async()=>{
+ const landing=await read('index.html');
+ assert.match(landing,/Your business deserves its/);
+ assert.match(landing,/own store link/);
+ assert.match(landing,/id="how-it-works"/);
+ assert.match(landing,/This could be your store/);
+ assert.match(landing,/Create my free store/);
+ assert.match(landing,/No login needed/);
+ assert.match(landing,/WhatsApp enquiries/);
+ assert.ok((landing.match(/href="\/create\/"/g)||[]).length>=4);
+ assert.doesNotMatch(landing,/href="\/demo-warri-pantry"/);
+ assert.doesNotMatch(landing,/View a sample store/);
+ assert.doesNotMatch(landing,/See example/);
+});
+
+test('customer storefront uses only functional quiet icons; conversion buttons are text-first',async()=>{
+ const catalogue=await read('s/index.html');
+ assert.match(catalogue,/add\.textContent='Add to cart'/);
+ assert.match(catalogue,/class="shop-cta" href="#products">Browse products<\/a>/);
+ assert.match(catalogue,/id="home-cart"/);
+ assert.match(catalogue,/id="filter-home"/);
+ assert.match(catalogue,/id="business-whatsapp"/);
+ assert.match(catalogue,/class="icon-control"/);
+ assert.doesNotMatch(catalogue,/id="filter-home"[^>]*>☷/);
+ assert.doesNotMatch(catalogue,/id="home-cart"[^>]*>🛒/);
+ assert.doesNotMatch(catalogue,/Browse products <span aria-hidden/);
+});
+
+test('merchant manager uses understandable labels and minimal non-decorative settings controls',async()=>{
+ const manager=await read('manage/index.html');
+ assert.match(manager,/id="add-more" type="button">Add product<\/button>/);
+ assert.match(manager,/view\.className='product-view'/);
+ assert.match(manager,/view=node\('span','View'\)/);
+ assert.match(manager,/settings-action-hint/);
+ assert.match(manager,/\.settings-card\[open\] \.settings-action-hint::after\{content:"Close"/);
+ assert.match(manager,/id="photo-icon"><svg/);
+ assert.doesNotMatch(manager,/id="add-more" type="button">\+ Add/);
 });
