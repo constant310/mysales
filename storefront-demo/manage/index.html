@@ -69,7 +69,7 @@ input:focus,textarea:focus,select:focus{border-color:#16A34A;box-shadow:0 0 0 3p
 <section class="panel" id="add-section"><span class="pill">mySales · ADD A PRODUCT</span><h2 style="margin-top:13px">What are you selling?</h2>
 <p class="muted">Take a photo, enter the price and you're done. No complex inventory forms.</p>
 <form id="add">
-<label class="photo-drop" for="product-photo"><span class="photo-icon" id="photo-icon">📷</span><img id="preview" alt="Product preview"><span><b id="photo-label">Add a product photo</b><small>Tap to open your camera or gallery</small></span><input id="product-photo" name="photo" type="file" accept="image/*"></label>
+<label class="photo-drop" for="product-photo"><span class="photo-icon" id="photo-icon">📷</span><img id="preview" alt="Product preview"><span><b id="photo-label">Choose a product photo</b><small>Required · Camera or gallery · We resize large photos automatically</small></span><input id="product-photo" name="photo" type="file" accept="image/*" required></label>
 <label for="product-name">Product name</label><input id="product-name" name="name" required maxlength="150" placeholder="e.g. Rice 5kg, Wig, Bluetooth speaker">
 <label for="product-price">Selling price (₦)</label><input id="product-price" name="price" required type="number" min="0" max="10000000000" step="1" inputmode="numeric" placeholder="e.g. 8500">
 <details class="optional" id="extras"><summary>Optional details & stock</summary>
@@ -79,7 +79,7 @@ input:focus,textarea:focus,select:focus{border-color:#16A34A;box-shadow:0 0 0 3p
 <input id="product-stock" name="stock" type="number" min="0" max="10000000" step="1" placeholder="Leave blank for WhatsApp enquiries">
 <p class="hint">You can skip quantity. Customers can ask about availability on WhatsApp.</p></details>
 <button id="add-button" class="btn" type="submit" style="width:100%;margin-top:17px">Add product to my shop →</button>
-<p id="add-note" class="hint">Your store becomes shareable after your first product is added.</p>
+<p id="add-note" class="hint">Your product picture, name and price appear together on your storefront.</p>
 </form></section>
 <section class="panel"><div class="inline" style="justify-content:space-between;align-items:center">
 <div><h2>My products <span id="total" style="font-size:.84rem;color:#789589"></span></h2>
@@ -138,12 +138,12 @@ async function refresh(){
 }
 function renderProduct(p){
  const unit=p.units?.[0],card=node('article','');card.className='product';
- if(p.image_path){const img=document.createElement('img');img.src=p.image_path;img.alt=p.name;img.loading='lazy';card.append(img);}
- else{const ph=node('div','📦');ph.className='ph';card.append(ph);}
+ if(p.image_path){const img=document.createElement('img');img.src=p.image_path;img.alt=p.name;img.loading='lazy';img.onerror=()=>{const ph=node('div','📷');ph.className='ph';img.replaceWith(ph);};card.append(img);}
+ else{const ph=node('div','📷');ph.className='ph';card.append(ph);}
  const content=node('div','');content.className='product-body';
  content.append(node('h3',p.name));
  const price=node('div',unit?currency(unit.price):'Contact for price');price.className='price';content.append(price);
- const meta=node('p',(p.published?'Visible':'Hidden')+' · '+(Number(p.stock)>0?p.stock+' in stock':'Enquiry-only')+(p.category?' · '+p.category:''));
+ const meta=node('p',(p.published?'Visible':'Hidden')+(p.image_path?' · Photo saved':' · Add a photo')+' · '+(Number(p.stock)>0?p.stock+' in stock':'Enquiry-only')+(p.category?' · '+p.category:''));
  meta.className='meta';content.append(meta);
  const actions=node('div','');actions.className='p-actions';
  const edit=node('button','Edit');edit.className='btn btn-outline btn-small';edit.type='button';
@@ -160,9 +160,9 @@ function renderProduct(p){
  const more=document.createElement('details');more.append(node('summary','More product options'));
  const upload=document.createElement('form');upload.className='inline';
  const photo=document.createElement('input');photo.type='file';photo.accept='image/*';photo.setAttribute('aria-label','Replace product photo');photo.style.maxWidth='230px';photo.required=true;
- const up=node('button','Change photo');up.className='btn btn-outline btn-small';upload.append(photo,up);
+ const up=node('button',p.image_path?'Change photo':'Add product photo');up.className='btn btn-outline btn-small';upload.append(photo,up);
  upload.onsubmit=async e=>{e.preventDefault();up.disabled=true;try{const f=await preparePhoto(photo.files?.[0]);const fd=new FormData();fd.append('productId',p.id);fd.append('image',f);await api('upload-image',{method:'POST',body:fd});say('Photo updated.');await refresh();}catch(err){say(err.message,true);}finally{up.disabled=false;}};
- more.append(upload);
+ content.append(upload);
  const stock=document.createElement('form');stock.className='inline';
  const qty=document.createElement('input');qty.type='number';qty.min='1';qty.step='1';qty.max='10000000';qty.placeholder='Quantity';qty.required=true;qty.setAttribute('aria-label','Quantity to add');
  const restock=node('button','Add stock');restock.className='btn btn-outline btn-small';stock.append(qty,restock);
@@ -186,7 +186,7 @@ async function preparePhoto(file){
  if(!file)throw Error('Choose a product photo first.');
  if(file.size>18000000)throw Error('This photo is too large. Choose one smaller than 18 MB.');
  if(file.size<=1900000&&['image/jpeg','image/png','image/webp'].includes(file.type))return file;
- const image=await createImageBitmap(file).catch(()=>{throw Error('This photo cannot be opened. Try JPG or PNG.');});
+ const image=await (typeof createImageBitmap==='function'?createImageBitmap(file):Promise.reject(Error('Unavailable'))).catch(async()=>{const u=URL.createObjectURL(file);try{const img=new Image();img.src=u;await img.decode();return img;}catch{throw Error('This photo cannot be opened. Try JPG or PNG.');}finally{URL.revokeObjectURL(u);}});
  const scale=Math.min(1,1400/Math.max(image.width,image.height));
  const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(image.width*scale));canvas.height=Math.max(1,Math.round(image.height*scale));
  const context=canvas.getContext('2d');if(!context)throw Error('Photo processing unavailable.');
@@ -201,23 +201,51 @@ $('product-photo').onchange=e=>{
  else{$('preview').style.display='none';$('photo-icon').style.display='block';$('photo-label').textContent='Add a product photo';}
 };
 $('add').onsubmit=async e=>{
- e.preventDefault();const f=e.currentTarget,b=$('add-button');b.disabled=true;b.textContent='Saving your product…';
- const data=Object.fromEntries(new FormData(f));const errors=[];
+ e.preventDefault();
+ const form=e.currentTarget,button=$('add-button');
+ button.disabled=true;button.textContent='Saving your product…';
+ const data=Object.fromEntries(new FormData(form));
  try{
-  const result=await post('products',{name:data.name,price:Number(data.price),description:data.description||'',category:data.category||'',baseUnit:'piece',unitName:'piece',factor:1});
-  if(data.photo?.size){try{const file=await preparePhoto(data.photo);const fd=new FormData();fd.append('productId',result.id);fd.append('image',file);await api('upload-image',{method:'POST',body:fd});}catch(err){errors.push('Photo: '+err.message);}}
-  if(data.stock&&Number(data.stock)>0){try{await post('restock',{productId:result.id,amount:Number(data.stock)});}catch(err){errors.push('Stock: '+err.message);}}
-  try{await post('publish',{productId:result.id,published:true});}
-  catch(err){errors.push('Publishing product: '+err.message);}
-  if(currentStore.status!=='published'){
-   try{const settings=await post('store-settings',{name:currentStore.name,whatsapp:currentStore.whatsapp,description:currentStore.description||'',status:'published'});currentStore=settings.store;updateHero();}
-   catch(err){errors.push('Store publication: '+err.message);}
+  // Process the photo before creating the product, so an unreadable image
+  // cannot create a duplicate or automatically publish a photo-less item.
+  const photo=await preparePhoto(data.photo);
+  const result=await post('products',{
+   name:data.name,price:Number(data.price),description:data.description||'',
+   category:data.category||'',baseUnit:'piece',unitName:'piece',factor:1
+  });
+  const errors=[];
+  let photoUploaded=false;
+  try{
+   const fd=new FormData();fd.append('productId',result.id);fd.append('image',photo);
+   const uploadResult=await api('upload-image',{method:'POST',body:fd});
+   if(!uploadResult.imageUrl)throw Error('The server did not return a saved photo.');
+   photoUploaded=true;
+  }catch(err){errors.push('Photo not saved: '+err.message);}
+  if(data.stock&&Number(data.stock)>0){
+   try{await post('restock',{productId:result.id,amount:Number(data.stock)});}
+   catch(err){errors.push('Stock could not update: '+err.message);}
   }
-  f.reset();$('extras').open=false;$('preview').style.display='none';$('photo-icon').style.display='block';$('photo-label').textContent='Add a product photo';
-  say(errors.length?'Product saved, but '+errors.join('. '):'🎉 Product added! Your shop is ready to share.',!!errors.length);
+  if(photoUploaded){
+   let published=false;
+   try{await post('publish',{productId:result.id,published:true});published=true;}
+   catch(err){errors.push('Could not publish: '+err.message);}
+   if(published&&currentStore.status!=='published'){
+    try{
+     const updated=await post('store-settings',{
+      name:currentStore.name,whatsapp:currentStore.whatsapp,
+      description:currentStore.description||'',status:'published'
+     });
+     currentStore=updated.store;updateHero();
+    }catch(err){errors.push('Store could not go live: '+err.message);}
+   }
+  }
+  form.reset();$('extras').open=false;$('preview').style.display='none';
+  $('photo-icon').style.display='block';$('photo-label').textContent='Choose a product photo';
+  say(errors.length?'Product saved as a draft or with an issue. '+errors.join(' ')+' Use its photo button below to retry.':
+   '🎉 Product and picture added! Share your storefront with customers.',errors.length>0);
   await refresh();
  }catch(err){say('Could not add product: '+err.message,true);}
- finally{b.disabled=false;b.textContent='Add another product →';}
+ finally{button.disabled=false;button.textContent='Add product to my shop →';}
 };
 $('add-more').onclick=()=>{$('add-section').scrollIntoView({behavior:'smooth'});$('product-name').focus({preventScroll:true});};
 $('settings').onsubmit=async e=>{e.preventDefault();const b=e.currentTarget.querySelector('button[type=submit]');b.disabled=true;try{const data=Object.fromEntries(new FormData(e.currentTarget));const updated=await post('store-settings',data);currentStore=updated.store;updateHero();say('Business details updated.');$('settings-panel').open=false;}catch(err){say(err.message,true);}finally{b.disabled=false;}};
