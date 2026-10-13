@@ -87,7 +87,7 @@ test('Public store registration issues scoped private tokens without operator pr
 
 test('First product flow is photo-first and does not expose unit conversion jargon',async()=>{
  const manager=await read('manage/index.html');
- assert.match(manager,/Add a product photo/);
+ assert.match(manager,/Choose a product photo/);
  assert.match(manager,/Product name/);
  assert.match(manager,/Selling price/);
  assert.match(manager,/Optional details & stock/);
@@ -123,4 +123,29 @@ test('proxy streams responses and exposes safe upstream timing diagnostics',asyn
  assert.ok(server.includes('Server-Timing'));
  assert.ok(server.includes("console.warn('Storefront upstream issue',path"));
  assert.doesNotMatch(server,/console\.warn\([^\n]*authorization/i);
+});
+
+test('merchant setup shows only the relevant step and protects required product images',async()=>{
+ const manager=await read('manage/index.html');
+ assert.match(manager,/showManagerView/);
+ assert.match(manager,/id="product-section"/);
+ assert.match(manager,/id="add-section"/);
+ assert.match(manager,/id="cancel-add"/);
+ assert.match(manager,/id="product-photo"[^>]*required/);
+ assert.match(manager,/photoUploaded/);
+ assert.match(manager,/imageUrl/);
+});
+
+test('focused landing and demo do not show competing marketing messages',async()=>{
+ const home=await read('index.html');
+ const signup=await read('create/index.html');
+ const catalogue=await read('s/index.html');
+ assert.match(home,/One link for/);
+ assert.match(home,/href="\/create\/"/);
+ assert.match(signup,/optional-details/);
+ assert.doesNotMatch(home,/faq/);
+ assert.doesNotMatch(catalogue,/id="floating"/);
+ assert.doesNotMatch(catalogue,/id="demo-foot"/);
+ assert.match(catalogue,/id="basket" hidden/);
+ assert.match(catalogue,/exampleImage/);
 });
