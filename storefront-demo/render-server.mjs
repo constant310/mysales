@@ -9,7 +9,7 @@ const allowed=new Set([
  '/api/merchant/me','/api/merchant/claim','/api/merchant/products',
  '/api/merchant/restock','/api/merchant/publish','/api/merchant/confirm-sale',
  '/api/merchant/export','/api/merchant/update-product',
- '/api/merchant/archive-product','/api/merchant/store-settings',
+ '/api/merchant/archive-product','/api/merchant/store-settings','/api/merchant/upload-image',
 ]);
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml','.ico':'image/x-icon'};
 const json=(res,status,body)=>{res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(body));};
@@ -57,7 +57,7 @@ http.createServer(async(req,res)=>{
     const chunks=[];let total=0;
     for await(const chunk of req){
      total+=chunk.length;
-     if(total>65536)return json(res,413,{error:'Request too large'});
+     if(total>(path==='/api/merchant/upload-image'?2100000:65536))return json(res,413,{error:'Request too large'});
      chunks.push(chunk);
     }
     body=Buffer.concat(chunks);
