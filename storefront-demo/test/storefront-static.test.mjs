@@ -69,7 +69,7 @@ test('Visitors can create stores directly from the public demo without an ERP lo
  const create=await read('create/index.html');
  const proxy=await read('render-server.mjs');
  assert.match(landing,/href="\/create\/"/);
- assert.match(catalogue,/id="demo-chip"/);
+ assert.match(catalogue,/id="home-demo"/);
  assert.match(catalogue,/href="\/create\/"/);
  assert.match(create,/fetch\('\/api\/signup'/);
  assert.match(create,/managementLink/);
@@ -150,79 +150,17 @@ test('focused landing and demo do not show competing marketing messages',async()
  assert.doesNotMatch(catalogue,/id="floating"/);
  assert.doesNotMatch(catalogue,/id="demo-foot"/);
  assert.match(catalogue,/id="drawer"/);
- assert.match(catalogue,/id="cart-count"/);
+ assert.match(catalogue,/id="home-count"/);
  assert.match(catalogue,/exampleImage/);
 });
 
-test('full-screen storefront matches requested reels-inspired mobile layout without social controls',async()=>{
- const catalogue=await read('s/index.html');
- assert.match(catalogue,/scroll-snap-type:y mandatory/);
- assert.match(catalogue,/reel-img/);
- assert.match(catalogue,/id="rail-add"/);
- assert.match(catalogue,/id="rail-enquire"/);
- assert.match(catalogue,/id="add-main"/);
- assert.match(catalogue,/id="price"/);
- assert.match(catalogue,/id="qty"/);
- assert.match(catalogue,/id="cart-count"/);
- assert.match(catalogue,/id="search"/);
- assert.doesNotMatch(catalogue,/id="like"/i);
- assert.doesNotMatch(catalogue,/id="share"/i);
-});
 
-test('full-screen customer shopping preserves basket, stock checks, and WhatsApp template',async()=>{
- const catalogue=await read('s/index.html');
- assert.match(catalogue,/renderCart/);
- assert.match(catalogue,/showPlaceholder/);
- assert.match(catalogue,/intersectionRatio/);
- assert.match(catalogue,/cartQtyFor/);
- assert.match(catalogue,/stockOf/);
- assert.match(catalogue,/whatsapp_template/);
- assert.match(catalogue,/customer-note/);
- assert.match(catalogue,/https:\/\/wa\.me\//);
- assert.match(catalogue,/id="add-toast"/);
- assert.match(catalogue,/id="toast-basket"/);
-});
 
-test('storefront opens on the merchant Home grid and can navigate to immersive Explore',async()=>{
- const catalogue=await read('s/index.html');
- assert.match(catalogue,/id="home-view"/);
- assert.match(catalogue,/id="explore-view" hidden/);
- assert.match(catalogue,/id="business-name"/);
- assert.match(catalogue,/id="business-description"/);
- assert.match(catalogue,/id="grid-products"/);
- assert.match(catalogue,/id="nav-home"/);
- assert.match(catalogue,/id="nav-explore"/);
- assert.match(catalogue,/function switchView/);
- assert.match(catalogue,/function renderHomeGrid/);
- assert.match(catalogue,/switchView\('explore',p\.id\)/);
-});
-test('both views share category filtering and the same enquiry basket',async()=>{
- const catalogue=await read('s/index.html');
- assert.match(catalogue,/id="filter-home"/);
- assert.match(catalogue,/id="filter-explore"/);
- assert.match(catalogue,/id="home-cart"/);
- assert.match(catalogue,/id="open-cart"/);
- assert.match(catalogue,/id="home-count"/);
- assert.match(catalogue,/id="cart-count"/);
- assert.match(catalogue,/function applyFilters/);
- assert.match(catalogue,/categoryFilter/);
- assert.match(catalogue,/home-count'\)\.textContent/);
-});
-test('purchase controls appear on demand with clear add and enquiry actions',async()=>{
- const catalogue=await read('s/index.html');
- assert.match(catalogue,/id="sheet-backdrop"/);
- assert.match(catalogue,/id="bottom-bar"/);
- assert.match(catalogue,/\.bottom-bar\.open/);
- assert.match(catalogue,/transform:translateY\(120%\)/);
- assert.match(catalogue,/id="sheet-close"/);
- assert.match(catalogue,/id="add-main"/);
- assert.match(catalogue,/id="sheet-enquire"/);
- assert.match(catalogue,/function openSheet/);
- assert.match(catalogue,/function closeSheet/);
- assert.match(catalogue,/closeSheet\(false\)/);
- assert.doesNotMatch(catalogue,/id="like"/);
- assert.doesNotMatch(catalogue,/id="share"/);
-});
+
+
+
+
+
 
 test('merchant products open a read-only details modal with explicit edit controls',async()=>{
  const manager=await read('manage/index.html');
@@ -264,49 +202,11 @@ test('secure product update saves stock and visibility atomically with audited a
  assert.match(edge,/await sql\.begin/);
 });
 
-test('Explore hides bottom navigation and the back button preserves previous Home position',async()=>{
- const catalogue=await read('s/index.html');
- assert.match(catalogue,/id="explore-back"/);
- assert.match(catalogue,/id="bottom-nav"/);
- assert.match(catalogue,/\$\('bottom-nav'\)\.hidden=name==='explore'/);
- assert.match(catalogue,/function backFromExplore\(\)/);
- assert.match(catalogue,/history\.pushState/);
- assert.match(catalogue,/history\.back\(\)/);
- assert.match(catalogue,/addEventListener\('popstate'/);
- assert.match(catalogue,/homeScrollY=\$\('home-scroll'\)\.scrollTop/);
- assert.match(catalogue,/scrollTop=homeScrollY/);
- assert.match(catalogue,/id="home-scroll"/);
- assert.match(catalogue,/#explore-view \.reel\{height:100dvh/);
-});
 
-test('Compact filter icon opens accessible category modal from Home or Explore',async()=>{
- const catalogue=await read('s/index.html');
- assert.match(catalogue,/id="filter-home"[^>]*aria-haspopup="dialog"/);
- assert.match(catalogue,/id="filter-explore"[^>]*aria-haspopup="dialog"/);
- assert.match(catalogue,/id="filter-dialog"[^>]*aria-labelledby="filter-heading"/);
- assert.match(catalogue,/id="filter-options"/);
- assert.match(catalogue,/id="filter-clear"/);
- assert.match(catalogue,/id="filter-apply"/);
- assert.match(catalogue,/function buildFilterOptions/);
- assert.match(catalogue,/filterDialog\.showModal\(\)/);
- assert.match(catalogue,/filterDialog\.close\(\)/);
- assert.match(catalogue,/categoryFilter=chosen\?\.value\|\|''/);
- assert.match(catalogue,/function applyFilters/);
- assert.doesNotMatch(catalogue,/id="category-home"/);
- assert.doesNotMatch(catalogue,/id="category"/);
-});
 
-test('bottom navigation is physically nested inside Home and absent from Explore subtree',async()=>{
- const catalogue=await read('s/index.html');
- const homeStart=catalogue.indexOf('<section id="home-view"');
- const nav=catalogue.indexOf('<nav id="bottom-nav"');
- const explore=catalogue.indexOf('<section id="explore-view"');
- assert.ok(homeStart!==-1&&nav>homeStart&&explore>nav);
- assert.match(catalogue,/#home-view\.home-view\{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0\}/);
- assert.match(catalogue,/#home-view \.home-scroll\{flex:1;min-height:0;overflow-y:auto/);
- assert.match(catalogue,/#home-view #bottom-nav\{position:relative/);
- assert.match(catalogue,/id="explore-back"/);
-});
+
+
+
 
 test('merchant settings display as three individual responsive cards',async()=>{
  const manager=await read('manage/index.html');
@@ -370,4 +270,78 @@ test('signup remembers private access on the merchant device',async()=>{
  assert.match(signup,/\[sessionStorage,localStorage\]/);
  assert.match(signup,/rememberToken\(value\)/);
  assert.match(signup,/\/manage\/\?welcome=1#token=/);
+});
+
+
+test('storefront is a single grid-only shopping experience with no Explore or bottom tabs',async()=>{
+ const catalogue=await read('s/index.html');
+ assert.match(catalogue,/id="products"/);
+ assert.match(catalogue,/id="grid-products"/);
+ assert.match(catalogue,/function renderProducts/);
+ assert.match(catalogue,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+ assert.match(catalogue,/@media\(min-width:680px\)\{\.grid-products\{grid-template-columns:repeat\(3/);
+ assert.match(catalogue,/@media\(min-width:1024px\)\{\.grid-products\{grid-template-columns:repeat\(4/);
+ assert.doesNotMatch(catalogue,/id="explore-view"/);
+ assert.doesNotMatch(catalogue,/id="bottom-nav"/);
+ assert.doesNotMatch(catalogue,/id="nav-home"/);
+ assert.doesNotMatch(catalogue,/id="nav-explore"/);
+ assert.doesNotMatch(catalogue,/function switchView/);
+ assert.doesNotMatch(catalogue,/scroll-snap-type:y mandatory/);
+});
+
+test('product cards use full-width Add to cart buttons with proper SVG icons',async()=>{
+ const catalogue=await read('s/index.html');
+ assert.match(catalogue,/\.grid-add\{display:flex;gap:8px;align-items:center;justify-content:center;width:100%/);
+ assert.match(catalogue,/add\.innerHTML=CART_SVG\+'<span>Add to cart<\/span>'/);
+ assert.match(catalogue,/add\.onclick=\(\)=>openSheet\(p,add\)/);
+ assert.match(catalogue,/grid-media/);
+ assert.match(catalogue,/grid-title/);
+ assert.match(catalogue,/grid-price/);
+ assert.match(catalogue,/const cartIcon=/);
+ assert.match(catalogue,/const addCartIcon=/);
+ assert.doesNotMatch(catalogue,/id="like"/i);
+ assert.doesNotMatch(catalogue,/id="share"/i);
+});
+
+test('customer shopping keeps stock-aware quantity selection, one basket, and WhatsApp templates',async()=>{
+ const catalogue=await read('s/index.html');
+ assert.match(catalogue,/function openSheet/);
+ assert.match(catalogue,/function closeSheet/);
+ assert.match(catalogue,/function renderCart/);
+ assert.match(catalogue,/function unitsInBasket/);
+ assert.match(catalogue,/function remaining/);
+ assert.match(catalogue,/stock>0&&wanted>stock/);
+ assert.match(catalogue,/id="purchase-sheet"/);
+ assert.match(catalogue,/id="sheet-add"/);
+ assert.match(catalogue,/id="sheet-enquire"/);
+ assert.match(catalogue,/id="home-count"/);
+ assert.match(catalogue,/id="add-toast"/);
+ assert.match(catalogue,/id="toast-basket"/);
+ assert.match(catalogue,/id="customer-note"/);
+ assert.match(catalogue,/whatsapp_template/);
+ assert.match(catalogue,/https:\/\/wa\.me\//);
+ assert.match(catalogue,/if\(isDemo\|\|!cart\.size\)return/);
+});
+
+test('single-page category modal works without a wide filter dropdown',async()=>{
+ const catalogue=await read('s/index.html');
+ assert.match(catalogue,/id="filter-home"/);
+ assert.match(catalogue,/id="filter-dialog"/);
+ assert.match(catalogue,/id="filter-options"/);
+ assert.match(catalogue,/id="filter-apply"/);
+ assert.match(catalogue,/id="filter-clear"/);
+ assert.match(catalogue,/function openFilters/);
+ assert.match(catalogue,/\$\('filter-dialog'\)\.showModal\(\)/);
+ assert.match(catalogue,/function applyFilters/);
+ assert.match(catalogue,/categoryFilter/);
+ assert.doesNotMatch(catalogue,/id="filter-explore"/);
+ assert.doesNotMatch(catalogue,/id="category-home"/);
+});
+test('merchant manager separates top action buttons from product cards and uses scalable SVG settings icons',async()=>{
+ const manager=await read('manage/index.html');
+ assert.match(manager,/#app>\.hero\{margin-bottom:32px\}/);
+ assert.match(manager,/\.settings-icon svg\{width:21px;height:21px;display:block\}/);
+ assert.match(manager,/\.settings-chevron svg\{width:20px;height:20px/);
+ assert.match(manager,/product-chevron/);
+ assert.match(manager,/arrow\.innerHTML=/);
 });
