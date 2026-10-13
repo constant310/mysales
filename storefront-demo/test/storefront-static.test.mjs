@@ -392,3 +392,14 @@ test('business name handles are unique, alias old URLs, and keep internal slugs 
  assert.match(edge,/returning slug,public_handle,name,description,whatsapp,status,whatsapp_template/);
  assert.match(edge,/store:\{slug:actor\.slug,public_handle:actor\.public_handle/);
 });
+
+test('operator only enters a business name and never needs a manual slug',async()=>{
+ const operator=await read('operator/index.html');
+ const edge=await read('supabase/functions/early-storefront-backend/index.ts');
+ assert.doesNotMatch(operator,/name="slug"/);
+ assert.doesNotMatch(operator,/s\.name\+' · '\+s\.slug/);
+ assert.match(operator,/name="name"/);
+ assert.match(edge,/const internalSlug=base\+'-'+crypto\.randomUUID/);
+ assert.match(edge,/values\(\$\{internalSlug\}/);
+ assert.doesNotMatch(edge,/String\(b\.slug/);
+});
