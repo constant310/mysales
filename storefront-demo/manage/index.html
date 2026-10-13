@@ -1,60 +1,115 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>mySales | Merchant dashboard</title>
-<style>body{font-family:system-ui;background:#f3f6f8;color:#152c37;margin:0}header{padding:18px 5%;background:#fff;border-bottom:1px solid #ddd;display:flex;justify-content:space-between}main{max-width:1000px;margin:24px auto;padding:0 16px}.card{background:white;padding:22px;border-radius:14px;margin-bottom:18px;border:1px solid #e1e6e8}label{display:block;margin:12px 0 5px}input,textarea{width:100%;padding:11px;box-sizing:border-box;border:1px solid #bac7cd;border-radius:8px;font:inherit}button{background:#087a7d;color:white;border:0;padding:11px 17px;border-radius:8px;cursor:pointer;margin-top:10px}button:disabled{opacity:.5}small{color:#657680}.product{padding:14px 0;border-bottom:1px solid #ddd}.flex{display:flex;gap:10px;flex-wrap:wrap}.flex>*{flex:1;min-width:110px}#logout{background:#425b65}#notice{min-height:22px}</style></head>
-<body><header><strong>mySales · My Store</strong><button id="logout">Close private access</button></header><main>
-<p id="notice" role="status">Checking private access…</p>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer"><title>mySales | Manage your storefront</title>
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#14313a;background:#f2f6f8}*{box-sizing:border-box}
+body{margin:0}header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px max(18px,calc((100vw - 1050px)/2));background:#123e43;color:white}
+main{max-width:1050px;margin:auto;padding:19px}h1{font-size:1.45rem}h2{font-size:1.1rem}p{line-height:1.5}.card{background:white;padding:22px;border:1px solid #dce6e9;border-radius:14px;margin:15px 0}
+button{border:0;border-radius:9px;padding:10px 14px;cursor:pointer;font:inherit;font-weight:600;color:white;background:#087a7d}
+button:disabled{opacity:.5;cursor:wait}button.secondary{background:#506a71}button.warn{background:#9d4646}
+a{color:#087a7d}input,textarea,select{width:100%;padding:10px;border:1px solid #bdcbcf;border-radius:8px;font:inherit;background:white}
+label{display:block;margin:11px 0 5px;font-size:.92rem;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.row>button{flex:none}.product{border:1px solid #e1e9ec;border-radius:12px;padding:16px;margin:14px 0}
+.product h3{margin:0}.product small,small{color:#586f77}.product form{margin-top:10px}#notice{min-height:32px}
+.product .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+header button{background:#3c6067}img.thumb{width:90px;height:90px;object-fit:cover;border-radius:10px}
+@media(max-width:610px){.grid{grid-template-columns:1fr}.card{padding:16px}.row>*{flex:1}header strong{font-size:.9rem}}
+</style></head><body>
+<header><strong>mySales · Private Store Manager</strong><button id="exit">Close access</button></header>
+<main><p id="notice" role="status">Checking your private link…</p>
 <div id="app" hidden>
-<section class="card"><p><a href="/api/merchant/export" download="mysales-storefront-export.json">Export my store data (JSON)</a></p></section>
-<section class="card"><h1>Products</h1><p>Add products to your catalogue. New products stay unpublished until you choose to publish them.</p><div id="products"></div></section>
-<section class="card"><h2>Add a product</h2><form id="new">
-<label>Product name<input name="name" maxlength="150" required></label>
-<label>Description<textarea name="description" maxlength="2000"></textarea></label>
-<label>Category<input name="category" maxlength="80"></label>
-<div class="flex"><div><label>Stock base unit<input name="baseUnit" value="piece" maxlength="40" required></label></div><div><label>Selling unit<input name="unitName" value="piece" maxlength="40" required></label></div></div>
-<div class="flex"><div><label>Pieces per selling unit<input name="factor" type="number" min="1" step="1" value="1" required></label></div><div><label>Price (₦)<input name="price" type="number" min="0" step="1" required></label></div></div>
-<button>Add product</button></form></section>
-</div></main>
+ <section class="card"><h1 id="store-title">My Store</h1><p>Use your private management link whenever you want. No registration or password. Keep the link secure.</p>
+  <a id="public-link" target="_blank" rel="noopener noreferrer">View public storefront</a>
+  <form id="settings"><h2>Business details</h2>
+   <div class="grid"><div><label for="business-name">Business name</label><input id="business-name" name="name" maxlength="150" required></div>
+   <div><label for="business-phone">WhatsApp number (international format)</label><input id="business-phone" name="whatsapp" maxlength="16" required></div></div>
+   <label for="business-description">Business description</label><textarea id="business-description" name="description" maxlength="2000"></textarea>
+   <label for="business-status">Store visibility</label><select id="business-status" name="status"><option value="draft">Private / not listed</option><option value="published">Published / visible to customers</option></select>
+   <button type="submit">Save business details</button>
+  </form>
+ </section>
+ <section class="card"><div class="row" style="justify-content:space-between"><h2>My products</h2><button id="export" type="button" class="secondary">Export all store data</button></div>
+  <p>New products remain hidden until you publish them. Update your prices or stock whenever needed.</p>
+  <div id="products"></div>
+ </section>
+ <section class="card"><h2>Add a product</h2>
+  <form id="add">
+   <label>Product name<input name="name" maxlength="150" required></label>
+   <label>Description<textarea name="description" maxlength="2000"></textarea></label>
+   <label>Category<input name="category" maxlength="80"></label>
+   <div class="grid"><div><label>Stock base unit<input name="baseUnit" value="piece" maxlength="40" required></label></div>
+   <div><label>Selling unit<input name="unitName" value="piece" maxlength="40" required></label></div></div>
+   <div class="grid"><div><label>Pieces per selling unit<input name="factor" type="number" min="1" max="1000000" step="1" value="1" required></label></div>
+   <div><label>Price (₦)<input name="price" type="number" min="0" step="1" required></label></div></div>
+   <button type="submit">Add product</button>
+  </form>
+ </section>
+</div>
+</main>
 <script type="module">
-const notice=document.getElementById('notice'),app=document.getElementById('app'),list=document.getElementById('products');
-async function api(path,options={}){const r=await fetch('/api/merchant/'+path,{credentials:'same-origin',cache:'no-store',...options});const j=await r.json();if(!r.ok)throw Error(j.error||'Request failed');return j;}
-function el(tag,text){const e=document.createElement(tag);e.textContent=String(text);return e;}
+const token=sessionStorage.getItem('mysales_private_management_token')||'';
+const $=id=>document.getElementById(id),notice=$('notice'),list=$('products');
+const el=(tag,value)=>{const node=document.createElement(tag);node.textContent=String(value);return node;};
+async function api(path,options={}){
+ if(!/^[A-Za-z0-9_-]{43}$/.test(token))throw Error('Open your private management link again.');
+ const h=new Headers(options.headers||{});h.set('Authorization','Bearer '+token);
+ const r=await fetch('/api/merchant/'+path,{...options,headers:h,cache:'no-store'});
+ const j=await r.json().catch(()=>({}));
+ if(!r.ok)throw Error(j.error||'Request failed. Please try again.');
+ return j;
+}
+function say(message){notice.textContent=message;}
+const post=(path,data)=>api(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
 async function refresh(){
- const {products}=await api('products');list.replaceChildren();
- if(!products.length)list.append(el('p','No products yet. Add your first product below.'));
- for(const p of products){
-  const box=document.createElement('div');box.className='product';box.append(el('strong',p.name),el('p',(p.category||'Uncategorised')+' · Stock: '+p.stock+' '+p.base_unit));
-  box.append(el('small',p.units.map(u=>u.name+': ₦'+Number(u.price).toLocaleString()+' ('+u.factor+' '+p.base_unit+')').join(' | ')));
-  const form=document.createElement('form');form.className='flex';const inp=document.createElement('input');inp.type='number';inp.min='1';inp.step='1';inp.placeholder='Add stock in '+p.base_unit;inp.required=true;const btn=el('button','Restock');form.append(inp,btn);
-  form.addEventListener('submit',async e=>{e.preventDefault();btn.disabled=true;try{await api('restock',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productId:p.id,amount:Number(inp.value)})});notice.textContent='Stock updated';await refresh();}catch(err){notice.textContent=err.message;}finally{btn.disabled=false;}});
-  box.append(form);
-  const publish=el('button',p.published?'Hide from customers':'Publish to customers');
-  publish.type='button';publish.style.marginLeft='8px';
-  publish.addEventListener('click',async()=>{publish.disabled=true;try{await api('publish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productId:p.id,published:!p.published})});notice.textContent='Visibility updated';await refresh();}catch(err){notice.textContent=err.message;publish.disabled=false;}});
-  box.append(publish);
+ const data=await api('products');list.replaceChildren();
+ if(!data.products.length)list.append(el('p','No products yet. Add your first product below.'));
+ for(const p of data.products){
+  const card=el('article','');card.className='product';
+  const title=el('h3',p.name);card.append(title);
+  if(p.image_path){const img=document.createElement('img');img.src=p.image_path;img.alt=p.name;img.className='thumb';img.loading='lazy';card.append(img);}
+  card.append(el('p',(p.category||'Uncategorised')+' · '+(p.published?'Visible to customers':'Hidden from customers')+' · Stock: '+p.stock+' '+p.base_unit));
+  card.append(el('small',p.units.map(u=>u.name+' ₦'+Number(u.price).toLocaleString()+' ('+u.factor+' '+p.base_unit+')').join(' · ')||'No active selling units'));
+  const restock=document.createElement('form');restock.className='row';
+  const stockAmount=document.createElement('input');stockAmount.type='number';stockAmount.min='1';stockAmount.max='10000000';stockAmount.step='1';stockAmount.placeholder='Add stock in '+p.base_unit;stockAmount.required=true;stockAmount.style.maxWidth='260px';
+  const restockButton=el('button','Add stock');restock.append(stockAmount,restockButton);
+  restock.addEventListener('submit',async event=>{event.preventDefault();restockButton.disabled=true;try{await post('restock',{productId:p.id,amount:Number(stockAmount.value)});say('Stock updated.');await refresh();}catch(e){say(e.message);}finally{restockButton.disabled=false;}});
+  card.append(restock);
+  const actions=document.createElement('div');actions.className='actions';
+  const publish=el('button',p.published?'Hide from customers':'Publish product');
+  publish.onclick=async()=>{publish.disabled=true;try{await post('publish',{productId:p.id,published:!p.published});say('Product visibility saved.');await refresh();}catch(e){say(e.message);publish.disabled=false;}};
+  actions.append(publish);
+  const editButton=el('button','Edit product');editButton.className='secondary';actions.append(editButton);
+  const archive=el('button','Archive product');archive.className='warn';actions.append(archive);
+  archive.onclick=async()=>{if(!confirm('Archive '+p.name+'? The product will disappear from your catalogue.'))return;archive.disabled=true;try{await post('archive-product',{productId:p.id});say('Product archived.');await refresh();}catch(e){say(e.message);archive.disabled=false;}};
+  card.append(actions);
   if(p.units.length){
-   const saleForm=document.createElement('form');saleForm.className='flex';
-   const select=document.createElement('select');select.setAttribute('aria-label','Selling unit');
-   for(const u of p.units){const o=el('option',u.name+' — ₦'+Number(u.price).toLocaleString());o.value=u.id;select.append(o);}
-   const qty=document.createElement('input');qty.type='number';qty.min='1';qty.step='1';qty.value='1';qty.required=true;qty.setAttribute('aria-label','Quantity sold');
-   const confirm=el('button','Confirm sale');confirm.type='submit';saleForm.append(select,qty,confirm);
-   let pendingKey=null;
-   saleForm.addEventListener('submit',async e=>{
-    e.preventDefault();if(!window.confirm('Confirm this sale and deduct stock?'))return;
-    confirm.disabled=true;pendingKey ||= crypto.randomUUID();
-    try{await api('confirm-sale',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productId:p.id,unitId:select.value,quantity:Number(qty.value),requestKey:pendingKey})});pendingKey=null;notice.textContent='Sale confirmed and stock updated';await refresh();}
-    catch(err){notice.textContent=err.message;confirm.disabled=false;}
-   });
-   box.append(saleForm);
-  }
-  list.append(box);
+   const u=p.units[0];
+   const edit=document.createElement('form');edit.hidden=true;edit.innerHTML='';
+   const editFields=[['name','Name',p.name],['description','Description',p.description||''],['category','Category',p.category||''],['price','Price (₦)',u.price]];
+   for(const [key,label,value] of editFields){const field=document.createElement('label');field.textContent=label;const input=document.createElement('input');input.name=key;input.value=String(value);input.required=key==='name'||key==='price';if(key==='price'){input.type='number';input.min='0';input.step='1';}field.append(input);edit.append(field);}
+   const submit=el('button','Save changes');edit.append(submit);card.append(edit);
+   editButton.onclick=()=>{edit.hidden=!edit.hidden;};
+   edit.onsubmit=async ev=>{ev.preventDefault();submit.disabled=true;try{const x=Object.fromEntries(new FormData(edit));await post('update-product',{productId:p.id,unitId:u.id,name:x.name,description:x.description,category:x.category,price:Number(x.price)});say('Changes saved.');await refresh();}catch(e){say(e.message);}finally{submit.disabled=false;}};
+   const sold=document.createElement('form');sold.className='row';
+   const unitSelect=document.createElement('select');unitSelect.setAttribute('aria-label','Selling unit');unitSelect.style.maxWidth='260px';
+   for(const unit of p.units){const option=el('option',unit.name+' — ₦'+Number(unit.price).toLocaleString());option.value=unit.id;unitSelect.append(option);}
+   const quantity=document.createElement('input');quantity.type='number';quantity.min='1';quantity.step='1';quantity.value='1';quantity.style.maxWidth='150px';quantity.setAttribute('aria-label','Quantity sold');
+   const confirmSale=el('button','Confirm sale');sold.append(unitSelect,quantity,confirmSale);
+   let pending=null;
+   sold.onsubmit=async ev=>{ev.preventDefault();if(!confirm('Confirm sale and deduct inventory?'))return;confirmSale.disabled=true;pending ||= crypto.randomUUID();try{await post('confirm-sale',{productId:p.id,unitId:unitSelect.value,quantity:Number(quantity.value),requestKey:pending});pending=null;say('Sale recorded, stock deducted.');await refresh();}catch(e){say(e.message);}finally{confirmSale.disabled=false;}};
+   card.append(sold);
+  }else{editButton.disabled=true;}
+  list.append(card);
  }
 }
-document.getElementById('new').addEventListener('submit',async e=>{
- e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');b.disabled=true;
- const d=Object.fromEntries(new FormData(f));d.factor=Number(d.factor);d.price=Number(d.price);d.priceNgn=d.price;
- try{await api('products',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});f.reset();notice.textContent='Product saved';await refresh();}
- catch(err){notice.textContent=err.message;}finally{b.disabled=false;}
-});
-document.getElementById('logout').addEventListener('click',async()=>{try{await api('logout',{method:'POST'});location.reload();}catch(e){notice.textContent=e.message;}});
-try{await api('me');app.hidden=false;notice.textContent='Your reusable private management link has granted access. You can use the same link on future visits.';await refresh();}
-catch(e){notice.textContent='Cannot open your dashboard: '+e.message;}
+$('settings').onsubmit=async e=>{e.preventDefault();const btn=e.currentTarget.querySelector('button');btn.disabled=true;try{const d=Object.fromEntries(new FormData(e.currentTarget));const result=await post('store-settings',d);$('store-title').textContent=result.store.name;say('Business details saved.');}catch(err){say(err.message);}finally{btn.disabled=false;}};
+$('add').onsubmit=async e=>{e.preventDefault();const b=e.currentTarget.querySelector('button');b.disabled=true;const data=Object.fromEntries(new FormData(e.currentTarget));data.factor=Number(data.factor);data.price=Number(data.price);try{await post('products',data);e.currentTarget.reset();say('Product created. Publish when ready.');await refresh();}catch(err){say(err.message);}finally{b.disabled=false;}};
+$('export').onclick=async()=>{const b=$('export');b.disabled=true;try{const data=await api('export');const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='mysales-storefront-export.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);say('Store data exported.');}catch(err){say(err.message);}finally{b.disabled=false;}};
+$('exit').onclick=()=>{sessionStorage.removeItem('mysales_private_management_token');location.replace('/manage/claim');};
+try{
+ const identity=await api('me');const store=identity.store;const form=$('settings');
+ form.elements.namedItem('name').value=store.name;form.elements.namedItem('description').value=store.description||'';
+ form.elements.namedItem('whatsapp').value=store.whatsapp;form.elements.namedItem('status').value=store.status;
+ $('store-title').textContent=store.name;$('public-link').href='/s/?slug='+encodeURIComponent(store.slug);
+ $('app').hidden=false;say('Private access active. Your link remains reusable until revoked.');await refresh();
+}catch(err){say('Cannot open your dashboard: '+err.message);}
 </script></body></html>
