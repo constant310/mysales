@@ -13,7 +13,7 @@ async function load(){const id=++seq;status.textContent='Loading businesses…';
 try{const response=await fetch('/api/discover?q='+encodeURIComponent(input.value.trim()),{cache:'no-store'});if(!response.ok)throw Error('Unable to retrieve published stores');const data=await response.json();if(id!==seq)return;
 status.textContent=data.stores.length+' published businesses found';
 for(const store of data.stores){const card=el('article','');card.className='card';card.append(el('h2',store.name),el('p',store.description||'View this business catalogue.'),el('small',store.product_count+' listed products'));
-const link=el('a','Visit store');link.href='/s/?slug='+encodeURIComponent(store.slug);card.append(el('p',''),link);results.append(card);}
+const link=el('a','Visit store');link.href='/'+encodeURIComponent(store.public_handle||store.slug);card.append(el('p',''),link);results.append(card);}
 if(!data.stores.length)results.append(el('p','No published businesses match your search yet.'));
 }catch(e){if(id===seq)status.textContent='Live business listings are temporarily unavailable. Please try again later.';}}
 let timer;input.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(load,300);});load();
