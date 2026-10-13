@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>mySales | Merchant dashboard</title>
 <style>body{font-family:system-ui;background:#f3f6f8;color:#152c37;margin:0}header{padding:18px 5%;background:#fff;border-bottom:1px solid #ddd;display:flex;justify-content:space-between}main{max-width:1000px;margin:24px auto;padding:0 16px}.card{background:white;padding:22px;border-radius:14px;margin-bottom:18px;border:1px solid #e1e6e8}label{display:block;margin:12px 0 5px}input,textarea{width:100%;padding:11px;box-sizing:border-box;border:1px solid #bac7cd;border-radius:8px;font:inherit}button{background:#087a7d;color:white;border:0;padding:11px 17px;border-radius:8px;cursor:pointer;margin-top:10px}button:disabled{opacity:.5}small{color:#657680}.product{padding:14px 0;border-bottom:1px solid #ddd}.flex{display:flex;gap:10px;flex-wrap:wrap}.flex>*{flex:1;min-width:110px}#logout{background:#425b65}#notice{min-height:22px}</style></head>
-<body><header><strong>mySales · My Store</strong><button id="logout">Sign out</button></header><main>
+<body><header><strong>mySales · My Store</strong><button id="logout">Close private access</button></header><main>
 <p id="notice" role="status">Checking private access…</p>
 <div id="app" hidden>
 <section class="card"><p><a href="/api/merchant/export" download="mysales-storefront-export.json">Export my store data (JSON)</a></p></section>
@@ -55,6 +55,6 @@ document.getElementById('new').addEventListener('submit',async e=>{
  catch(err){notice.textContent=err.message;}finally{b.disabled=false;}
 });
 document.getElementById('logout').addEventListener('click',async()=>{try{await api('logout',{method:'POST'});location.reload();}catch(e){notice.textContent=e.message;}});
-try{await api('me');app.hidden=false;notice.textContent='Your private session is active.';await refresh();}
+try{await api('me');app.hidden=false;notice.textContent='Your private management link has granted access to this store.';await refresh();}
 catch(e){notice.textContent='Cannot open your dashboard: '+e.message;}
 </script></body></html>
