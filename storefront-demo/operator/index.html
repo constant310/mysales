@@ -1,38 +1,214 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Operator · mySales Early Storefront</title>
-<style>body{font-family:system-ui;margin:0;color:#1b3440;background:#f3f7f8}header{background:#113d4a;color:white;padding:20px max(18px,calc((100vw - 980px)/2));display:flex;justify-content:space-between;align-items:center}main{max-width:980px;margin:25px auto;padding:0 16px}.card{background:white;border-radius:15px;padding:22px;border:1px solid #dce5e7;margin-bottom:20px}label{display:block;margin:12px 0 6px}input,textarea{display:block;width:100%;box-sizing:border-box;font:inherit;padding:12px;border:1px solid #bdccd0;border-radius:8px}button{background:#087a7d;color:white;border:0;padding:11px 15px;border-radius:8px;cursor:pointer}button:disabled{opacity:.5}.row{padding:13px 0;border-top:1px solid #e5ebed}.actions{display:flex;gap:8px;flex-wrap:wrap}.danger{background:#a32929}code{overflow-wrap:anywhere}a{color:#056969}.muted{color:#657881}</style></head><body>
-<header><strong>mySales · Private Operator</strong><button id="logout">Close session</button></header>
-<main><p id="status" role="status">Checking private operator access…</p><div id="main" hidden>
-<section class="card"><h1>Create a merchant storefront</h1><p class="muted">The owner will receive a permanent, revocable private link. No merchant signup or password.</p>
-<form id="create">
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
+<title>mySales · Private Admin</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#18382a;background:#f5f8f5}
+*{box-sizing:border-box}body{margin:0}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}a{color:#12733b;text-decoration:none}a:hover{text-decoration:underline}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #57c883;outline-offset:3px}
+[hidden]{display:none!important}.app{max-width:1180px;margin:0 auto;padding:0 19px 60px}
+header{background:#103b25;color:white}.topbar{max-width:1180px;margin:auto;min-height:74px;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.identity{display:flex;align-items:center;gap:11px;font-size:1.1rem;font-weight:900;letter-spacing:-.04em}
+.mark{background:#1daa58;border-radius:12px;width:40px;height:40px;display:grid;place-items:center;color:white;font-size:1.04rem}
+.identity small{display:block;letter-spacing:0;font-size:.68rem;font-weight:700;color:#acd5b7;margin-top:1px}
+#logout{border:1px solid #94bf9e65;background:#ffffff10;color:white;border-radius:11px;padding:11px 13px;font-size:.8rem;font-weight:850}
+.status{padding:14px 18px;background:#e8f3ea;border-radius:12px;color:#39694b;font-size:.83rem;margin:20px 0}
+.heading{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;margin:26px 0 18px}
+.kicker{font-size:.71rem;font-weight:900;letter-spacing:.11em;color:#168143}
+h1{font-size:clamp(1.55rem,4vw,2.2rem);letter-spacing:-.055em;line-height:1.15;margin:7px 0}
+.heading p{margin:7px 0 0;color:#788b7d;font-size:.85rem}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.secondary{border:1px solid #d1e1d4;background:white;color:#286a42;border-radius:10px;padding:11px 13px;font-size:.82rem;font-weight:800}
+#range{border:1px solid #d1e1d4;border-radius:10px;padding:11px 13px;background:white;color:#1d4a30;font-weight:850}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}
+.metric{min-width:0;background:#fff;border:1px solid #e2ebe3;border-radius:17px;padding:20px 18px;box-shadow:0 4px 17px #19472c05}
+.metric .eyebrow{font-size:.72rem;color:#718776;font-weight:750;line-height:1.45}
+.metric strong{display:block;font-size:clamp(1.65rem,3.6vw,2.3rem);font-weight:950;letter-spacing:-.065em;color:#123e29;margin:8px 0 6px;line-height:1}
+.metric small{color:#819385;font-size:.7rem;line-height:1.35}
+.metric.emphasis{background:linear-gradient(115deg,#126f3b,#17482e);border-color:#226841}
+.metric.emphasis .eyebrow,.metric.emphasis strong,.metric.emphasis small{color:white}
+.row-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);gap:16px;margin-top:18px}
+.panel{background:white;border:1px solid #e0eae2;border-radius:18px;padding:23px;min-width:0}
+.panel h2{font-size:1.06rem;margin:0;color:#233f2d;letter-spacing:-.03em}
+.panel p.subtle{font-size:.76rem;margin:7px 0 0;line-height:1.55;color:#789080}
+.chart{display:grid;grid-template-columns:repeat(var(--days),minmax(0,1fr));gap:3px;height:170px;align-items:end;margin-top:25px;border-bottom:1px solid #dae6dc;padding-bottom:0}
+.bar{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:end;gap:3px;height:100%;position:relative}
+.bar span{display:block;width:min(100%,17px);min-height:2px;background:#15934d;border-radius:4px 4px 0 0}
+.bar:nth-child(7n) span{background:#74b98b}.bar:hover span{background:#0d572d}
+.bar i{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:#16452a;color:white;padding:5px 7px;border-radius:7px;font-style:normal;font-size:.67rem;white-space:nowrap;display:none;pointer-events:none}
+.bar:hover i,.bar:focus-within i{display:block}
+.legend{display:flex;justify-content:space-between;color:#839889;font-size:.69rem;margin-top:8px}
+.progress{background:#ebf5ed;height:10px;border-radius:15px;overflow:hidden;margin:23px 0 12px}
+.progress>div{height:100%;background:#15944b;min-width:0;width:0}
+.health-number{font-size:2rem;font-weight:950;letter-spacing:-.05em;color:#137740;margin-top:15px}
+.health-caption{font-size:.8rem;color:#688273;margin-top:3px;line-height:1.55}
+.table-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+#store-search{border:1px solid #dce9df;padding:10px 12px;border-radius:10px;min-width:150px;max-width:100%;background:#fff;outline:0}
+.store-list{display:grid;gap:10px}
+.store{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;padding:17px;border:1px solid #e8eee9;border-radius:13px}
+.store-title{font-weight:900;color:#1d402a;overflow-wrap:anywhere}
+.store-meta{margin:5px 0;color:#718779;font-size:.75rem;line-height:1.5}
+.store-measures{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:.73rem;color:#527461;margin-top:9px}
+.store-measures b{color:#1c7f44}
+.store-actions{display:flex;flex-direction:column;gap:8px;min-width:140px}
+.store-actions button,.store-actions a{font-weight:800;text-align:center;font-size:.73rem;border:1px solid #c5dfcd;border-radius:8px;padding:9px 12px;background:#eef8f1;color:#14733e}
+.store-actions .danger{background:white;color:#a65c23;border-color:#f1d2b4}
+.flag{display:inline-block;margin-left:7px;border-radius:20px;padding:4px 7px;background:#edf8ed;color:#168349;font-weight:800;font-size:.65rem;vertical-align:middle}
+.flag.draft{background:#fff6e6;color:#9b6b20}
+details.setup{margin:18px 0;background:#fff;border:1px solid #e2eee3;border-radius:16px;padding:17px 20px}
+details.setup summary{font-weight:900;color:#146439;cursor:pointer}details.setup p{font-size:.8rem;color:#77907c}
+form.create{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+label{display:block;font-size:.78rem;font-weight:850;color:#41644b}
+label input,label textarea{display:block;width:100%;border:1px solid #d4e3d7;border-radius:10px;padding:12px;margin:6px 0 0;font-weight:500;color:#23452b}
+label textarea{min-height:78px;resize:vertical}
+label.wide{grid-column:1/-1}
+.primary{background:#148441;border:0;border-radius:10px;padding:13px 16px;color:#fff;font-weight:900;font-size:.82rem}
+#newlink{border:1px solid #f1dcb1;border-radius:12px;background:#fff9e9;padding:14px;margin-top:15px}
+#newlink a{overflow-wrap:anywhere;font-size:.75rem}
+.footer-note{margin:18px 0;color:#829184;font-size:.76rem;line-height:1.65}
+@media(max-width:790px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.row-grid{grid-template-columns:1fr}}
+@media(max-width:480px){.app{padding-inline:13px}.metrics{gap:8px}.metric{padding:15px 12px}.panel{padding:17px}.store{flex-direction:column}.store-actions{flex-direction:row;flex-wrap:wrap;width:100%}.store-actions>*{flex:1}form.create{grid-template-columns:1fr}label.wide{grid-column:auto}.heading{margin-top:19px}.topbar{padding-inline:13px}}
+</style></head>
+<body>
+<header><div class="topbar"><div class="identity"><span class="mark">mS</span><span>mySales<small>PRIVATE ADMIN · STOREFRONTS</small></span></div><button id="logout" type="button">Log out</button></div></header>
+<main class="app">
+<p id="status" class="status" role="status">Verifying private admin access…</p>
+<div id="main" hidden>
+<section class="heading"><div><span class="kicker">STORE PERFORMANCE</span><h1>Platform overview</h1><p>Real merchant activity, products and anonymous customer sessions.</p></div><div class="controls"><select id="range" aria-label="Analytics time range"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option></select><button type="button" id="refresh" class="secondary">Refresh stats</button></div></section>
+<div class="metrics">
+<article class="metric emphasis"><span class="eyebrow">Businesses registered</span><strong id="metric-stores">—</strong><small id="metric-new">New registrations loading</small></article>
+<article class="metric"><span class="eyebrow">Published stores</span><strong id="metric-published">—</strong><small>Customer-visible shops</small></article>
+<article class="metric"><span class="eyebrow">Published products</span><strong id="metric-products">—</strong><small>Across every business</small></article>
+<article class="metric"><span class="eyebrow">Store visits</span><strong id="metric-visits">—</strong><small>Anonymous browser sessions in selected period</small></article>
+<article class="metric"><span class="eyebrow">Stores with products</span><strong id="metric-activated">—</strong><small>Businesses that uploaded an item</small></article>
+<article class="metric"><span class="eyebrow">Cart engagement</span><strong id="metric-cart">—</strong><small>Sessions that added to cart</small></article>
+<article class="metric"><span class="eyebrow">WhatsApp intent</span><strong id="metric-whatsapp">—</strong><small>Sessions that clicked WhatsApp enquiry</small></article>
+<article class="metric"><span class="eyebrow">Recorded merchant sales</span><strong id="metric-sales">—</strong><small>Merchant-confirmed sales, not online checkouts</small></article>
+</div>
+<div class="row-grid">
+<section class="panel"><h2>Daily store visits</h2><p class="subtle">Number of browser-tab sessions, counted once per store each UTC day. Tracking starts on the date this version goes live.</p><div id="visits-chart" class="chart" role="img" aria-label="Daily store visits chart"></div><div class="legend"><span id="chart-first"></span><span id="chart-last"></span></div></section>
+<section class="panel"><h2>Merchant activation</h2><p class="subtle">Businesses that have uploaded at least one non-archived product.</p><div class="health-number" id="activation">—</div><p class="health-caption" id="activation-note">Loading store activity…</p><div class="progress"><div id="activation-bar"></div></div><p class="subtle" id="updated">Data is refreshed on request.</p></section>
+</div>
+<section class="panel" style="margin-top:18px"><div class="table-head"><div><h2>All businesses</h2><p class="subtle">Latest registered stores, publication status, products and customer engagement.</p></div><input id="store-search" type="search" aria-label="Search registered businesses" placeholder="Search businesses…"></div><div id="stores" class="store-list">Loading businesses…</div></section>
+<details class="setup"><summary>Create a merchant storefront</summary><p>This operator-only form creates a shop and issues a permanent, revocable private management link.</p>
+<form id="create" class="create">
 <label>Business name<input name="name" required maxlength="150" placeholder="e.g. Ada Beauty Store"></label>
-
-<label>WhatsApp number (international format)<input name="whatsapp" required placeholder="+2348012345678"></label>
-<label>About this business<textarea name="description" maxlength="2000"></textarea></label>
-<button>Create store & private link</button></form>
-<div id="newlink" hidden><h2>New management link</h2><p>Send this privately to the merchant. It will not appear in the store list again.</p><p><a id="private" target="_blank" rel="noreferrer"></a></p><button id="copy" type="button">Copy private link</button></div></section>
-<section class="card"><h2>Existing stores</h2><p class="muted">Rotating a private link immediately invalidates the previous links and sessions for that store.</p><div id="stores">Loading…</div></section></div></main>
+<label>WhatsApp number<input name="whatsapp" required placeholder="+2348012345678"></label>
+<label class="wide">About this business<textarea name="description" maxlength="2000"></textarea></label>
+<button type="submit" class="primary">Create store & private link</button>
+</form>
+<div id="newlink" hidden><strong>New management link</strong><p>Only send this to the store owner. Copy it now; it is not retrievable again.</p><a id="private" target="_blank" rel="noreferrer"></a><p><button id="copy" type="button" class="secondary">Copy private link</button></p></div></details>
+<p class="footer-note">Visitor figures are anonymous session estimates, not identifiable people or completed purchases. Historical visits before analytics activation cannot be reconstructed. Admin data is private and is never sent to public storefront pages.</p>
+</div>
+</main>
 <script type="module">
 const $=id=>document.getElementById(id),status=$('status'),list=$('stores');
-const text=(tag,t)=>{const e=document.createElement(tag);e.textContent=String(t);return e;};
+const text=(tag,value)=>{const e=document.createElement(tag);e.textContent=String(value);return e;};
 const operatorToken=sessionStorage.getItem('mysales_private_operator_token')||'';
+let allStores=[], currentDays=30;
 async function api(path,options={}){
  if(!/^[A-Za-z0-9_-]{43}$/.test(operatorToken))throw Error('Open your private operator link again.');
  const headers=new Headers(options.headers||{});headers.set('Authorization','Bearer '+operatorToken);
  const r=await fetch('/api/operator/'+path,{cache:'no-store',...options,headers});
  const j=await r.json();if(!r.ok)throw Error(j.error||'Request failed');return j;
 }
-function showLink(link){$('newlink').hidden=false;$('private').href=link;$('private').textContent=link;$('copy').onclick=async()=>{try{await navigator.clipboard.writeText(link);status.textContent='Link copied. Send privately.';}catch{status.textContent='Copy the private link shown above.';}};}
+const int=v=>Number(v||0).toLocaleString('en-NG');
+function setMetric(id,value){$(id).textContent=int(value);}
+function renderChart(events,days){
+ const chart=$('visits-chart');chart.replaceChildren();chart.style.setProperty('--days',String(days));
+ const values=new Map();
+ for(const e of events)if(e.event_type==='store_view')values.set(String(e.day).slice(0,10),Number(e.sessions)||0);
+ const today=new Date(),daily=[];
+ for(let i=days-1;i>=0;i--){
+  const d=new Date(Date.UTC(today.getUTCFullYear(),today.getUTCMonth(),today.getUTCDate()-i));
+  const key=d.toISOString().slice(0,10);daily.push({key,value:values.get(key)||0});
+ }
+ const high=Math.max(1,...daily.map(d=>d.value));
+ for(const d of daily){
+  const bar=text('div','');bar.className='bar';
+  const column=text('span','');column.style.height=Math.max(2,Math.round(d.value/high*140))+'px';
+  const tip=text('i',d.key+': '+d.value+' visits');bar.title=d.key+': '+d.value+' visits';
+  bar.append(column,tip);chart.append(bar);
+ }
+ $('chart-first').textContent=daily[0]?.key||'';
+ $('chart-last').textContent=daily.at(-1)?.key||'';
+}
+function showLink(link){
+ $('newlink').hidden=false;$('private').href=link;$('private').textContent=link;
+ $('copy').onclick=async()=>{try{await navigator.clipboard.writeText(link);status.textContent='Link copied. Send privately.';}catch{status.textContent='Copy the private link shown above.';}};
+ document.querySelector('details.setup').open=true;
+}
 async function action(body){return api('stores',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});}
-async function refresh(){const {stores}=await api('stores');list.replaceChildren();if(!stores.length)list.append(text('p','No stores yet.'));
-for(const s of stores){const box=text('div','');box.className='row';box.append(text('strong',s.name),text('p',s.product_count+' products · '+s.status+' · '+s.whatsapp));
-const a=text('a','Open public store');a.href='/'+encodeURIComponent(s.public_handle||s.slug);a.target='_blank';box.append(a);
-const actions=text('div','');actions.className='actions';
-const rotate=text('button','Replace private management link');rotate.onclick=async()=>{if(!confirm('Replace private link? All previous links and merchant sessions will stop working.'))return;rotate.disabled=true;try{const r=await action({action:'rotate',storeId:s.id});showLink(r.managementLink);status.textContent='A new private management link was issued.';}catch(e){status.textContent=e.message;}finally{rotate.disabled=false;}};
-const pub=text('button',s.status==='published'?'Unpublish store':'Publish store');pub.onclick=async()=>{pub.disabled=true;try{await action({action:'publish-store',storeId:s.id,published:s.status!=='published'});await refresh();}catch(e){status.textContent=e.message;pub.disabled=false;}};
-actions.append(rotate,pub);box.append(actions);list.append(box);
-}}
-$('create').onsubmit=async e=>{e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');b.disabled=true;const details=Object.fromEntries(new FormData(f));try{const r=await action({action:'create',...details});showLink(r.managementLink);f.reset();status.textContent='Store created. Private link ready to send.';await refresh();}catch(err){status.textContent=err.message;}finally{b.disabled=false;}};
+function renderStores(){
+ list.replaceChildren();
+ const search=$('store-search').value.toLowerCase().trim();
+ const chosen=allStores.filter(s=>[s.name,s.public_handle,s.whatsapp].some(v=>String(v||'').toLowerCase().includes(search)));
+ if(!chosen.length){list.append(text('p',search?'No matching stores.':'No stores registered yet.'));return;}
+ for(const s of chosen){
+  const box=text('article','');box.className='store';
+  const info=text('div','');info.style.minWidth='0';
+  const name=text('span',s.name);name.className='store-title';
+  const flag=text('small',s.status);flag.className='flag'+(s.status!=='published'?' draft':'');
+  const title=text('div','');title.append(name,flag);
+  const date=new Date(s.created_at);
+  const stamp=Number.isFinite(date.valueOf())?date.toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}):'';
+  const meta=text('p','Joined '+stamp+' · '+(s.whatsapp||'No number'));meta.className='store-meta';
+  const measures=text('div','');measures.className='store-measures';
+  for(const [n,v] of [['Products',s.product_count],['Visits',s.visits],['Carts',s.cart_sessions],['WhatsApp',s.whatsapp_sessions]]){
+   const item=text('span','');item.append(text('b',int(v)),text('span',' '+n));measures.append(item);
+  }
+  info.append(title,meta,measures);
+  const actions=text('div','');actions.className='store-actions';
+  const a=text('a','View store');a.href='/'+encodeURIComponent(s.public_handle||s.slug);a.target='_blank';a.rel='noopener';actions.append(a);
+  const rotate=text('button','Reset merchant link');rotate.type='button';rotate.className='danger';
+  rotate.onclick=async()=>{
+   if(!confirm('Reset the merchant access link? All previous links and sessions for this store will stop working.'))return;
+   rotate.disabled=true;try{
+    const r=await action({action:'rotate',storeId:s.id});showLink(r.managementLink);
+    status.textContent='New private merchant link issued. Copy it before leaving the page.';
+   }catch(e){status.textContent=e.message;}finally{rotate.disabled=false;}
+  };
+  const publish=text('button',s.status==='published'?'Unpublish':'Publish');publish.type='button';
+  publish.onclick=async()=>{publish.disabled=true;try{await action({action:'publish-store',storeId:s.id,published:s.status!=='published'});await refresh();}catch(e){status.textContent=e.message;}finally{publish.disabled=false;}};
+  actions.append(publish,rotate);box.append(info,actions);list.append(box);
+ }
+}
+async function refresh(){
+ $('refresh').disabled=true;
+ try{
+  const data=await api('analytics?days='+currentDays);
+  allStores=data.stores||[];
+  const s=data.summary||{},v=data.totals||{};
+  setMetric('metric-stores',s.total_stores);
+  setMetric('metric-published',s.published_stores);
+  setMetric('metric-products',s.published_products);
+  setMetric('metric-visits',v.visits);
+  setMetric('metric-activated',s.stores_with_products);
+  setMetric('metric-cart',v.cartSessions);
+  setMetric('metric-whatsapp',v.whatsappSessions);
+  setMetric('metric-sales',s.recorded_sales);
+  $('metric-new').textContent=int(s.new_stores)+' new in the last '+currentDays+' days';
+  const percent=s.total_stores?Math.round(100*Number(s.stores_with_products||0)/Number(s.total_stores)):0;
+  $('activation').textContent=percent+'%';
+  $('activation-bar').style.width=percent+'%';
+  $('activation-note').textContent=int(s.stores_with_products)+' of '+int(s.total_stores)+' registered stores have products listed.';
+  $('updated').textContent='Updated '+new Date(data.generatedAt||Date.now()).toLocaleString('en-NG')+' · '+int(s.sales_period)+' recorded sales in the selected period.';
+  renderChart(data.dailyEvents||[],currentDays);
+  renderStores();
+  status.textContent='Private operator access verified. Live database data loaded.';
+ }catch(e){status.textContent='Could not load stats: '+e.message;throw e;}
+ finally{$('refresh').disabled=false;}
+}
+$('store-search').oninput=renderStores;
+$('range').onchange=e=>{currentDays=Number(e.target.value)===7?7:30;refresh().catch(()=>{});};
+$('refresh').onclick=()=>refresh().catch(()=>{});
+$('create').onsubmit=async e=>{
+ e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');b.disabled=true;
+ const details=Object.fromEntries(new FormData(f));
+ try{const r=await action({action:'create',...details});showLink(r.managementLink);f.reset();status.textContent='Store created. Private link ready to send.';await refresh();}
+ catch(err){status.textContent=err.message;}finally{b.disabled=false;}
+};
 $('logout').onclick=()=>{sessionStorage.removeItem('mysales_private_operator_token');location.replace('/operator/claim');};
-(async()=>{try{await api('me');$('main').hidden=false;status.textContent='Secure operator access enabled.';await refresh();}catch(e){status.textContent='Private operator access required. Open your saved operator link.';}})();
+(async()=>{try{await api('me');$('main').hidden=false;await refresh();}catch(e){status.textContent='Private operator access required or dashboard unavailable. Open your saved private operator link.';}})();
 </script></body></html>
