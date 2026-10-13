@@ -142,14 +142,18 @@ Deno.serve(async (request: Request) => {
           const phone=String(b.whatsapp||'');
           const digits=phone.replace(/[^0-9]/g,'');
           if(!textVal(b.name,150,true)||!textVal(b.description??'',2000)||
-             !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(String(b.slug||''))||String(b.slug).length>80||
              !/^[+0-9]+$/.test(phone)||digits.length<8||digits.length>15||digits.startsWith('0'))
-            return out(400,{error:'Invalid business name, URL or WhatsApp number'});
+            return out(400,{error:'Invalid business name or WhatsApp number'});
+          // Internal identifier is generated automatically; the customer only sees /business-name.
+          const base=String(b.name).normalize('NFKD').toLowerCase()
+            .replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-')
+            .replace(/^-|-$/g,'').slice(0,48).replace(/-$/,'')||'store';
+          const internalSlug=base+'-'+crypto.randomUUID().replace(/-/g,'').slice(0,8);
           const token=issuePrivateToken();
           const tokenHash=await hash(token);
           const store=await sql.begin(async tx=>{
             const rows=await tx`insert into early_storefront.stores(slug,name,description,whatsapp,status)
-              values(${b.slug},${String(b.name).trim()},${b.description??''},${b.whatsapp},'published')
+              values(${internalSlug},${String(b.name).trim()},${b.description??''},${b.whatsapp},'published')
               returning id,slug,public_handle,name`;
             await tx`insert into early_storefront.management_links(store_id,token_hash,expires_at)
               values(${rows[0].id},${tokenHash},'infinity'::timestamptz)`;
