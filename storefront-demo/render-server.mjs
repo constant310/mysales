@@ -7,7 +7,7 @@ import {resolve,extname,sep} from 'node:path';
 const root=resolve('storefront-demo');
 const edgeBase='https://wsxszbdvvtowmrnxdsrp.supabase.co/functions/v1/early-storefront-backend';
 const allowed=new Set([
- '/api/store','/api/discover',
+ '/api/store','/api/discover','/api/signup',
  '/api/merchant/me','/api/merchant/claim','/api/merchant/products',
  '/api/merchant/restock','/api/merchant/publish','/api/merchant/confirm-sale',
  '/api/merchant/export','/api/merchant/update-product',
@@ -17,7 +17,8 @@ const allowed=new Set([
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml','.ico':'image/x-icon'};
 const json=(res,status,body)=>{res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(body));};
 async function edgeFetch(path,method='GET',headers={},body) {
- const response=await fetch(edgeBase+path,{method,headers,body,signal:AbortSignal.timeout(12000),redirect:'error'});
+ const target=path.startsWith('/api/signup')?edgeBase.replace('/early-storefront-backend','/early-storefront-signup'):edgeBase;
+ const response=await fetch(target+path,{method,headers,body,signal:AbortSignal.timeout(12000),redirect:'error'});
  const raw=await response.text();
  return {response,raw};
 }
@@ -91,6 +92,7 @@ http.createServer(async(req,res)=>{
   let staticPath=path;
   if(path==='/')staticPath='/index.html';
   if(path==='/discover'||path==='/discover/')staticPath='/discover/index.html';
+  if(path==='/create'||path==='/create/')staticPath='/create/index.html';
   if(path==='/manage'||path==='/manage/')staticPath='/manage/index.html';
   if(path==='/manage/claim')staticPath='/manage/claim.html';
   if(path==='/operator'||path==='/operator/')staticPath='/operator/index.html';
