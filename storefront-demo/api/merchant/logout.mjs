@@ -1,3 +1,4 @@
+import {safeOrigin} from '../../server/http-auth.mjs';
 import { logoutMerchant } from '../../server/merchant-session-store.mjs';
 
 function cookieValue(header, key) {
@@ -11,6 +12,7 @@ export default async function handler(req, res) {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
   }
+  if(!safeOrigin(req))return res.status(403).json({error:'Invalid origin'});
   const token = cookieValue(req.headers.cookie, '__Host-early_storefront_session');
   try {
     res.setHeader('Set-Cookie', await logoutMerchant(token));
