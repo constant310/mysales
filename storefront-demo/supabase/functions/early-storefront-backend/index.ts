@@ -1,7 +1,12 @@
 import postgres from 'npm:postgres@3.4.5';
 import {createClient} from 'npm:@supabase/supabase-js@2';
 
-const origin = 'https://mysales-early-storefront-branch.onrender.com';
+const origin = 'https://store.mysalesofficial.com';
+const trustedOrigins = new Set([origin,'https://mysales-early-storefront-branch.onrender.com']);
+const originFor = (request:Request) => {
+ const requested = request.headers.get('origin');
+ return requested && trustedOrigins.has(requested) ? requested : origin;
+};
 const url = Deno.env.get('SUPABASE_DB_URL');
 const sql = url ? postgres(url, { max: 2, prepare: false, connect_timeout: 7, idle_timeout: 10 }) : null;
 const headers = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer' };
@@ -74,7 +79,7 @@ async function operator(request: Request) {
  const rows=await sql!`select id from early_storefront.operator_links where token_hash=${await hash(match[1])} and revoked_at is null limit 1`;
  return rows.length>0;
 }
-const managementUrl=(token:string)=>origin+'/manage/claim#token='+encodeURIComponent(token);
+const managementUrl=(token:string,request:Request)=>originFor(request)+'/manage/claim#token='+encodeURIComponent(token);
 const issuePrivateToken=()=>{
  const bytes=crypto.getRandomValues(new Uint8Array(32));
  return btoa(String.fromCharCode(...bytes)).split('+').join('-').split('/').join('_').replaceAll('=','');
@@ -126,7 +131,7 @@ Deno.serve(async (request: Request) => {
     }
     if(pathname.startsWith('/api/operator/')) {
       const requestedOrigin=request.headers.get('origin');
-      if(request.method!=='GET' && requestedOrigin && requestedOrigin!==origin) return out(403,{error:'Invalid origin'});
+      if(request.method!=='GET' && requestedOrigin && !trustedOrigins.has(requestedOrigin)) return out(403,{error:'Invalid origin'});
       if(!(await operator(request)))return out(401,{error:'Private operator link required'});
       if(pathname==='/api/operator/me' && request.method==='GET')
         return out(200,{authenticated:true});
@@ -159,7 +164,7 @@ Deno.serve(async (request: Request) => {
               values(${rows[0].id},${tokenHash},'infinity'::timestamptz)`;
             return rows[0];
           });
-          return out(201,{store,publicUrl:'/'+encodeURIComponent(store.public_handle),managementLink:managementUrl(token)});
+          return out(201,{store,publicUrl:'/'+encodeURIComponent(store.public_handle),managementLink:managementUrl(token,request)});
         }
         if(b.action==='rotate'){
           if(!uuid.test(String(b.storeId||'')))return out(400,{error:'Invalid store'});
@@ -174,7 +179,7 @@ Deno.serve(async (request: Request) => {
               values(${b.storeId},${tokenHash},'infinity'::timestamptz)`;
             return true;
           });
-          return rotated?out(200,{storeId:b.storeId,managementLink:managementUrl(token)}):out(404,{error:'Store not found'});
+          return rotated?out(200,{storeId:b.storeId,managementLink:managementUrl(token,request)}):out(404,{error:'Store not found'});
         }
         if(b.action==='publish-store'){
           if(!uuid.test(String(b.storeId||''))||typeof b.published!=='boolean')
@@ -191,7 +196,7 @@ Deno.serve(async (request: Request) => {
     if (!['GET','POST','PATCH'].includes(request.method)) return out(405,{error:'Method not allowed'});
     if (request.method !== 'GET') {
       const requestedOrigin = request.headers.get('origin');
-      if (requestedOrigin && requestedOrigin !== origin) return out(403,{error:'Invalid origin'});
+      if (requestedOrigin && !trustedOrigins.has(requestedOrigin)) return out(403,{error:'Invalid origin'});
     }
     // Every merchant action, including read-only exports, requires the high-entropy
     // revocable bearer URL token. Do not accept credentials from query strings.
