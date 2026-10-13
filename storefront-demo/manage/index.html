@@ -54,6 +54,25 @@ header{background:#133D25;justify-content:flex-start}
 .pill,.photo-icon{background:#F0FDF4;color:#15803D}
 input:focus,textarea:focus,select:focus{border-color:#16A34A;box-shadow:0 0 0 3px #16A34A20}
 @media(max-width:460px){.brand .mark{width:29px;height:29px}.brand .wordmark{font-size:1.08rem}.manager-tag{font-size:.62rem}}
+
+/* Focused manager: one task at a time, never two competing columns. */
+main{max-width:870px;padding-top:19px}
+.hero{padding:21px 25px;border-radius:15px;margin-bottom:16px;box-shadow:none}
+.hero h1{font-size:1.55rem;margin:5px 0}.hero p{font-size:.86rem;margin:4px 0 12px}
+.hero .actions{gap:8px}.hero .btn{min-height:40px;padding:9px 13px;font-size:.83rem}
+.columns{display:block}.panel{padding:22px;border-radius:15px;box-shadow:none}
+#product-section[hidden],#add-section[hidden]{display:none}
+.panel-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#add-section,#product-section{max-width:760px;margin:0 auto}
+#notice{margin:0;min-height:0;font-size:.85rem}
+#notice:empty{display:none}
+.footer-panel{max-width:760px;margin:16px auto 0}
+#add-section form{max-width:570px}
+.photo-drop{min-height:83px;border-color:#AEDABB;background:#F7FCF8}
+#add-section .muted{margin-bottom:12px}
+#product-section .product-list{gap:9px}
+.product{border-radius:11px;box-shadow:none}
+@media(max-width:600px){main{padding:10px 12px 50px}.hero{padding:17px;border-radius:12px;margin-bottom:12px}.hero h1{font-size:1.4rem}.hero .actions .btn{flex:1}.panel{padding:16px;border-radius:12px}.photo-drop{min-height:75px}}
 </style></head><body>
 <header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Storefront Manager</span>
 <button id="exit" class="head-btn">Close private access</button></header>
@@ -64,10 +83,10 @@ input:focus,textarea:focus,select:focus{border-color:#16A34A;box-shadow:0 0 0 3p
 <div class="actions">
 <button id="share" class="btn btn-light" type="button">Copy shop link ↗</button>
 <a id="public-link" class="btn btn-light" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;align-items:center">View my shop</a>
-</div><p class="share-link" id="public-url"></p></section>
+</div><p class="share-link" id="public-url" hidden></p></section>
 <div class="columns">
-<section class="panel" id="add-section"><span class="pill">mySales · ADD A PRODUCT</span><h2 style="margin-top:13px">What are you selling?</h2>
-<p class="muted">Take a photo, enter the price and you're done. No complex inventory forms.</p>
+<section class="panel" id="add-section"><div class="panel-top"><div><span class="pill">New product</span><h2 style="margin-top:12px">Add a product</h2></div><button class="btn btn-outline btn-small" type="button" id="cancel-add" hidden>← My products</button></div>
+ <p class="muted">Choose a photo, name your product and enter the price.</p>
 <form id="add">
 <label class="photo-drop" for="product-photo"><span class="photo-icon" id="photo-icon">📷</span><img id="preview" alt="Product preview"><span><b id="photo-label">Choose a product photo</b><small>Required · Camera or gallery · We resize large photos automatically</small></span><input id="product-photo" name="photo" type="file" accept="image/*" required></label>
 <label for="product-name">Product name</label><input id="product-name" name="name" required maxlength="150" placeholder="e.g. Rice 5kg, Wig, Bluetooth speaker">
@@ -81,9 +100,8 @@ input:focus,textarea:focus,select:focus{border-color:#16A34A;box-shadow:0 0 0 3p
 <button id="add-button" class="btn" type="submit" style="width:100%;margin-top:17px">Add product to my shop →</button>
 <p id="add-note" class="hint">Your product picture, name and price appear together on your storefront.</p>
 </form></section>
-<section class="panel"><div class="inline" style="justify-content:space-between;align-items:center">
-<div><h2>My products <span id="total" style="font-size:.84rem;color:#789589"></span></h2>
-<p class="muted">Edit prices, photos or stock any time.</p></div><button class="btn btn-outline btn-small" id="add-more" type="button">+ Add</button></div>
+<section class="panel" id="product-section"><div class="inline" style="justify-content:space-between;align-items:center">
+<div><h2>Your products <span id="total" style="font-size:.84rem;color:#789589"></span></h2></div><button class="btn btn-outline btn-small" id="add-more" type="button">+ Add</button></div>
 <div id="products" class="product-list"></div></section>
 </div>
 <section class="panel footer-panel"><details id="settings-panel"><summary>⚙️ Change business details</summary>
@@ -101,7 +119,16 @@ input:focus,textarea:focus,select:focus{border-color:#16A34A;box-shadow:0 0 0 3p
 <script type="module">
 const token=sessionStorage.getItem('mysales_private_management_token')||'';
 const $=id=>document.getElementById(id),notice=$('notice'),list=$('products');
-let currentStore=null,products=[];
+let currentStore=null,products=[],isAdding=new URLSearchParams(location.search).has('welcome');
+function showManagerView(){
+ const hasProducts=products.length>0;
+ const adding=isAdding||!hasProducts;
+ $('add-section').hidden=!adding;
+ $('product-section').hidden=adding;
+ $('cancel-add').hidden=!hasProducts;
+ $('add-more').hidden=!hasProducts;
+}
+
 const node=(tag,value)=>{const n=document.createElement(tag);n.textContent=String(value);return n;};
 function say(message,problem=false){notice.textContent=message;notice.style.color=problem?'#af3f32':'#15803d';}
 function currency(value){return '₦'+Number(value||0).toLocaleString('en-NG');}
@@ -130,6 +157,7 @@ function updateHero(){
 async function refresh(){
  const data=await api('products');products=data.products||[];
  $('total').textContent='('+products.length+')';list.replaceChildren();
+ showManagerView();
  if(!products.length){
   const empty=node('div','');empty.className='blank';empty.append(node('div','📦'),node('strong','No products yet'),node('p','Add your first item using the simple form.'));
   list.append(empty);
@@ -243,11 +271,12 @@ $('add').onsubmit=async e=>{
   $('photo-icon').style.display='block';$('photo-label').textContent='Choose a product photo';
   say(errors.length?'Product saved as a draft or with an issue. '+errors.join(' ')+' Use its photo button below to retry.':
    '🎉 Product and picture added! Share your storefront with customers.',errors.length>0);
-  await refresh();
+  isAdding=false;await refresh();
  }catch(err){say('Could not add product: '+err.message,true);}
  finally{button.disabled=false;button.textContent='Add product to my shop →';}
 };
-$('add-more').onclick=()=>{$('add-section').scrollIntoView({behavior:'smooth'});$('product-name').focus({preventScroll:true});};
+$('add-more').onclick=()=>{isAdding=true;showManagerView();$('add-section').scrollIntoView({behavior:'smooth'});$('product-name').focus({preventScroll:true});};
+$('cancel-add').onclick=()=>{isAdding=false;showManagerView();$('product-section').scrollIntoView({behavior:'smooth'});};
 $('settings').onsubmit=async e=>{e.preventDefault();const b=e.currentTarget.querySelector('button[type=submit]');b.disabled=true;try{const data=Object.fromEntries(new FormData(e.currentTarget));const updated=await post('store-settings',data);currentStore=updated.store;updateHero();say('Business details updated.');$('settings-panel').open=false;}catch(err){say(err.message,true);}finally{b.disabled=false;}};
 $('share').onclick=()=>copy(publicUrl());
 $('copy-manager').onclick=()=>copy(location.origin+'/manage/claim#token='+encodeURIComponent(token));
