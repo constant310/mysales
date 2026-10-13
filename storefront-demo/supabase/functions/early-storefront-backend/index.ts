@@ -47,7 +47,7 @@ async function merchant(request: Request) {
   const match = /^Bearer ([A-Za-z0-9_-]{43})$/.exec(request.headers.get('authorization')||'');
   if (!match) return null;
   const tokenHash = await hash(match[1]);
-  const found = await sql!`select s.id as store_id,s.slug,s.name,s.description,s.whatsapp,s.status
+  const found = await sql!`select s.id as store_id,s.slug,s.name,s.description,s.whatsapp,s.status,s.whatsapp_template
     from early_storefront.management_links l
     join early_storefront.stores s on s.id=l.store_id
     where l.token_hash=${tokenHash} and l.revoked_at is null and l.expires_at>now()
@@ -105,7 +105,7 @@ Deno.serve(async (request: Request) => {
     if (pathname === '/api/store' && request.method === 'GET') {
       const slug=query.get('slug')||'';
       if (!/^[a-z0-9-]{2,80}$/.test(slug)) return out(400,{error:'Invalid store'});
-      const stores=await sql`select id,slug,name,description,whatsapp from early_storefront.stores
+      const stores=await sql`select id,slug,name,description,whatsapp,whatsapp_template from early_storefront.stores
         where slug=${slug} and status='published' limit 1`;
       if (!stores.length) return out(404,{error:'Store not found'});
       const {id,...store}=stores[0];
@@ -183,7 +183,7 @@ Deno.serve(async (request: Request) => {
     if (!actor) return out(401,{error:'Private management link invalid or revoked'});
     const id=actor.store_id as string;
     if (pathname === '/api/merchant/me' && request.method==='GET')
-      return out(200,{authenticated:true,storeId:id,store:{slug:actor.slug,name:actor.name,description:actor.description,whatsapp:actor.whatsapp,status:actor.status}});
+      return out(200,{authenticated:true,storeId:id,store:{slug:actor.slug,name:actor.name,description:actor.description,whatsapp:actor.whatsapp,status:actor.status,whatsapp_template:actor.whatsapp_template}});
     if (pathname === '/api/merchant/claim' && request.method==='POST')
       return out(200,{ok:true,storeId:id,reusable:true});
     if (pathname === '/api/merchant/products' && request.method==='GET')
@@ -265,9 +265,15 @@ Deno.serve(async (request: Request) => {
       const b=await bodyJson(request);
       if (!textVal(b.name,150,true)||!textVal(b.description??'',2000)||!/^\+?[1-9]\d{7,14}$/.test(String(b.whatsapp||''))||
         !['draft','published'].includes(String(b.status))) return out(400,{error:'Invalid store settings'});
+      // Older merchant clients omit the template when publishing their first item.
+      // Preserve it on those updates instead of silently overwriting an edit.
+      const template=b.whatsapp_template===undefined?actor.whatsapp_template:b.whatsapp_template;
+      if(template!==null&&(!textVal(template,1500)||typeof template!=='string'))
+        return out(400,{error:'WhatsApp message must be under 1,500 characters'});
       const changed=await sql`update early_storefront.stores set name=${String(b.name).trim()},
-        description=${b.description??''},whatsapp=${b.whatsapp},status=${b.status}
-        where id=${id} and status<>'suspended' returning slug,name,description,whatsapp,status`;
+        description=${b.description??''},whatsapp=${b.whatsapp},status=${b.status},
+        whatsapp_template=${template??null}
+        where id=${id} and status<>'suspended' returning slug,name,description,whatsapp,status,whatsapp_template`;
       return changed.length?out(200,{store:changed[0]}):out(404,{error:'Store not found'});
     }
     if (pathname === '/api/merchant/upload-image' && request.method==='POST') {
