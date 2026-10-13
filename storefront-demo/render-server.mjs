@@ -5,6 +5,7 @@ const root=resolve('storefront-demo');
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.webp':'image/webp'};
 const routes={
  '/api/store':'./api/store.mjs',
+ '/api/discover':'./api/discover.mjs',
  '/api/merchant/me':'./api/merchant/me.mjs',
  '/api/merchant/login':'./api/merchant/login.mjs',
  '/api/merchant/logout':'./api/merchant/logout.mjs',
