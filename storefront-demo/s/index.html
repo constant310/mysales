@@ -138,7 +138,7 @@ function render(){
  for(const p of visible){
   const card=elem('article','');card.className='item';
   const picture=p.image_path||(isDemo?exampleImage(p.name):'');
-  if(picture){const img=document.createElement('img');img.src=picture;img.alt=(p.image_path?'Photo of ':'Illustrative example of ')+p.name;img.loading='lazy';img.decoding='async';img.onerror=()=>{if(isDemo&&img.src!==exampleImage(p.name)){img.src=exampleImage(p.name);return;}const fallback=elem('div','📷');fallback.className='empty-img';img.replaceWith(fallback);};card.append(img);}
+  if(picture){const img=document.createElement('img');img.src=picture;img.alt=(p.image_path?'Photo of ':'Illustrative example of ')+p.name;img.loading='lazy';img.decoding='async';img.onerror=()=>{if(isDemo&&img.dataset.usedFallback!=='1'){img.dataset.usedFallback='1';img.src=exampleImage(p.name);return;}const fallback=elem('div','📷');fallback.className='empty-img';img.replaceWith(fallback);};card.append(img);}
   else{const placeholder=elem('div','📷');placeholder.className='empty-img';card.append(placeholder);}
   const inside=elem('div','');inside.className='inside';
   const category=elem('div',p.category||'Shop collection');category.className='category';inside.append(category,elem('h3',p.name));
