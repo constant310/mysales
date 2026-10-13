@@ -298,7 +298,7 @@ test('product cards use full-width Add to cart buttons with proper SVG icons',as
  assert.match(catalogue,/grid-title/);
  assert.match(catalogue,/grid-price/);
  assert.match(catalogue,/id="home-cart"/);
- assert.match(catalogue,/const CART_SVG=/);
+ assert.doesNotMatch(catalogue,/const CART_SVG=/);
  assert.doesNotMatch(catalogue,/id="like"/i);
  assert.doesNotMatch(catalogue,/id="share"/i);
 });
@@ -441,4 +441,31 @@ test('merchant manager uses understandable labels and minimal non-decorative set
  assert.match(manager,/\.settings-card\[open\] \.settings-action-hint::after\{content:"Close"/);
  assert.match(manager,/id="photo-icon"><svg/);
  assert.doesNotMatch(manager,/id="add-more" type="button">\+ Add/);
+});
+
+
+test('sample storefront is explicitly a free-store signup funnel, not a real ordering demo',async()=>{
+ const catalogue=await read('s/index.html');
+ const landing=await read('index.html');
+ assert.match(catalogue,/id="demo-promo"/);
+ assert.match(catalogue,/id="demo-last-cta"/);
+ assert.match(catalogue,/\$\('demo-promo'\)\.hidden=!isDemo/);
+ assert.match(catalogue,/\$\('demo-last-cta'\)\.hidden=!isDemo/);
+ assert.match(catalogue,/SEE WHAT YOU CAN BUILD/);
+ assert.match(catalogue,/Create my free store/);
+ assert.match(catalogue,/if\(isDemo\|\|!cart\.size\)return/);
+ assert.match(landing,/Create my store for free/);
+ assert.match(landing,/This could be your store/);
+ assert.doesNotMatch(landing,/href="\/demo-warri-pantry"/);
+});
+
+test('shopping buttons are legible without decorative cart and WhatsApp icons',async()=>{
+ const catalogue=await read('s/index.html');
+ assert.match(catalogue,/add\.textContent='Add to cart'/);
+ assert.doesNotMatch(catalogue,/const CART_SVG=/);
+ assert.match(catalogue,/id="sheet-add" type="button">Add to cart<\/button>/);
+ assert.match(catalogue,/id="sheet-enquire" type="button">Enquire now<\/button>/);
+ assert.match(catalogue,/id="send-label">Send WhatsApp enquiry<\/span>/);
+ assert.match(catalogue,/id="filter-home"/);
+ assert.match(catalogue,/id="home-cart"/);
 });
