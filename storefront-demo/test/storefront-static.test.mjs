@@ -28,3 +28,13 @@ test('Static responses prohibit framing',async()=>{
  assert.match(server,/frame-ancestors/);
  assert.match(server,/X-Frame-Options/);
 });
+
+test('Merchant access is private-link only, without phone or code login endpoint',async()=>{
+ const server=await readFile(new URL('render-server.mjs',root),'utf8');
+ const session=await readFile(new URL('server/merchant-session-store.mjs',root),'utf8');
+ const claim=await readFile(new URL('api/merchant/claim.mjs',root),'utf8');
+ assert.doesNotMatch(server,/['"]\\/api\\/merchant\\/login['"]/);
+ assert.doesNotMatch(session,/loginMerchant|verifyAccessCode|login_attempts/);
+ assert.match(session,/s\\.store_id IS NOT NULL/);
+ assert.match(claim,/redeemManagementLink/);
+});
