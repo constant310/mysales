@@ -1,48 +1,61 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#086e64"><title>Manage your store | mySales</title>
+<meta name="theme-color" content="#1C8220"><title>Manage your store | mySales</title>
 <style>
-:root{font-family:Inter,system-ui,-apple-system,sans-serif;background:#f6f8f6;color:#153530}
+:root{font-family:Inter,system-ui,-apple-system,sans-serif;background:#f6f8f6;color:#374151}
 *{box-sizing:border-box}body{margin:0}button,input,textarea,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.54;cursor:wait}
-a{color:#087b6d}header{background:#073d39;color:#fff;padding:16px max(18px,calc((100vw - 1080px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}
-.brand{font-size:1.35rem;font-weight:900;letter-spacing:-.06em}.brand span{color:#35d6b1}.head-btn{color:#d6f4e9;background:transparent;border:1px solid #4c7771;border-radius:11px;padding:9px 12px;font-size:.82rem;font-weight:800}
+a{color:#16582a}header{background:#133d25;color:#fff;padding:16px max(18px,calc((100vw - 1080px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-size:1.35rem;font-weight:900;letter-spacing:-.06em}.brand span{color:#16a34a}.head-btn{color:#e7f8ed;background:transparent;border:1px solid #4c7771;border-radius:11px;padding:9px 12px;font-size:.82rem;font-weight:800}
 main{max-width:1050px;margin:0 auto;padding:25px 18px 75px}
-#notice{min-height:28px;margin:0 0 12px;font-size:.9rem;color:#176c5f;line-height:1.5}
-.hero{background:linear-gradient(130deg,#063f39,#0b7d71);color:#fff;border-radius:24px;padding:27px 31px;box-shadow:0 15px 33px #073f3917;margin-bottom:18px}
-.hero h1{font-size:clamp(1.7rem,4vw,2.45rem);margin:6px 0 7px;letter-spacing:-.045em}.hero p{color:#d6f1e7;margin:4px 0 17px;line-height:1.5}
-.eyebrow{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;font-weight:900;color:#94e7cf}
-.actions{display:flex;flex-wrap:wrap;gap:10px}.btn{border:0;border-radius:12px;background:#077e70;color:white;font-weight:800;padding:12px 16px;min-height:45px}
-.btn:hover{background:#096a5f}.btn-light{background:#fff;color:#095c52}.btn-light:hover{background:#e6fff7}.btn-outline{background:transparent;border:1px solid #d2e2d9;color:#126a60}
+#notice{min-height:28px;margin:0 0 12px;font-size:.9rem;color:#15803d;line-height:1.5}
+.hero{background:linear-gradient(130deg,#133d25,#1c8220);color:#fff;border-radius:24px;padding:27px 31px;box-shadow:0 15px 33px #133d2517;margin-bottom:18px}
+.hero h1{font-size:clamp(1.7rem,4vw,2.45rem);margin:6px 0 7px;letter-spacing:-.045em}.hero p{color:#e7f8ed;margin:4px 0 17px;line-height:1.5}
+.eyebrow{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;font-weight:900;color:#baf0ca}
+.actions{display:flex;flex-wrap:wrap;gap:10px}.btn{border:0;border-radius:12px;background:#1c8220;color:white;font-weight:800;padding:12px 16px;min-height:45px}
+.btn:hover{background:#15803d}.btn-light{background:#fff;color:#15803d}.btn-light:hover{background:#f0fdf4}.btn-outline{background:transparent;border:1px solid #e5e7eb;color:#15803d}
 .btn-outline:hover{background:#f0faf5}.btn-small{font-size:.8rem;padding:8px 12px;min-height:37px}.btn-danger{color:#a34139;border:1px solid #e5c9c2;background:#fff}
 .columns{display:grid;grid-template-columns:420px 1fr;gap:18px;align-items:start}.panel{background:#fff;border:1px solid #e0eae4;border-radius:20px;padding:25px;box-shadow:0 6px 30px #164f3610}
 h2{font-size:1.3rem;margin:0 0 8px;letter-spacing:-.035em}.muted{color:#748b83;line-height:1.45;font-size:.86rem;margin:0 0 19px}
-label{display:block;font-size:.87rem;font-weight:750;color:#27463f;margin:14px 0 7px}
-input,textarea,select{width:100%;padding:12px 13px;border-radius:11px;border:1px solid #d3e0d8;color:#193c35;background:#fbfdfb;min-height:45px;outline:0}
-input:focus,textarea:focus,select:focus{border-color:#0da58d;box-shadow:0 0 0 3px #d8f5e8}
+label{display:block;font-size:.87rem;font-weight:750;color:#374151;margin:14px 0 7px}
+input,textarea,select{width:100%;padding:12px 13px;border-radius:11px;border:1px solid #d3e0d8;color:#374151;background:#ffffff;min-height:45px;outline:0}
+input:focus,textarea:focus,select:focus{border-color:#16a34a;box-shadow:0 0 0 3px #d8f5e8}
 textarea{resize:vertical;min-height:72px}.hint{color:#71887f;font-size:.76rem;margin:7px 0}
-.photo-drop{display:flex;gap:13px;align-items:center;border:1.5px dashed #abd4c3;background:#f4fbf7;border-radius:13px;padding:12px;margin:12px 0;cursor:pointer}
+.photo-drop{display:flex;gap:13px;align-items:center;border:1.5px dashed #e7f8ed;background:#f4fbf7;border-radius:13px;padding:12px;margin:12px 0;cursor:pointer}
 .photo-drop input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
-.photo-drop b{color:#0b7f70;font-size:.88rem}.photo-drop small{color:#71877c;font-size:.75rem;display:block;margin-top:3px}
-.photo-icon{background:#e0f6e9;font-size:1.55rem;padding:15px;border-radius:12px}
+.photo-drop b{color:#15803d;font-size:.88rem}.photo-drop small{color:#71877c;font-size:.75rem;display:block;margin-top:3px}
+.photo-icon{background:#f0fdf4;font-size:1.55rem;padding:15px;border-radius:12px}
 #preview{width:70px;height:70px;object-fit:cover;border-radius:12px;display:none}
-.optional{border-top:1px solid #eef1eb;margin-top:15px;padding-top:7px}
-summary{cursor:pointer;list-style:none;color:#0a7d70;font-size:.87rem;font-weight:800;padding:12px 0}summary::after{content:'⌄';float:right}
+.optional{border-top:1px solid #eceff0;margin-top:15px;padding-top:7px}
+summary{cursor:pointer;list-style:none;color:#15803d;font-size:.87rem;font-weight:800;padding:12px 0}summary::after{content:'⌄';float:right}
 .product-list{display:grid;gap:11px;max-height:none}.product{display:flex;gap:14px;border:1px solid #e0eae4;border-radius:14px;padding:13px;background:#fff;align-items:start}
-.product img{width:74px;height:74px;border-radius:11px;object-fit:cover;flex:none;background:#e8f3ed}.ph{width:74px;height:74px;border-radius:11px;background:#edf5ed;display:grid;place-items:center;font-size:1.6rem;flex:none}
+.product img{width:74px;height:74px;border-radius:11px;object-fit:cover;flex:none;background:#f0fdf4}.ph{width:74px;height:74px;border-radius:11px;background:#f0fdf4;display:grid;place-items:center;font-size:1.6rem;flex:none}
 .product-body{min-width:0;flex:1}.product h3{margin:0 0 3px;font-size:.99rem;word-break:break-word}
-.price{font-weight:900;color:#0c685b;font-size:1.01rem}.meta{color:#7b8c83;font-size:.75rem;line-height:1.5;margin:4px 0 10px}
+.price{font-weight:900;color:#15803d;font-size:1.01rem}.meta{color:#7b8c83;font-size:.75rem;line-height:1.5;margin:4px 0 10px}
 .p-actions{display:flex;flex-wrap:wrap;gap:6px}.product details{border-top:1px solid #eef1ee;margin-top:8px}
 .product details summary{font-size:.77rem;padding:9px 0}
 .product form{margin:9px 0 12px}.product form label{font-size:.75rem}.inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.inline input{width:115px}.inline select{max-width:175px}.inline .btn{flex:none}
-.blank{text-align:center;border:1px dashed #d5e4da;background:#fbfdfa;border-radius:15px;padding:27px 14px;color:#6c8379}
-.blank strong{display:block;color:#365e51;margin:6px 0}.pill{display:inline-block;background:#e8f9ef;color:#147c64;font-size:.73rem;font-weight:800;border-radius:25px;padding:6px 9px}
+.blank{text-align:center;border:1px dashed #d5e4da;background:#fbfdfa;border-radius:15px;padding:27px 14px;color:#6b7280}
+.blank strong{display:block;color:#16582a;margin:6px 0}.pill{display:inline-block;background:#f0fdf4;color:#1c8220;font-size:.73rem;font-weight:800;border-radius:25px;padding:6px 9px}
 #app[hidden]{display:none}
-.footer-panel{margin-top:20px}.share-link{color:#afecdd;word-break:break-all;font-size:.83rem}
+.footer-panel{margin-top:20px}.share-link{color:#d1f4d7;word-break:break-all;font-size:.83rem}
 @media(max-width:830px){.columns{grid-template-columns:1fr}.hero{padding:23px}.panel{padding:22px}}
 @media(max-width:460px){header{padding:12px 16px}.head-btn{padding:8px;font-size:.75rem}.hero{border-radius:17px;padding:21px}.hero h1{font-size:1.75rem}.panel{padding:18px;border-radius:16px}main{padding:15px 12px 70px}.actions .btn{flex:1}.product{padding:10px;gap:10px}.product img,.ph{width:61px;height:61px}.btn-small{padding:8px}}
+
+header{background:#133D25;justify-content:flex-start}
+.brand{display:inline-flex;align-items:center;gap:8px;color:white;text-decoration:none}
+.brand .mark{display:inline-grid;place-items:center;width:33px;height:33px;border-radius:9px;background:#16A34A;color:white;letter-spacing:-.13em;padding-right:3px;font-size:1.08rem}
+.brand .wordmark{color:#fff;font-size:1.21rem;letter-spacing:-.06em;font-weight:900}
+.manager-tag{font-size:.72rem;color:#DCF5E5;font-weight:800;letter-spacing:.02em;margin-right:auto}
+.head-btn{color:#E7F8ED;border-color:#507653}
+.hero{background:linear-gradient(130deg,#133D25,#1C8220)}
+.btn{background:#1C8220}.btn:hover{background:#15803D}.btn-light{background:#fff;color:#15803D}.btn-light:hover{background:#F0FDF4}
+.btn-outline{color:#15803D;border-color:#D6E8DA;background:#fff}.btn-outline:hover{background:#F0FDF4}
+.pill,.photo-icon{background:#F0FDF4;color:#15803D}
+input:focus,textarea:focus,select:focus{border-color:#16A34A;box-shadow:0 0 0 3px #16A34A20}
+@media(max-width:460px){.brand .mark{width:29px;height:29px}.brand .wordmark{font-size:1.08rem}.manager-tag{font-size:.62rem}}
 </style></head><body>
-<header><div class="brand">my<span>Sales</span>. <small style="font-weight:500;letter-spacing:0;font-size:.7rem;color:#c3e3da">STORE MANAGER</small></div>
+<header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Storefront Manager</span>
 <button id="exit" class="head-btn">Close private access</button></header>
 <main><p id="notice" role="status" aria-live="polite">Opening your store…</p>
 <div id="app" hidden>
@@ -53,7 +66,7 @@ summary{cursor:pointer;list-style:none;color:#0a7d70;font-size:.87rem;font-weigh
 <a id="public-link" class="btn btn-light" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;align-items:center">View my shop</a>
 </div><p class="share-link" id="public-url"></p></section>
 <div class="columns">
-<section class="panel" id="add-section"><span class="pill">+ ADD A PRODUCT</span><h2 style="margin-top:13px">What are you selling?</h2>
+<section class="panel" id="add-section"><span class="pill">mySales · ADD A PRODUCT</span><h2 style="margin-top:13px">What are you selling?</h2>
 <p class="muted">Take a photo, enter the price and you're done. No complex inventory forms.</p>
 <form id="add">
 <label class="photo-drop" for="product-photo"><span class="photo-icon" id="photo-icon">📷</span><img id="preview" alt="Product preview"><span><b id="photo-label">Add a product photo</b><small>Tap to open your camera or gallery</small></span><input id="product-photo" name="photo" type="file" accept="image/*"></label>
@@ -90,7 +103,7 @@ const token=sessionStorage.getItem('mysales_private_management_token')||'';
 const $=id=>document.getElementById(id),notice=$('notice'),list=$('products');
 let currentStore=null,products=[];
 const node=(tag,value)=>{const n=document.createElement(tag);n.textContent=String(value);return n;};
-function say(message,problem=false){notice.textContent=message;notice.style.color=problem?'#af3f32':'#176c5f';}
+function say(message,problem=false){notice.textContent=message;notice.style.color=problem?'#af3f32':'#15803d';}
 function currency(value){return '₦'+Number(value||0).toLocaleString('en-NG');}
 async function api(path,options={}){
  if(!/^[A-Za-z0-9_-]{43}$/.test(token))throw Error('Open your private management link again.');
