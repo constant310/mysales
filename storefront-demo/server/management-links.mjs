@@ -1,4 +1,4 @@
-// Passwordless merchant access: server-only. A management link is a bearer secret.
+// Reusable, non-expiring, revocable merchant access: the private URL is a bearer secret.
 // Store only its SHA-256 hash; issue it via a trusted operator workflow, never a public route.
 import { randomBytes, createHash } from 'node:crypto';
 import pg from 'pg';
@@ -21,7 +21,7 @@ export async function issueManagementLink(storeId, origin) {
   const token = randomBytes(32).toString('base64url');
   await pool.query(
     `INSERT INTO early_storefront.management_links(store_id,token_hash,expires_at)
-     SELECT id,$2,now()+interval '48 hours' FROM early_storefront.stores WHERE id=$1`,
+     SELECT id,$2,'infinity'::timestamptz FROM early_storefront.stores WHERE id=$1`,
     [storeId, hash(token)],
   );
   const url = new URL('/manage/claim', base);
@@ -36,8 +36,8 @@ export async function redeemManagementLink(token) {
     await client.query('BEGIN');
     const result = await client.query(
       `UPDATE early_storefront.management_links
-       SET used_at=now()
-       WHERE token_hash=$1 AND used_at IS NULL AND revoked_at IS NULL AND expires_at>now()
+       SET used_at=COALESCE(used_at,now())
+       WHERE token_hash=$1 AND revoked_at IS NULL AND expires_at>now()
        RETURNING store_id`,
       [hash(token)],
     );
