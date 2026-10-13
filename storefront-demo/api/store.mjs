@@ -6,7 +6,7 @@ export default async function handler(req,res){
  const slug=String(req.query.slug||'');
  if(!/^[a-z0-9-]{2,80}$/.test(slug))return res.status(400).json({error:'Invalid store'});
  try{
-  const s=await pool.query("select id,slug,name,description,whatsapp from early_storefront.stores where slug=$1 and status='active' limit 1",[slug]);
+  const s=await pool.query("select id,slug,name,description,whatsapp from early_storefront.stores where slug=$1 and status='published' limit 1",[slug]);
   if(!s.rowCount)return res.status(404).json({error:'Store not found'});
   const store=s.rows[0];
   const p=await pool.query(`select p.id,p.name,p.description,p.category,p.image_path,p.base_unit,
