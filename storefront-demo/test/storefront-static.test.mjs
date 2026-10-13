@@ -220,3 +220,43 @@ test('purchase controls appear on demand with clear add and enquiry actions',asy
  assert.doesNotMatch(catalogue,/id="like"/);
  assert.doesNotMatch(catalogue,/id="share"/);
 });
+
+test('merchant products open a read-only details modal with explicit edit controls',async()=>{
+ const manager=await read('manage/index.html');
+ assert.match(manager,/id="product-dialog"/);
+ assert.match(manager,/aria-modal="true"/);
+ assert.match(manager,/id="dialog-edit"/);
+ assert.match(manager,/id="dialog-close"/);
+ assert.match(manager,/function openProductDialog/);
+ assert.match(manager,/function enterProductEdit/);
+ assert.match(manager,/function renderProduct/);
+ assert.match(manager,/open\.onclick=\(\)=>openProductDialog\(p\.id\)/);
+ assert.match(manager,/dialogForm\.hidden=true/);
+ assert.match(manager,/dialogEditing=false/);
+ assert.doesNotMatch(manager,/const more=document\.createElement\('details'\);more\.append\(node\('summary','More product options'\)\)/);
+});
+test('modal Save remains disabled until valid details or a product photo change',async()=>{
+ const manager=await read('manage/index.html');
+ assert.match(manager,/id="dialog-save"[^>]*disabled/);
+ assert.match(manager,/function hasDetailChanges/);
+ assert.match(manager,/function updateDetailSave/);
+ assert.match(manager,/dialogForm\.checkValidity\(\)/);
+ assert.match(manager,/Boolean\(dialogPhotoFile\)/);
+ assert.match(manager,/dialogSave\.disabled=!dialogEditing\|\|dialogBusy\|\|!hasDetailChanges\(\)\|\|!allowed/);
+ assert.match(manager,/id="dialog-photo"/);
+ assert.match(manager,/id="dialog-edit-stock"/);
+ assert.match(manager,/id="dialog-edit-published"/);
+ assert.match(manager,/discard unsaved product changes/i);
+});
+test('secure product update saves stock and visibility atomically with audited adjustments',async()=>{
+ const edge=await read('supabase/functions/early-storefront-backend/index.ts');
+ assert.match(edge,/const hasStock=b\.stock!==undefined/);
+ assert.match(edge,/const hasPublished=b\.published!==undefined/);
+ assert.match(edge,/goodInt\(b\.stock,0,10000000\)/);
+ assert.match(edge,/typeof b\.published!=='boolean'/);
+ assert.match(edge,/early_storefront\.stock[\s\S]*for update/);
+ assert.match(edge,/early_storefront\.stock_movements/);
+ assert.match(edge,/manual_adjustment/);
+ assert.match(edge,/where id=\$\{b\.productId\} and store_id=\$\{id\}/);
+ assert.match(edge,/await sql\.begin/);
+});
