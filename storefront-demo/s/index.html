@@ -152,55 +152,6 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 .icon-control{transition:border-color .15s,background .15s}
 @media(max-width:600px){.demo-promo{margin:0 15px 15px;flex-direction:column;align-items:stretch;padding:17px}.demo-promo-cta{width:100%}.demo-promo strong{font-size:.96rem}.demo-promo p{font-size:.76rem}}
 
-/* Mobile-first reel viewport: keep the full product visible instead of cropping its photo. */
-.site{overflow:visible;overflow:clip}
-.collection.feeds-enabled{padding-bottom:0}
-.collection.feeds-enabled .powered,.collection.feeds-enabled #demo-last-cta{display:none!important}
-.reel-experience{position:relative;background:#071a10;color:#fff}
-.reel-toolbar{height:0;position:sticky;top:0;z-index:16;pointer-events:none}
-.reel-toolbar-inner{display:flex;align-items:center;gap:11px;width:min(100%,1130px);padding:calc(11px + env(safe-area-inset-top,0px)) clamp(12px,3vw,26px) 11px;pointer-events:none}
-.reel-toolbar-inner>*{pointer-events:auto}
-.reel-search{display:flex;align-items:center;gap:9px;flex:1;min-width:0;background:#fffffff4;color:#294331;border:1px solid #ffffffb0;border-radius:28px;height:49px;padding:0 16px;box-shadow:0 8px 24px #0003;backdrop-filter:blur(15px)}
-.reel-search svg{width:19px;height:19px;color:#4d6254;flex:none}
-.reel-search input{border:0;background:transparent;outline:0;min-width:0;width:100%;color:#20352a;font-size:14px}
-.reel-search input::placeholder{color:#66786b}
-.reel-cart{position:relative;flex:none;width:49px;height:49px;border-radius:50%;border:1px solid #fff7;background:#12281cdd;display:grid;place-items:center;color:white;backdrop-filter:blur(14px);box-shadow:0 8px 25px #0004}
-.reel-cart svg{width:23px;height:23px;stroke-width:2}
-.reel-cart .cart-count{right:-2px;top:-5px}
-.reel-slide{position:relative;height:100svh;min-height:0;overflow:hidden;scroll-snap-align:start;scroll-snap-stop:normal;background:#10251a;isolation:isolate}
-@supports(height:100dvh){.reel-slide{height:100dvh}}
-.reel-media{position:absolute;inset:calc(80px + env(safe-area-inset-top,0px)) 0 158px;overflow:hidden;background:radial-gradient(circle at 50% 44%,#416b4d,#142c1b 70%,#071a11)}
-.reel-backdrop-image{position:absolute;inset:-8%;width:116%;height:116%;object-fit:cover;filter:blur(26px) brightness(.37) saturate(.9);transform:scale(1.04);opacity:.78}
-.reel-media .grid-image{position:relative;z-index:1;height:100%;width:100%;object-fit:contain;object-position:center center;background:transparent;filter:drop-shadow(0 12px 18px #0005)}
-.reel-media .grid-fallback{position:relative;z-index:1;height:100%;background:transparent;color:#bddac2}
-.reel-media .grid-fallback svg{width:95px;height:95px}
-.reel-shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,#05120b52 0%,transparent 19%,transparent 66%,#02140b6b 81%,#03150cf0 100%)}
-.reel-side{position:absolute;right:clamp(10px,3vw,25px);bottom:calc(185px + env(safe-area-inset-bottom,0px));z-index:5;display:grid;gap:15px;justify-items:center}
-.reel-action{border:0;background:none;color:white;display:flex;flex-direction:column;gap:5px;align-items:center;font-size:.72rem;font-weight:850;text-shadow:0 2px 6px #000a;width:76px;padding:0;min-height:82px}
-.reel-action-symbol{display:grid;place-items:center;border-radius:50%;height:56px;width:56px;border:1px solid #ffffff9a;background:#138442;box-shadow:0 6px 18px #0006}
-.reel-action-symbol svg{width:25px;height:25px;stroke-width:2}
-.reel-action.checkout .reel-action-symbol{background:#075334}
-.reel-action:disabled .reel-action-symbol{background:#64766e}
-.reel-details{position:absolute;left:0;bottom:0;right:0;z-index:3;padding:23px clamp(16px,4vw,37px) calc(20px + env(safe-area-inset-bottom,0px));background:linear-gradient(180deg,#03190d00,#03190dda 13%,#03180dec 48%,#03180d 100%);text-shadow:0 2px 6px #0007}
-.reel-brand{font-size:.76rem;font-weight:850;display:flex;align-items:center;gap:8px;margin-bottom:6px;color:#e4f6e9}
-.reel-brand:before{content:"✓";display:grid;place-items:center;height:19px;width:19px;border-radius:50%;background:#158040;font-size:12px}
-.reel-name{font-size:clamp(1.4rem,5vw,2rem);font-weight:950;line-height:1.12;letter-spacing:-.045em;margin:0 76px 6px 0;overflow-wrap:anywhere}
-.reel-description{font-size:.84rem;line-height:1.4;margin:0 76px 11px 0;color:#e1efe5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.reel-bottom{display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap;margin-right:76px;max-width:650px}
-.reel-price{display:flex;flex-direction:column;gap:1px}
-.reel-price strong{font-size:clamp(1.15rem,4.7vw,1.55rem);font-weight:950;letter-spacing:-.03em}
-.reel-price small,.reel-availability{color:#d1e2d4;font-size:.73rem}
-.reel-counter{display:flex;align-items:center;gap:1px;border-radius:30px;background:#fff;color:#1b3d29;padding:3px;box-shadow:0 2px 15px #0004;text-shadow:none}
-.reel-counter button{background:#e8f4ec;border:0;border-radius:50%;height:31px;width:31px;color:#146737;font-size:1.13rem;display:grid;place-items:center}
-.reel-counter button:disabled{opacity:.38}
-.reel-counter output{font-size:.86rem;font-weight:950;min-width:23px;text-align:center}
-.reel-availability{margin-top:7px;display:block}
-@media(max-width:370px){.reel-side{right:7px;bottom:calc(185px + env(safe-area-inset-bottom,0px))}.reel-action{width:65px}.reel-action-symbol{width:50px;height:50px}.reel-bottom,.reel-name,.reel-description{margin-right:68px}.reel-details{padding-inline:15px}.reel-counter button{height:29px;width:29px}}
-@media(max-height:620px){.reel-media{top:calc(68px + env(safe-area-inset-top,0px));bottom:150px}.reel-side{gap:7px;bottom:calc(167px + env(safe-area-inset-bottom,0px))}.reel-action{min-height:69px;font-size:.66rem}.reel-action-symbol{height:47px;width:47px}.reel-details{padding-top:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}.reel-description{-webkit-line-clamp:1}}
-@media(min-width:700px){.reel-slide{height:min(100svh,850px)}.reel-media{inset:77px 0 170px}.reel-details{padding-inline:35px}.reel-side{right:27px;bottom:220px}}
-@media(max-width:700px){html{scroll-snap-type:y proximity;scroll-padding-top:0}}
-@media(prefers-reduced-motion:reduce){html{scroll-snap-type:none!important}}
-
 </style></head><body><div class="site">
 <header class="brandbar"><a class="brand" href="/" aria-label="mySales home"><span class="brand-mark" aria-hidden="true">mS</span><span>mySales</span></a><span class="brand-note">Online storefront</span></header>
 <aside id="demo-promo" class="demo-promo" aria-label="Create your own store" hidden>
@@ -224,11 +175,7 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 </div>
 <div id="grid-products" class="grid-products" aria-live="polite"></div>
 <div id="demo-last-cta" class="demo-last-cta" hidden><p>Imagine your products in a store like this.</p><a href="/create/">Create my free store</a><small>Upload your product photos and prices in minutes.</small></div><p class="powered">Powered by <strong>mySales Storefronts</strong></p>
-</section><section id="reel-experience" class="reel-experience" aria-label="Full-screen product browsing" hidden>
-<div class="reel-toolbar"><div class="reel-toolbar-inner">
-<label class="reel-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7.5"/><path d="m20 20-4-4"/></svg><input id="reel-search" type="search" aria-label="Search products in full-screen feed" placeholder="Search products…" autocomplete="off"></label>
-<button id="reel-cart" class="reel-cart" type="button" aria-label="Open cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.1 11.5h11.8L21 8H6"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg><span id="reel-count" class="cart-count">0</span></button>
-</div></div><div id="reel-feed" aria-live="off"></div></section></main></div>
+</section></section></main></div>
 <div id="overlay" class="overlay"></div>
 <aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="drawer-title">
 <div class="drawer-header"><h2 id="drawer-title">Your enquiry basket <span id="cart-title-count"></span></h2><button id="close-cart" class="close-button" type="button" aria-label="Close basket">×</button></div>
@@ -322,93 +269,12 @@ function fillPhoto(host,p,click=null){
  if(click)host.addEventListener('click',click);
 }
 
-// A natural-scroll product feed (not a separate page or a trapped modal).
-// Product details and basket are shared with the standard storefront.
-const reelQuantities=new Map();
-const reelQtyUpdates=new Map();
-const REEL_CART_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M3 4h2l2 11h12l2-8H6"/><path d="M12 8v6m-3-3h6"/></svg>';
-const REEL_CHECK_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2 11h12l2-8H6"/><path d="m10 10 2 2 4-4"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>';
-function quickReelAdd(product,quantity,openBasket){
- if(!unitOf(product)){notify('Ask the seller for the price of this item.');return;}
- const quantityLimit=Math.min(99,remaining(product));
- if(quantityLimit<1){notify('Maximum available quantity is already in your basket.');return;}
- selectedProduct=product;
- selectedQuantity=Math.min(quantity,quantityLimit);
- addSelected(openBasket);
- reelQuantities.set(product.id,1);
- reelQtyUpdates.get(product.id)?.();
-}
-function renderReels(){
- const area=$('reel-experience'),host=$('reel-feed');host.replaceChildren();
- reelQtyUpdates.clear();
- $('products').classList.toggle('feeds-enabled',visible.length>0);
- area.hidden=!visible.length;
- if(!visible.length)return;
- const fragment=document.createDocumentFragment();
- for(const p of visible){
-  const u=unitOf(p),slide=node('article');slide.className='reel-slide';
-  slide.innerHTML='<div class="reel-media"></div><div class="reel-shade"></div><div class="reel-side"></div><div class="reel-details"></div>';
-  const media=slide.querySelector('.reel-media'),photo=productPhoto(p);
-  if(photo){
-   const blurred=document.createElement('img');
-   blurred.className='reel-backdrop-image';blurred.src=photo;
-   blurred.alt='';blurred.setAttribute('aria-hidden','true');
-   blurred.loading='lazy';blurred.decoding='async';
-   media.append(blurred);
-  }
-  fillPhoto(media,p);
-  const side=slide.querySelector('.reel-side'),details=slide.querySelector('.reel-details');
-  const count=()=>Math.min(99,remaining(p));
-  const qty=Math.max(1,Math.min(count()||1,reelQuantities.get(p.id)||1));
-  reelQuantities.set(p.id,qty);
-  const actions=[
-   {label:'Add to cart',cls:'add',icon:REEL_CART_ICON,openBasket:false},
-   {label:'Checkout',cls:'checkout',icon:REEL_CHECK_ICON,openBasket:true}
-  ];
-  for(const a of actions){
-   const b=node('button');b.type='button';b.className='reel-action '+a.cls;
-   b.setAttribute('aria-label',a.label+': '+p.name);
-   const circle=node('span');circle.className='reel-action-symbol';circle.innerHTML=a.icon;
-   b.append(circle,node('span',a.label));b.disabled=!u;
-   b.onclick=()=>quickReelAdd(p,reelQuantities.get(p.id)||1,a.openBasket);
-   side.append(b);
-  }
-  const brand=node('div',store?.name||'Shop collection');brand.className='reel-brand';details.append(brand);
-  const name=node('h2',p.name);name.className='reel-name';details.append(name);
-  const description=node('p',p.description||p.category||'Explore this product and ask the seller for details.');
-  description.className='reel-description';details.append(description);
-  const bottom=node('div');bottom.className='reel-bottom';
-  const price=node('div');price.className='reel-price';
-  price.append(node('strong',u?currency(u.price):'Ask price'),node('small',u?'per '+u.name:'Contact seller'));
-  bottom.append(price);
-  const counter=node('div');counter.className='reel-counter';
-  const minus=node('button','−');minus.type='button';minus.setAttribute('aria-label','Decrease quantity for '+p.name);
-  const output=node('output',qty);output.setAttribute('aria-label','Selected quantity');
-  const plus=node('button','+');plus.type='button';plus.setAttribute('aria-label','Increase quantity for '+p.name);
-  function updateQty(next){
-   const updated=Math.max(1,Math.min(Math.max(1,count()),next));reelQuantities.set(p.id,updated);
-   output.value=String(updated);output.textContent=String(updated);
-   minus.disabled=updated<=1;plus.disabled=updated>=count();
-  }
-  minus.onclick=()=>updateQty((reelQuantities.get(p.id)||1)-1);
-  plus.onclick=()=>updateQty((reelQuantities.get(p.id)||1)+1);
-  counter.append(minus,output,plus);bottom.append(counter);details.append(bottom);
-  reelQtyUpdates.set(p.id,()=>updateQty(reelQuantities.get(p.id)||1));
-  updateQty(qty);
-  if(stockOf(p)>0){const available=node('small',remaining(p)+' available');available.className='reel-availability';details.append(available);}
-  fragment.append(slide);
- }
- host.append(fragment);
-}
-$('reel-search').oninput=event=>{searchText=event.target.value;$('home-search').value=searchText;applyFilters();};
-$('reel-cart').onclick=()=>openCart();
-
 function renderProducts(){
  const host=$('grid-products');host.replaceChildren();
  $('grid-count').textContent=visible.length+' product'+(visible.length===1?'':'s');
  if(!visible.length){
   const empty=node('p',products.length?'No products match your search or category.':'This store has no published products yet.');
-  empty.className='grid-empty';host.append(empty);renderReels();return;
+  empty.className='grid-empty';host.append(empty);return;
  }
  const fragment=document.createDocumentFragment();
  for(const p of visible){
@@ -425,7 +291,6 @@ function renderProducts(){
   details.append(add);card.append(details);fragment.append(card);
  }
  host.append(fragment);
- renderReels();
 }
 function applyFilters(){
  const search=searchText.toLowerCase().trim();
@@ -436,7 +301,7 @@ function applyFilters(){
  $('filter-home').setAttribute('aria-label',categoryFilter?'Filter category: '+categoryFilter:'Filter products by category');
  renderProducts();
 }
-$('home-search').oninput=event=>{searchText=event.target.value;$('reel-search').value=searchText;applyFilters();};
+$('home-search').oninput=event=>{searchText=event.target.value;applyFilters();};
 function openFilters(){
  const host=$('filter-options');host.replaceChildren();
  const categories=[...new Set(products.map(p=>p.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
@@ -507,9 +372,6 @@ function renderCart(){
  }
  if(!qty){const blank=node('p','Your basket is empty. Add a product to get started.');blank.className='help';host.append(blank);}
  $('home-count').textContent=String(qty);
- $('reel-count').textContent=String(qty);
- for(const refresh of reelQtyUpdates.values())refresh();
- $('reel-cart').setAttribute('aria-label','Open cart, '+qty+' items');
  $('home-cart').setAttribute('aria-label','Open basket, '+qty+' items');
  $('cart-title-count').textContent=qty?'('+qty+')':'';
  $('cart-total').textContent=currency(total);
