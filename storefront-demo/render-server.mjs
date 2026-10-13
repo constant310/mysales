@@ -6,6 +6,8 @@ import {resolve,extname,sep} from 'node:path';
 
 const root=resolve('storefront-demo');
 const edgeBase='https://wsxszbdvvtowmrnxdsrp.supabase.co/functions/v1/early-storefront-backend';
+// Exact public origins accepted for browser POST requests; never trust wildcard origins.
+const allowedOrigins=new Set(['https://store.mysalesofficial.com','https://mysales-early-storefront-branch.onrender.com']);
 const allowed=new Set([
  '/api/store','/api/discover','/api/signup',
  '/api/merchant/me','/api/merchant/claim','/api/merchant/products',
@@ -51,7 +53,7 @@ http.createServer(async(req,res)=>{
    if(!['GET','POST'].includes(req.method))return json(res,405,{error:'Method not allowed'});
    if(req.method!=='GET'){
     const origin=req.headers.origin;
-    if(origin && origin!=='https://mysales-early-storefront-branch.onrender.com')return json(res,403,{error:'Invalid origin'});
+    if(origin && !allowedOrigins.has(origin))return json(res,403,{error:'Invalid origin'});
    }
    const headers={};
    if(req.headers.authorization)headers['authorization']=req.headers.authorization;
