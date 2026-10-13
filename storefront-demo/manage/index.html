@@ -83,6 +83,61 @@ main{max-width:870px;padding-top:19px}
 .manager-toast span{display:grid;place-items:center;width:23px;height:23px;border-radius:50%;background:#16A34A;color:white;font-weight:900}
 .manager-toast.visible{opacity:1;transform:translate(-50%,0);visibility:visible}
 @media(prefers-reduced-motion:reduce){.manager-toast{transition:none}}
+
+/* Product cards are simple launchers; details and edits live in one modal. */
+.product-list{gap:10px}
+.product{padding:0;border:1px solid #e3ebe4;overflow:hidden;background:white;transition:border-color .15s ease,box-shadow .15s ease}
+.product:hover{border-color:#b9d6c1;box-shadow:0 6px 20px #1d583014}
+.product-open{display:flex;align-items:center;gap:13px;width:100%;padding:13px;border:0;background:transparent;text-align:left;color:inherit;cursor:pointer}
+.product-open:focus-visible{outline:3px solid #16a34a;outline-offset:-3px}
+.product-open img,.product-open .ph{width:83px;height:83px;flex:none;border-radius:10px;object-fit:cover}
+.product-body{flex:1;min-width:0}
+.product-body h3{font-size:.97rem;margin:0 0 5px;color:#26392d}
+.product-body .price{font-size:1.02rem;margin:0 0 2px}
+.product-body .meta{margin:3px 0 0;color:#78897e;font-size:.75rem}
+.product-chevron{font-size:1.45rem;color:#6f957b;padding:0 2px;font-weight:300}
+.product-dialog{border:0;padding:0;width:min(560px,calc(100vw - 28px));max-height:min(92dvh,870px);margin:auto;border-radius:20px;background:#fff;color:#374151;box-shadow:0 24px 80px #07191060;overflow:hidden}
+.product-dialog[open]{display:flex;flex-direction:column}
+.product-dialog::backdrop{background:rgba(5,20,11,.65);backdrop-filter:blur(3px)}
+.modal-header{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px 20px 15px;border-bottom:1px solid #e7eee8}
+.modal-header-text{min-width:0;flex:1}
+.modal-header h2{font-size:1.13rem;margin:4px 0 0;letter-spacing:-.035em;line-height:1.25;overflow-wrap:anywhere;color:#20372b}
+.modal-overline{font-size:.68rem;color:#15803d;font-weight:850;letter-spacing:.08em;text-transform:uppercase}
+.modal-controls{display:flex;align-items:center;gap:8px;flex:none}
+.modal-edit-button{border:1px solid #d2e7d8;border-radius:10px;background:#eef9f0;color:#18743a;padding:9px 12px;min-height:39px;font-size:.82rem;font-weight:900}
+.modal-close{border:0;border-radius:50%;background:#f2f6f2;color:#34483b;font-size:1.4rem;width:37px;height:37px}
+.modal-scroll{padding:18px 20px;overflow-y:auto;min-height:0;overscroll-behavior:contain}
+.modal-photo{height:205px;position:relative;overflow:hidden;background:#f0f7f1;border:1px solid #e3ece5;border-radius:14px;display:grid;place-items:center}
+.modal-photo img{width:100%;height:100%;object-fit:contain;background:#f2f7f2}
+.modal-photo-empty{display:grid;place-items:center;gap:5px;color:#6a8370}
+.modal-photo-empty span{font-size:2.5rem}
+.modal-photo-empty small{font-size:.79rem}
+.modal-photo-picker{position:absolute;right:10px;bottom:10px;display:inline-flex;align-items:center;gap:8px;width:auto;margin:0;cursor:pointer;background:#fff;color:#166c35;border-radius:10px;padding:10px 12px;box-shadow:0 4px 16px #0929153f;font-size:.83rem;font-weight:900}
+.modal-photo-picker[hidden]{display:none}
+.modal-photo-picker input{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden;opacity:0;padding:0}
+.modal-price{font-size:1.5rem;font-weight:950;letter-spacing:-.045em;color:#167839;margin:19px 0}
+.modal-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;background:#f7faf7;padding:16px;border:1px solid #e9f0e9;border-radius:12px}
+.modal-detail-grid small{display:block;color:#758a7a;font-size:.72rem;margin-bottom:5px}
+.modal-detail-grid strong{font-size:.88rem;color:#263e2d;line-height:1.35;overflow-wrap:anywhere}
+.modal-description{padding:18px 0 4px}
+.modal-description h3{font-size:.87rem;margin:0 0 8px;color:#27392d}
+.modal-description p{font-size:.88rem;line-height:1.62;color:#63786a;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.modal-advanced{border-top:1px solid #e9efe9;margin-top:14px}
+.modal-advanced summary{font-size:.8rem;padding:12px 0}
+.modal-sale-form{margin:0 0 10px}.modal-sale-form label{font-size:.77rem}
+.modal-sale-row{display:flex;gap:9px;align-items:center}.modal-sale-row input{max-width:125px}
+.modal-form label{display:block;margin:14px 0 6px;font-size:.79rem;color:#354a39;font-weight:850}
+.modal-form input,.modal-form textarea,.modal-form select{font-size:.91rem;min-height:44px}
+.modal-form textarea{min-height:102px}
+.modal-field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-field-grid>div{min-width:0}
+.modal-error{background:#fff4f1;border:1px solid #eac4bc;color:#9a3528;border-radius:10px;padding:10px;font-size:.82rem;line-height:1.5}
+.modal-remove{margin:15px 0 0;border:0;background:transparent;color:#a54337;font-size:.8rem;font-weight:850;padding:9px 0;text-decoration:underline;text-underline-offset:3px}
+.modal-footer{flex:none;display:flex;justify-content:space-between;gap:10px;padding:14px 20px calc(14px + env(safe-area-inset-bottom));border-top:1px solid #e8eee8;background:#fff}
+.modal-footer .btn{flex:1;min-height:47px}
+.modal-footer #dialog-save:disabled{background:#cedbd1;color:#6c8471;opacity:1;cursor:not-allowed}
+@media(max-width:500px){.product-dialog{max-height:95dvh;width:calc(100vw - 18px);border-radius:17px}.modal-header,.modal-scroll{padding-left:15px;padding-right:15px}.modal-header{padding-top:14px}.modal-photo{height:185px}.modal-footer{padding-left:15px;padding-right:15px}.product-open img,.product-open .ph{width:69px;height:69px}.modal-field-grid{gap:9px}}
+@media(prefers-reduced-motion:reduce){.product{transition:none}}
 </style></head><body>
 <header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Storefront Manager</span>
 <button id="exit" class="head-btn">Close private access</button></header>
@@ -142,6 +197,45 @@ main{max-width:870px;padding-top:19px}
 <div class="actions"><button class="btn btn-outline btn-small" id="copy-manager" type="button">Copy my private manager link</button><button id="export" class="btn btn-outline btn-small" type="button">Download my store backup</button></div>
 </details></section>
 </div></main>
+<dialog id="product-dialog" class="product-dialog" aria-labelledby="dialog-title">
+  <div class="modal-header">
+    <div class="modal-header-text"><span class="modal-overline" id="dialog-eyebrow">Product details</span><h2 id="dialog-title">Product details</h2></div>
+    <div class="modal-controls"><button id="dialog-edit" type="button" class="modal-edit-button" aria-label="Edit product details">✎ Edit</button><button id="dialog-close" class="modal-close" type="button" aria-label="Close product details">×</button></div>
+  </div>
+  <div class="modal-scroll">
+    <div class="modal-photo">
+      <img id="dialog-image" alt="Product photo" hidden>
+      <div id="dialog-image-fallback" class="modal-photo-empty" hidden><span aria-hidden="true">📷</span><small>No photo added yet</small></div>
+      <label id="dialog-photo-picker" class="modal-photo-picker" for="dialog-photo" hidden>📷 <span id="dialog-photo-label">Choose photo</span><input id="dialog-photo" type="file" accept="image/*"></label>
+    </div>
+    <div id="dialog-read" class="modal-read">
+      <div class="modal-price" id="dialog-price"></div>
+      <div class="modal-detail-grid">
+        <div><small>Category</small><strong id="dialog-category"></strong></div>
+        <div><small>Available quantity</small><strong id="dialog-stock"></strong></div>
+        <div><small>Visibility</small><strong id="dialog-visibility"></strong></div>
+        <div><small>Selling unit</small><strong id="dialog-unit"></strong></div>
+      </div>
+      <div class="modal-description"><h3>Description</h3><p id="dialog-description"></p></div>
+      <details class="modal-advanced"><summary>Inventory actions</summary>
+        <p class="hint">To change the current quantity, tap Edit. To record a completed sale and deduct stock, use this form.</p>
+        <form id="dialog-sale-form" class="modal-sale-form"><label for="dialog-sale-qty">Quantity sold</label><div class="modal-sale-row"><input id="dialog-sale-qty" type="number" min="1" max="100000" step="1" value="1" required><button type="submit" class="btn btn-outline btn-small" id="dialog-sale-button">Record sale</button></div></form>
+      </details>
+    </div>
+    <form id="dialog-form" class="modal-form" hidden>
+      <label for="dialog-name">Product name</label><input id="dialog-name" name="name" maxlength="150" required>
+      <div class="modal-field-grid"><div><label for="dialog-edit-price">Selling price (₦)</label><input id="dialog-edit-price" name="price" type="number" min="0" max="10000000000" step="1" inputmode="numeric" required></div>
+      <div><label for="dialog-edit-stock">Quantity in stock</label><input id="dialog-edit-stock" name="stock" type="number" min="0" max="10000000" step="1" inputmode="numeric" required></div></div>
+      <label for="dialog-edit-category">Category</label><input id="dialog-edit-category" name="category" maxlength="80" placeholder="e.g. Electronics">
+      <label for="dialog-edit-description">Description</label><textarea id="dialog-edit-description" name="description" maxlength="2000" rows="4" placeholder="Describe this product"></textarea>
+      <label for="dialog-edit-published">Product visibility</label><select id="dialog-edit-published" name="published"><option value="true">Visible to customers</option><option value="false">Hidden from customers</option></select>
+      <p class="hint">Changing the quantity updates your inventory record. Uploading a new photo replaces the image shown to customers.</p>
+      <p id="dialog-error" class="modal-error" role="alert" hidden></p>
+      <button id="dialog-remove" type="button" class="modal-remove">Remove this product</button>
+    </form>
+  </div>
+  <div id="dialog-footer" class="modal-footer" hidden><button type="button" id="dialog-cancel" class="btn btn-outline">Cancel</button><button type="submit" form="dialog-form" id="dialog-save" class="btn" disabled>Save changes</button></div>
+</dialog>
 <div id="manager-toast" class="manager-toast" role="status" aria-live="polite"><span aria-hidden="true">✓</span> <strong id="manager-toast-message">Product added</strong></div>
 <script type="module">
 const token=sessionStorage.getItem('mysales_private_management_token')||'';
