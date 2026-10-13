@@ -81,6 +81,21 @@ async function refresh(){
   const archive=el('button','Archive product');archive.className='warn';actions.append(archive);
   archive.onclick=async()=>{if(!confirm('Archive '+p.name+'? The product will disappear from your catalogue.'))return;archive.disabled=true;try{await post('archive-product',{productId:p.id});say('Product archived.');await refresh();}catch(e){say(e.message);archive.disabled=false;}};
   card.append(actions);
+  const photoForm=document.createElement('form');photoForm.className='row';
+  const photoFile=document.createElement('input');photoFile.type='file';photoFile.accept='image/jpeg,image/png,image/webp';
+  photoFile.setAttribute('aria-label','Product photo');photoFile.required=true;photoFile.style.maxWidth='320px';
+  const uploadButton=el('button','Upload photo');
+  photoForm.append(photoFile,uploadButton);
+  photoForm.onsubmit=async ev=>{
+   ev.preventDefault();const chosen=photoFile.files?.[0];
+   if(!chosen)return;
+   if(chosen.size>2000000){say('Image must be smaller than 2 MB.');return;}
+   const data=new FormData();data.append('productId',p.id);data.append('image',chosen);
+   uploadButton.disabled=true;
+   try{await api('upload-image',{method:'POST',body:data});say('Product photo uploaded.');await refresh();}
+   catch(e){say(e.message);}finally{uploadButton.disabled=false;}
+  };
+  card.append(photoForm);
   if(p.units.length){
    const u=p.units[0];
    const edit=document.createElement('form');edit.hidden=true;edit.innerHTML='';
