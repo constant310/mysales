@@ -3,10 +3,11 @@ import postgres from 'npm:postgres@3.4.5';
 
 const url=Deno.env.get('SUPABASE_DB_URL');
 const sql=url?postgres(url,{max:3,prepare:false,connect_timeout:7,idle_timeout:15}):null;
-const allowedOrigin='https://mysales-early-storefront-branch.onrender.com';
-const response=(status:number,body:unknown)=>new Response(JSON.stringify(body),{
+const primaryOrigin='https://store.mysalesofficial.com';
+const trustedOrigins=new Set([primaryOrigin,'https://mysales-early-storefront-branch.onrender.com']);
+const response=(status:number,body:unknown,origin=primaryOrigin)=>new Response(JSON.stringify(body),{
  status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store',
-  'x-content-type-options':'nosniff','referrer-policy':'no-referrer','access-control-allow-origin':allowedOrigin}
+  'x-content-type-options':'nosniff','referrer-policy':'no-referrer','access-control-allow-origin':trustedOrigins.has(origin)?origin:primaryOrigin}
 });
 const hex=(bytes:Uint8Array)=>[...bytes].map(b=>b.toString(16).padStart(2,'0')).join('');
 const randomToken=()=>btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))))
@@ -17,7 +18,7 @@ Deno.serve(async request=>{
  if(request.method!=='POST')return response(405,{error:'Method not allowed'});
  if(!sql)return response(503,{error:'Store creation is temporarily unavailable'});
  const origin=request.headers.get('origin');
- if(origin&&origin!==allowedOrigin)return response(403,{error:'Invalid origin'});
+ if(origin&&!trustedOrigins.has(origin))return response(403,{error:'Invalid origin'});
  if(!(request.headers.get('content-type')||'').startsWith('application/json'))
   return response(415,{error:'JSON required'});
  if(Number(request.headers.get('content-length')||0)>6000)return response(413,{error:'Request too large'});
@@ -75,7 +76,7 @@ Deno.serve(async request=>{
    return response(429,{error:'We are receiving too many requests. Please try again later.'});
   }
   return response(201,{store:result.store,
-   managementLink:allowedOrigin+'/manage/claim#token='+encodeURIComponent(token),
+   managementLink:(origin&&trustedOrigins.has(origin)?origin:primaryOrigin)+'/manage/claim#token='+encodeURIComponent(token),
    publicUrl:'/'+encodeURIComponent(result.store.public_handle)});
  }catch(e){
   console.error('Storefront signup failed',e instanceof Error?e.message:'Unknown error');
