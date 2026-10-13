@@ -1,130 +1,225 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="referrer" content="no-referrer"><title>mySales | Manage your storefront</title>
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#086e64"><title>Manage your store | mySales</title>
 <style>
-:root{font-family:system-ui,-apple-system,sans-serif;color:#14313a;background:#f2f6f8}*{box-sizing:border-box}
-body{margin:0}header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px max(18px,calc((100vw - 1050px)/2));background:#123e43;color:white}
-main{max-width:1050px;margin:auto;padding:19px}h1{font-size:1.45rem}h2{font-size:1.1rem}p{line-height:1.5}.card{background:white;padding:22px;border:1px solid #dce6e9;border-radius:14px;margin:15px 0}
-button{border:0;border-radius:9px;padding:10px 14px;cursor:pointer;font:inherit;font-weight:600;color:white;background:#087a7d}
-button:disabled{opacity:.5;cursor:wait}button.secondary{background:#506a71}button.warn{background:#9d4646}
-a{color:#087a7d}input,textarea,select{width:100%;padding:10px;border:1px solid #bdcbcf;border-radius:8px;font:inherit;background:white}
-label{display:block;margin:11px 0 5px;font-size:.92rem;font-weight:600}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.row>button{flex:none}.product{border:1px solid #e1e9ec;border-radius:12px;padding:16px;margin:14px 0}
-.product h3{margin:0}.product small,small{color:#586f77}.product form{margin-top:10px}#notice{min-height:32px}
-.product .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-header button{background:#3c6067}img.thumb{width:90px;height:90px;object-fit:cover;border-radius:10px}
-@media(max-width:610px){.grid{grid-template-columns:1fr}.card{padding:16px}.row>*{flex:1}header strong{font-size:.9rem}}
+:root{font-family:Inter,system-ui,-apple-system,sans-serif;background:#f6f8f6;color:#153530}
+*{box-sizing:border-box}body{margin:0}button,input,textarea,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.54;cursor:wait}
+a{color:#087b6d}header{background:#073d39;color:#fff;padding:16px max(18px,calc((100vw - 1080px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-size:1.35rem;font-weight:900;letter-spacing:-.06em}.brand span{color:#35d6b1}.head-btn{color:#d6f4e9;background:transparent;border:1px solid #4c7771;border-radius:11px;padding:9px 12px;font-size:.82rem;font-weight:800}
+main{max-width:1050px;margin:0 auto;padding:25px 18px 75px}
+#notice{min-height:28px;margin:0 0 12px;font-size:.9rem;color:#176c5f;line-height:1.5}
+.hero{background:linear-gradient(130deg,#063f39,#0b7d71);color:#fff;border-radius:24px;padding:27px 31px;box-shadow:0 15px 33px #073f3917;margin-bottom:18px}
+.hero h1{font-size:clamp(1.7rem,4vw,2.45rem);margin:6px 0 7px;letter-spacing:-.045em}.hero p{color:#d6f1e7;margin:4px 0 17px;line-height:1.5}
+.eyebrow{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;font-weight:900;color:#94e7cf}
+.actions{display:flex;flex-wrap:wrap;gap:10px}.btn{border:0;border-radius:12px;background:#077e70;color:white;font-weight:800;padding:12px 16px;min-height:45px}
+.btn:hover{background:#096a5f}.btn-light{background:#fff;color:#095c52}.btn-light:hover{background:#e6fff7}.btn-outline{background:transparent;border:1px solid #d2e2d9;color:#126a60}
+.btn-outline:hover{background:#f0faf5}.btn-small{font-size:.8rem;padding:8px 12px;min-height:37px}.btn-danger{color:#a34139;border:1px solid #e5c9c2;background:#fff}
+.columns{display:grid;grid-template-columns:420px 1fr;gap:18px;align-items:start}.panel{background:#fff;border:1px solid #e0eae4;border-radius:20px;padding:25px;box-shadow:0 6px 30px #164f3610}
+h2{font-size:1.3rem;margin:0 0 8px;letter-spacing:-.035em}.muted{color:#748b83;line-height:1.45;font-size:.86rem;margin:0 0 19px}
+label{display:block;font-size:.87rem;font-weight:750;color:#27463f;margin:14px 0 7px}
+input,textarea,select{width:100%;padding:12px 13px;border-radius:11px;border:1px solid #d3e0d8;color:#193c35;background:#fbfdfb;min-height:45px;outline:0}
+input:focus,textarea:focus,select:focus{border-color:#0da58d;box-shadow:0 0 0 3px #d8f5e8}
+textarea{resize:vertical;min-height:72px}.hint{color:#71887f;font-size:.76rem;margin:7px 0}
+.photo-drop{display:flex;gap:13px;align-items:center;border:1.5px dashed #abd4c3;background:#f4fbf7;border-radius:13px;padding:12px;margin:12px 0;cursor:pointer}
+.photo-drop input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.photo-drop b{color:#0b7f70;font-size:.88rem}.photo-drop small{color:#71877c;font-size:.75rem;display:block;margin-top:3px}
+.photo-icon{background:#e0f6e9;font-size:1.55rem;padding:15px;border-radius:12px}
+#preview{width:70px;height:70px;object-fit:cover;border-radius:12px;display:none}
+.optional{border-top:1px solid #eef1eb;margin-top:15px;padding-top:7px}
+summary{cursor:pointer;list-style:none;color:#0a7d70;font-size:.87rem;font-weight:800;padding:12px 0}summary::after{content:'⌄';float:right}
+.product-list{display:grid;gap:11px;max-height:none}.product{display:flex;gap:14px;border:1px solid #e0eae4;border-radius:14px;padding:13px;background:#fff;align-items:start}
+.product img{width:74px;height:74px;border-radius:11px;object-fit:cover;flex:none;background:#e8f3ed}.ph{width:74px;height:74px;border-radius:11px;background:#edf5ed;display:grid;place-items:center;font-size:1.6rem;flex:none}
+.product-body{min-width:0;flex:1}.product h3{margin:0 0 3px;font-size:.99rem;word-break:break-word}
+.price{font-weight:900;color:#0c685b;font-size:1.01rem}.meta{color:#7b8c83;font-size:.75rem;line-height:1.5;margin:4px 0 10px}
+.p-actions{display:flex;flex-wrap:wrap;gap:6px}.product details{border-top:1px solid #eef1ee;margin-top:8px}
+.product details summary{font-size:.77rem;padding:9px 0}
+.product form{margin:9px 0 12px}.product form label{font-size:.75rem}.inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.inline input{width:115px}.inline select{max-width:175px}.inline .btn{flex:none}
+.blank{text-align:center;border:1px dashed #d5e4da;background:#fbfdfa;border-radius:15px;padding:27px 14px;color:#6c8379}
+.blank strong{display:block;color:#365e51;margin:6px 0}.pill{display:inline-block;background:#e8f9ef;color:#147c64;font-size:.73rem;font-weight:800;border-radius:25px;padding:6px 9px}
+#app[hidden]{display:none}
+.footer-panel{margin-top:20px}.share-link{color:#afecdd;word-break:break-all;font-size:.83rem}
+@media(max-width:830px){.columns{grid-template-columns:1fr}.hero{padding:23px}.panel{padding:22px}}
+@media(max-width:460px){header{padding:12px 16px}.head-btn{padding:8px;font-size:.75rem}.hero{border-radius:17px;padding:21px}.hero h1{font-size:1.75rem}.panel{padding:18px;border-radius:16px}main{padding:15px 12px 70px}.actions .btn{flex:1}.product{padding:10px;gap:10px}.product img,.ph{width:61px;height:61px}.btn-small{padding:8px}}
 </style></head><body>
-<header><strong>mySales · Private Store Manager</strong><button id="exit">Close access</button></header>
-<main><p id="notice" role="status">Checking your private link…</p>
+<header><div class="brand">my<span>Sales</span>. <small style="font-weight:500;letter-spacing:0;font-size:.7rem;color:#c3e3da">STORE MANAGER</small></div>
+<button id="exit" class="head-btn">Close private access</button></header>
+<main><p id="notice" role="status" aria-live="polite">Opening your store…</p>
 <div id="app" hidden>
- <section class="card"><h1 id="store-title">My Store</h1><p>Use your private management link whenever you want. No registration or password. Keep the link secure.</p>
-  <a id="public-link" target="_blank" rel="noopener noreferrer">View public storefront</a>
-  <form id="settings"><h2>Business details</h2>
-   <div class="grid"><div><label for="business-name">Business name</label><input id="business-name" name="name" maxlength="150" required></div>
-   <div><label for="business-phone">WhatsApp number (international format)</label><input id="business-phone" name="whatsapp" maxlength="16" required></div></div>
-   <label for="business-description">Business description</label><textarea id="business-description" name="description" maxlength="2000"></textarea>
-   <label for="business-status">Store visibility</label><select id="business-status" name="status"><option value="draft">Private / not listed</option><option value="published">Published / visible to customers</option></select>
-   <button type="submit">Save business details</button>
-  </form>
- </section>
- <section class="card"><div class="row" style="justify-content:space-between"><h2>My products</h2><button id="export" type="button" class="secondary">Export all store data</button></div>
-  <p>New products remain hidden until you publish them. Update your prices or stock whenever needed.</p>
-  <div id="products"></div>
- </section>
- <section class="card"><h2>Add a product</h2>
-  <form id="add">
-   <label>Product name<input name="name" maxlength="150" required></label>
-   <label>Description<textarea name="description" maxlength="2000"></textarea></label>
-   <label>Category<input name="category" maxlength="80"></label>
-   <div class="grid"><div><label>Stock base unit<input name="baseUnit" value="piece" maxlength="40" required></label></div>
-   <div><label>Selling unit<input name="unitName" value="piece" maxlength="40" required></label></div></div>
-   <div class="grid"><div><label>Pieces per selling unit<input name="factor" type="number" min="1" max="1000000" step="1" value="1" required></label></div>
-   <div><label>Price (₦)<input name="price" type="number" min="0" step="1" required></label></div></div>
-   <button type="submit">Add product</button>
-  </form>
- </section>
+<section class="hero"><div class="eyebrow" id="state">Your online store</div>
+<h1 id="store-title">Welcome to your store</h1><p id="greeting">Let's get your first product online.</p>
+<div class="actions">
+<button id="share" class="btn btn-light" type="button">Copy shop link ↗</button>
+<a id="public-link" class="btn btn-light" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;align-items:center">View my shop</a>
+</div><p class="share-link" id="public-url"></p></section>
+<div class="columns">
+<section class="panel" id="add-section"><span class="pill">+ ADD A PRODUCT</span><h2 style="margin-top:13px">What are you selling?</h2>
+<p class="muted">Take a photo, enter the price and you're done. No complex inventory forms.</p>
+<form id="add">
+<label class="photo-drop" for="product-photo"><span class="photo-icon" id="photo-icon">📷</span><img id="preview" alt="Product preview"><span><b id="photo-label">Add a product photo</b><small>Tap to open your camera or gallery</small></span><input id="product-photo" name="photo" type="file" accept="image/*"></label>
+<label for="product-name">Product name</label><input id="product-name" name="name" required maxlength="150" placeholder="e.g. Rice 5kg, Wig, Bluetooth speaker">
+<label for="product-price">Selling price (₦)</label><input id="product-price" name="price" required type="number" min="0" max="10000000000" step="1" inputmode="numeric" placeholder="e.g. 8500">
+<details class="optional" id="extras"><summary>Optional details & stock</summary>
+<label for="product-description">Description</label><textarea id="product-description" name="description" maxlength="2000" placeholder="Size, colour, brand or other useful details"></textarea>
+<label for="product-category">Category</label><input id="product-category" name="category" maxlength="80" placeholder="e.g. Groceries">
+<label for="product-stock">Quantity available (optional)</label>
+<input id="product-stock" name="stock" type="number" min="0" max="10000000" step="1" placeholder="Leave blank for WhatsApp enquiries">
+<p class="hint">You can skip quantity. Customers can ask about availability on WhatsApp.</p></details>
+<button id="add-button" class="btn" type="submit" style="width:100%;margin-top:17px">Add product to my shop →</button>
+<p id="add-note" class="hint">Your store becomes shareable after your first product is added.</p>
+</form></section>
+<section class="panel"><div class="inline" style="justify-content:space-between;align-items:center">
+<div><h2>My products <span id="total" style="font-size:.84rem;color:#789589"></span></h2>
+<p class="muted">Edit prices, photos or stock any time.</p></div><button class="btn btn-outline btn-small" id="add-more" type="button">+ Add</button></div>
+<div id="products" class="product-list"></div></section>
 </div>
-</main>
+<section class="panel footer-panel"><details id="settings-panel"><summary>⚙️ Change business details</summary>
+<form id="settings"><div class="inline" style="gap:14px">
+<div style="flex:1;min-width:180px"><label>Business name<input name="name" maxlength="150" required></label></div>
+<div style="flex:1;min-width:180px"><label>WhatsApp number<input name="whatsapp" maxlength="16" required></label></div></div>
+<label>About your business<textarea name="description" maxlength="2000"></textarea></label>
+<label>Store visibility<select name="status"><option value="published">Public — customers can view</option><option value="draft">Private — hidden from customers</option></select></label>
+<button class="btn btn-small" type="submit">Save changes</button></form></details>
+<details><summary>🔐 Private access &amp; backup</summary>
+<p class="muted">Anyone with your management link can edit this shop. Only send it to people you trust. You can keep using the same link unless it is revoked by the operator.</p>
+<div class="actions"><button class="btn btn-outline btn-small" id="copy-manager" type="button">Copy my private manager link</button><button id="export" class="btn btn-outline btn-small" type="button">Download my store backup</button></div>
+</details></section>
+</div></main>
 <script type="module">
 const token=sessionStorage.getItem('mysales_private_management_token')||'';
 const $=id=>document.getElementById(id),notice=$('notice'),list=$('products');
-const el=(tag,value)=>{const node=document.createElement(tag);node.textContent=String(value);return node;};
+let currentStore=null,products=[];
+const node=(tag,value)=>{const n=document.createElement(tag);n.textContent=String(value);return n;};
+function say(message,problem=false){notice.textContent=message;notice.style.color=problem?'#af3f32':'#176c5f';}
+function currency(value){return '₦'+Number(value||0).toLocaleString('en-NG');}
 async function api(path,options={}){
  if(!/^[A-Za-z0-9_-]{43}$/.test(token))throw Error('Open your private management link again.');
  const h=new Headers(options.headers||{});h.set('Authorization','Bearer '+token);
  const r=await fetch('/api/merchant/'+path,{...options,headers:h,cache:'no-store'});
  const j=await r.json().catch(()=>({}));
- if(!r.ok)throw Error(j.error||'Request failed. Please try again.');
+ if(!r.ok)throw Error(j.error||'Could not save. Try again.');
  return j;
 }
-function say(message){notice.textContent=message;}
 const post=(path,data)=>api(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-async function refresh(){
- const data=await api('products');list.replaceChildren();
- if(!data.products.length)list.append(el('p','No products yet. Add your first product below.'));
- for(const p of data.products){
-  const card=el('article','');card.className='product';
-  const title=el('h3',p.name);card.append(title);
-  if(p.image_path){const img=document.createElement('img');img.src=p.image_path;img.alt=p.name;img.className='thumb';img.loading='lazy';card.append(img);}
-  card.append(el('p',(p.category||'Uncategorised')+' · '+(p.published?'Visible to customers':'Hidden from customers')+' · Stock: '+p.stock+' '+p.base_unit));
-  card.append(el('small',p.units.map(u=>u.name+' ₦'+Number(u.price).toLocaleString()+' ('+u.factor+' '+p.base_unit+')').join(' · ')||'No active selling units'));
-  const restock=document.createElement('form');restock.className='row';
-  const stockAmount=document.createElement('input');stockAmount.type='number';stockAmount.min='1';stockAmount.max='10000000';stockAmount.step='1';stockAmount.placeholder='Add stock in '+p.base_unit;stockAmount.required=true;stockAmount.style.maxWidth='260px';
-  const restockButton=el('button','Add stock');restock.append(stockAmount,restockButton);
-  restock.addEventListener('submit',async event=>{event.preventDefault();restockButton.disabled=true;try{await post('restock',{productId:p.id,amount:Number(stockAmount.value)});say('Stock updated.');await refresh();}catch(e){say(e.message);}finally{restockButton.disabled=false;}});
-  card.append(restock);
-  const actions=document.createElement('div');actions.className='actions';
-  const publish=el('button',p.published?'Hide from customers':'Publish product');
-  publish.onclick=async()=>{publish.disabled=true;try{await post('publish',{productId:p.id,published:!p.published});say('Product visibility saved.');await refresh();}catch(e){say(e.message);publish.disabled=false;}};
-  actions.append(publish);
-  const editButton=el('button','Edit product');editButton.className='secondary';actions.append(editButton);
-  const archive=el('button','Archive product');archive.className='warn';actions.append(archive);
-  archive.onclick=async()=>{if(!confirm('Archive '+p.name+'? The product will disappear from your catalogue.'))return;archive.disabled=true;try{await post('archive-product',{productId:p.id});say('Product archived.');await refresh();}catch(e){say(e.message);archive.disabled=false;}};
-  card.append(actions);
-  const photoForm=document.createElement('form');photoForm.className='row';
-  const photoFile=document.createElement('input');photoFile.type='file';photoFile.accept='image/jpeg,image/png,image/webp';
-  photoFile.setAttribute('aria-label','Product photo');photoFile.required=true;photoFile.style.maxWidth='320px';
-  const uploadButton=el('button','Upload photo');
-  photoForm.append(photoFile,uploadButton);
-  photoForm.onsubmit=async ev=>{
-   ev.preventDefault();const chosen=photoFile.files?.[0];
-   if(!chosen)return;
-   if(chosen.size>2000000){say('Image must be smaller than 2 MB.');return;}
-   const data=new FormData();data.append('productId',p.id);data.append('image',chosen);
-   uploadButton.disabled=true;
-   try{await api('upload-image',{method:'POST',body:data});say('Product photo uploaded.');await refresh();}
-   catch(e){say(e.message);}finally{uploadButton.disabled=false;}
-  };
-  card.append(photoForm);
-  if(p.units.length){
-   const u=p.units[0];
-   const edit=document.createElement('form');edit.hidden=true;edit.innerHTML='';
-   const editFields=[['name','Name',p.name],['description','Description',p.description||''],['category','Category',p.category||''],['price','Price (₦)',u.price]];
-   for(const [key,label,value] of editFields){const field=document.createElement('label');field.textContent=label;const input=document.createElement('input');input.name=key;input.value=String(value);input.required=key==='name'||key==='price';if(key==='price'){input.type='number';input.min='0';input.step='1';}field.append(input);edit.append(field);}
-   const submit=el('button','Save changes');edit.append(submit);card.append(edit);
-   editButton.onclick=()=>{edit.hidden=!edit.hidden;};
-   edit.onsubmit=async ev=>{ev.preventDefault();submit.disabled=true;try{const x=Object.fromEntries(new FormData(edit));await post('update-product',{productId:p.id,unitId:u.id,name:x.name,description:x.description,category:x.category,price:Number(x.price)});say('Changes saved.');await refresh();}catch(e){say(e.message);}finally{submit.disabled=false;}};
-   const sold=document.createElement('form');sold.className='row';
-   const unitSelect=document.createElement('select');unitSelect.setAttribute('aria-label','Selling unit');unitSelect.style.maxWidth='260px';
-   for(const unit of p.units){const option=el('option',unit.name+' — ₦'+Number(unit.price).toLocaleString());option.value=unit.id;unitSelect.append(option);}
-   const quantity=document.createElement('input');quantity.type='number';quantity.min='1';quantity.step='1';quantity.value='1';quantity.style.maxWidth='150px';quantity.setAttribute('aria-label','Quantity sold');
-   const confirmSale=el('button','Confirm sale');sold.append(unitSelect,quantity,confirmSale);
-   let pending=null;
-   sold.onsubmit=async ev=>{ev.preventDefault();if(!confirm('Confirm sale and deduct inventory?'))return;confirmSale.disabled=true;pending ||= crypto.randomUUID();try{await post('confirm-sale',{productId:p.id,unitId:unitSelect.value,quantity:Number(quantity.value),requestKey:pending});pending=null;say('Sale recorded, stock deducted.');await refresh();}catch(e){say(e.message);}finally{confirmSale.disabled=false;}};
-   card.append(sold);
-  }else{editButton.disabled=true;}
-  list.append(card);
- }
+async function copy(value){
+ try{await navigator.clipboard.writeText(value);say('Link copied! Share it with your customers.');}
+ catch{window.prompt('Copy your link:',value);}
 }
-$('settings').onsubmit=async e=>{e.preventDefault();const btn=e.currentTarget.querySelector('button');btn.disabled=true;try{const d=Object.fromEntries(new FormData(e.currentTarget));const result=await post('store-settings',d);$('store-title').textContent=result.store.name;say('Business details saved.');}catch(err){say(err.message);}finally{btn.disabled=false;}};
-$('add').onsubmit=async e=>{e.preventDefault();const b=e.currentTarget.querySelector('button');b.disabled=true;const data=Object.fromEntries(new FormData(e.currentTarget));data.factor=Number(data.factor);data.price=Number(data.price);try{await post('products',data);e.currentTarget.reset();say('Product created. Publish when ready.');await refresh();}catch(err){say(err.message);}finally{b.disabled=false;}};
-$('export').onclick=async()=>{const b=$('export');b.disabled=true;try{const data=await api('export');const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='mysales-storefront-export.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);say('Store data exported.');}catch(err){say(err.message);}finally{b.disabled=false;}};
+function publicUrl(){return location.origin+'/s/?slug='+encodeURIComponent(currentStore.slug);}
+function updateHero(){
+ const live=currentStore.status==='published';
+ $('store-title').textContent=currentStore.name;
+ $('greeting').textContent=live?'Your storefront is live. Share the link to start receiving enquiries.': 'Add your first product and your shop will be ready to share.';
+ $('state').textContent=live?'● Your store is live':'○ Setting up your store';
+ $('public-link').href=publicUrl();$('public-url').textContent=live?publicUrl():'Your public link becomes active once you add a product';
+ $('share').disabled=!live;$('public-link').style.pointerEvents=live?'auto':'none';$('public-link').style.opacity=live?'1':'.55';
+}
+async function refresh(){
+ const data=await api('products');products=data.products||[];
+ $('total').textContent='('+products.length+')';list.replaceChildren();
+ if(!products.length){
+  const empty=node('div','');empty.className='blank';empty.append(node('div','📦'),node('strong','No products yet'),node('p','Add your first item using the simple form.'));
+  list.append(empty);
+ }
+ for(const p of products)renderProduct(p);
+}
+function renderProduct(p){
+ const unit=p.units?.[0],card=node('article','');card.className='product';
+ if(p.image_path){const img=document.createElement('img');img.src=p.image_path;img.alt=p.name;img.loading='lazy';card.append(img);}
+ else{const ph=node('div','📦');ph.className='ph';card.append(ph);}
+ const content=node('div','');content.className='product-body';
+ content.append(node('h3',p.name));
+ const price=node('div',unit?currency(unit.price):'Contact for price');price.className='price';content.append(price);
+ const meta=node('p',(p.published?'Visible':'Hidden')+' · '+(Number(p.stock)>0?p.stock+' in stock':'Enquiry-only')+(p.category?' · '+p.category:''));
+ meta.className='meta';content.append(meta);
+ const actions=node('div','');actions.className='p-actions';
+ const edit=node('button','Edit');edit.className='btn btn-outline btn-small';edit.type='button';
+ const publish=node('button',p.published?'Hide':'Show');publish.className='btn btn-outline btn-small';publish.type='button';
+ publish.onclick=async()=>{publish.disabled=true;try{await post('publish',{productId:p.id,published:!p.published});say('Product visibility updated.');await refresh();}catch(e){say(e.message,true);publish.disabled=false;}};
+ actions.append(edit,publish);content.append(actions);
+ const form=document.createElement('form');form.hidden=true;
+ const fields=[['name','Product name',p.name],['price','Price (₦)',unit?.price??0],['category','Category',p.category||''],['description','Description',p.description||'']];
+ for(const [key,label,value] of fields){const l=node('label',label);const f=document.createElement(key==='description'?'textarea':'input');f.name=key;f.value=String(value);if(key==='price'){f.type='number';f.min='0';f.step='1';}f.required=key==='name'||key==='price';l.append(f);form.append(l);}
+ const save=node('button','Save product changes');save.className='btn btn-small';save.type='submit';form.append(save);
+ form.onsubmit=async e=>{e.preventDefault();save.disabled=true;try{const f=Object.fromEntries(new FormData(form));await post('update-product',{productId:p.id,unitId:unit.id,name:f.name,description:f.description,category:f.category,price:Number(f.price)});say('Product saved.');await refresh();}catch(err){say(err.message,true);save.disabled=false;}};
+ edit.onclick=()=>{form.hidden=!form.hidden;};if(!unit)edit.disabled=true;
+ content.append(form);
+ const more=document.createElement('details');more.append(node('summary','More product options'));
+ const upload=document.createElement('form');upload.className='inline';
+ const photo=document.createElement('input');photo.type='file';photo.accept='image/*';photo.setAttribute('aria-label','Replace product photo');photo.style.maxWidth='230px';photo.required=true;
+ const up=node('button','Change photo');up.className='btn btn-outline btn-small';upload.append(photo,up);
+ upload.onsubmit=async e=>{e.preventDefault();up.disabled=true;try{const f=await preparePhoto(photo.files?.[0]);const fd=new FormData();fd.append('productId',p.id);fd.append('image',f);await api('upload-image',{method:'POST',body:fd});say('Photo updated.');await refresh();}catch(err){say(err.message,true);}finally{up.disabled=false;}};
+ more.append(upload);
+ const stock=document.createElement('form');stock.className='inline';
+ const qty=document.createElement('input');qty.type='number';qty.min='1';qty.step='1';qty.max='10000000';qty.placeholder='Quantity';qty.required=true;qty.setAttribute('aria-label','Quantity to add');
+ const restock=node('button','Add stock');restock.className='btn btn-outline btn-small';stock.append(qty,restock);
+ stock.onsubmit=async e=>{e.preventDefault();restock.disabled=true;try{await post('restock',{productId:p.id,amount:Number(qty.value)});say('Stock updated.');await refresh();}catch(err){say(err.message,true);}finally{restock.disabled=false;}};
+ more.append(node('p','If you track inventory, add newly received quantities here.'),stock);
+ if(unit){
+  const sale=document.createElement('form');sale.className='inline';
+  const soldqty=document.createElement('input');soldqty.type='number';soldqty.min='1';soldqty.step='1';soldqty.value='1';soldqty.setAttribute('aria-label','Quantity sold');soldqty.required=true;
+  const sold=node('button','Record sale');sold.className='btn btn-outline btn-small';sale.append(soldqty,sold);
+  let requestKey=null;
+  sale.onsubmit=async e=>{e.preventDefault();if(!confirm('Deduct sold stock?'))return;sold.disabled=true;requestKey||=crypto.randomUUID();try{await post('confirm-sale',{productId:p.id,unitId:unit.id,quantity:Number(soldqty.value),requestKey});requestKey=null;say('Sale recorded.');await refresh();}catch(err){say(err.message,true);sold.disabled=false;}};
+  more.append(node('p','Already sold something? Record it to deduct tracked stock.'),sale);
+ }
+ const archive=node('button','Remove product');archive.className='btn btn-danger btn-small';archive.onclick=async()=>{
+  if(!confirm('Remove '+p.name+' from your shop?'))return;archive.disabled=true;
+  try{await post('archive-product',{productId:p.id});say('Product removed.');await refresh();}catch(err){say(err.message,true);archive.disabled=false;}
+ };
+ more.append(archive);content.append(more);card.append(content);list.append(card);
+}
+async function preparePhoto(file){
+ if(!file)throw Error('Choose a product photo first.');
+ if(file.size>18000000)throw Error('This photo is too large. Choose one smaller than 18 MB.');
+ if(file.size<=1900000&&['image/jpeg','image/png','image/webp'].includes(file.type))return file;
+ const image=await createImageBitmap(file).catch(()=>{throw Error('This photo cannot be opened. Try JPG or PNG.');});
+ const scale=Math.min(1,1400/Math.max(image.width,image.height));
+ const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(image.width*scale));canvas.height=Math.max(1,Math.round(image.height*scale));
+ const context=canvas.getContext('2d');if(!context)throw Error('Photo processing unavailable.');
+ context.drawImage(image,0,0,canvas.width,canvas.height);image.close?.();
+ const jpg=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.78));
+ if(!jpg||jpg.size>=2000000)throw Error('Photo is still too large. Try a smaller image.');
+ return new File([jpg],'product.jpg',{type:'image/jpeg'});
+}
+$('product-photo').onchange=e=>{
+ const file=e.target.files?.[0];const old=$('preview').dataset.url;if(old)URL.revokeObjectURL(old);
+ if(file){const url=URL.createObjectURL(file);$('preview').dataset.url=url;$('preview').src=url;$('preview').style.display='block';$('photo-icon').style.display='none';$('photo-label').textContent=file.name||'Photo selected';}
+ else{$('preview').style.display='none';$('photo-icon').style.display='block';$('photo-label').textContent='Add a product photo';}
+};
+$('add').onsubmit=async e=>{
+ e.preventDefault();const f=e.currentTarget,b=$('add-button');b.disabled=true;b.textContent='Saving your product…';
+ const data=Object.fromEntries(new FormData(f));const errors=[];
+ try{
+  const result=await post('products',{name:data.name,price:Number(data.price),description:data.description||'',category:data.category||'',baseUnit:'piece',unitName:'piece',factor:1});
+  if(data.photo?.size){try{const file=await preparePhoto(data.photo);const fd=new FormData();fd.append('productId',result.id);fd.append('image',file);await api('upload-image',{method:'POST',body:fd});}catch(err){errors.push('Photo: '+err.message);}}
+  if(data.stock&&Number(data.stock)>0){try{await post('restock',{productId:result.id,amount:Number(data.stock)});}catch(err){errors.push('Stock: '+err.message);}}
+  try{await post('publish',{productId:result.id,published:true});}
+  catch(err){errors.push('Publishing product: '+err.message);}
+  if(currentStore.status!=='published'){
+   try{const settings=await post('store-settings',{name:currentStore.name,whatsapp:currentStore.whatsapp,description:currentStore.description||'',status:'published'});currentStore=settings.store;updateHero();}
+   catch(err){errors.push('Store publication: '+err.message);}
+  }
+  f.reset();$('extras').open=false;$('preview').style.display='none';$('photo-icon').style.display='block';$('photo-label').textContent='Add a product photo';
+  say(errors.length?'Product saved, but '+errors.join('. '):'🎉 Product added! Your shop is ready to share.',!!errors.length);
+  await refresh();
+ }catch(err){say('Could not add product: '+err.message,true);}
+ finally{b.disabled=false;b.textContent='Add another product →';}
+};
+$('add-more').onclick=()=>{$('add-section').scrollIntoView({behavior:'smooth'});$('product-name').focus({preventScroll:true});};
+$('settings').onsubmit=async e=>{e.preventDefault();const b=e.currentTarget.querySelector('button[type=submit]');b.disabled=true;try{const data=Object.fromEntries(new FormData(e.currentTarget));const updated=await post('store-settings',data);currentStore=updated.store;updateHero();say('Business details updated.');$('settings-panel').open=false;}catch(err){say(err.message,true);}finally{b.disabled=false;}};
+$('share').onclick=()=>copy(publicUrl());
+$('copy-manager').onclick=()=>copy(location.origin+'/manage/claim#token='+encodeURIComponent(token));
+$('export').onclick=async()=>{const b=$('export');b.disabled=true;try{const data=await api('export');const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='mysales-store-backup.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);say('Backup downloaded.');}catch(err){say(err.message,true);}finally{b.disabled=false;}};
 $('exit').onclick=()=>{sessionStorage.removeItem('mysales_private_management_token');location.replace('/manage/claim');};
 try{
- const identity=await api('me');const store=identity.store;const form=$('settings');
- form.elements.namedItem('name').value=store.name;form.elements.namedItem('description').value=store.description||'';
- form.elements.namedItem('whatsapp').value=store.whatsapp;form.elements.namedItem('status').value=store.status;
- $('store-title').textContent=store.name;$('public-link').href='/s/?slug='+encodeURIComponent(store.slug);
- $('app').hidden=false;say('Private access active. Your link remains reusable until revoked.');await refresh();
-}catch(err){say('Cannot open your dashboard: '+err.message);}
+ const identity=await api('me');currentStore=identity.store;
+ const form=$('settings');form.elements.namedItem('name').value=currentStore.name;
+ form.elements.namedItem('description').value=currentStore.description||'';
+ form.elements.namedItem('whatsapp').value=currentStore.whatsapp;
+ form.elements.namedItem('status').value=currentStore.status;
+ updateHero();$('app').hidden=false;
+ say(new URLSearchParams(location.search).has('welcome')?'Welcome! Add your first product to launch your store.':'Your private store manager is ready.');
+ await refresh();
+}catch(err){say('Could not open your store: '+err.message,true);}
 </script></body></html>
