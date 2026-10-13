@@ -109,8 +109,14 @@ Deno.serve(async (request: Request) => {
       const key=handle||slug;
       if(!/^[a-z0-9-]{2,80}$/.test(key))return out(400,{error:'Invalid store'});
       const stores=handle
-        ? await sql`select id,slug,public_handle,name,description,whatsapp,whatsapp_template
-          from early_storefront.stores where public_handle=${handle} and status='published' limit 1`
+        ? await sql`select s.id,s.slug,s.public_handle,s.name,s.description,s.whatsapp,s.whatsapp_template
+          from early_storefront.stores s
+          where s.status='published' and (
+            s.public_handle=${handle} or exists (
+              select 1 from early_storefront.public_handle_aliases a
+              where a.store_id=s.id and a.handle=${handle}
+            )
+          ) limit 1`
         : await sql`select id,slug,public_handle,name,description,whatsapp,whatsapp_template
           from early_storefront.stores where slug=${slug} and status='published' limit 1`;
       if (!stores.length) return out(404,{error:'Store not found'});
