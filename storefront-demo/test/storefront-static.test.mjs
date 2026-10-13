@@ -477,7 +477,7 @@ test('immersive feed keeps product photos fully visible with stable mobile contr
  assert.match(page,/\.reel-slide\{[^}]*scroll-snap-align:start/);
  assert.match(page,/html\{scroll-snap-type:y proximity/);
  assert.match(page,/\.site\{overflow:visible;overflow:clip\}/);
- assert.match(page,/\.collection\.feeds-enabled \.powered\{display:none!important\}/);
+ assert.match(page,/\.collection\.feeds-enabled \.powered,\.collection\.feeds-enabled #demo-last-cta\{display:none!important\}/);
  assert.match(page,/class="reel-toolbar"/);
  assert.match(page,/id="reel-search"/);
  assert.match(page,/id="reel-cart"/);
