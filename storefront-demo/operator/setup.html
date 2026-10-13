@@ -1,0 +1,38 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>Set up mySales private operator access</title>
+<style>:root{font-family:system-ui,-apple-system,sans-serif;color:#18323a;background:#f4f7f8}
+body{margin:0;padding:20px}main{max-width:750px;margin:32px auto}section{border:1px solid #dce6e8;border-radius:14px;background:white;padding:23px;margin:18px 0}
+p{line-height:1.55}button,.button{background:#087a7d;color:white;border:0;padding:12px 18px;border-radius:9px;font:inherit;text-decoration:none;display:inline-block;cursor:pointer}
+button:disabled{opacity:.5}textarea{width:100%;box-sizing:border-box;min-height:140px;padding:13px;font:14px/1.5 monospace;border:1px solid #cad4d8;border-radius:8px}
+a{color:#087a7d}#link{overflow-wrap:anywhere}.note{color:#536d76}#result[hidden]{display:none}</style></head>
+<body><main><h1>Set up your private operator link</h1>
+<p>You only need to do this once. This generates a private link for <strong>you</strong> to create merchants and issue their permanent storefront management links. No passwords or merchant logins are needed.</p>
+<section><h2>Step 1 — Generate your operator link</h2><p>The private token is created inside your browser. It is never committed to GitHub or placed inside a database connection URL.</p>
+<button id="generate">Generate private operator link</button><p id="message" role="status"></p></section>
+<div id="result" hidden>
+<section><h2>Step 2 — Activate it in Supabase</h2>
+<p>Copy the SQL below, open your <a href="https://supabase.com/dashboard/project/wsxszbdvvtowmrnxdsrp/sql/new" target="_blank" rel="noopener noreferrer">Supabase SQL Editor</a>, paste it, and click <strong>Run</strong>. Only the hashed token is stored in the database.</p>
+<textarea id="sql" readonly aria-label="Operator activation SQL"></textarea><p><button id="copy-sql">Copy activation SQL</button></p></section>
+<section><h2>Step 3 — Save your permanent operator link</h2>
+<p>This link will work whenever you want to create a business. It does not expire; you can revoke it from the database if it is ever shared accidentally.</p>
+<p id="link"></p><button id="copy-link">Copy private link</button>
+<p class="note">Save this link privately now. The website cannot reconstruct it later because the database stores only its hash.</p>
+</section></div>
+</main>
+<script type="module">
+const $=id=>document.getElementById(id);
+const copy=async text=>{try{await navigator.clipboard.writeText(text);$('message').textContent='Copied.';}catch{$('message').textContent='Select the text and copy it manually.';}};
+$('generate').addEventListener('click',async()=>{
+ const bytes=crypto.getRandomValues(new Uint8Array(32));
+ const token=btoa(String.fromCharCode(...bytes)).replaceAll('+','-').replaceAll('/','_').replaceAll('=','');
+ const hashArray=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token)));
+ const tokenHash=[...hashArray].map(x=>x.toString(16).padStart(2,'0')).join('');
+ const sql="INSERT INTO early_storefront.operator_links(token_hash)\nSELECT '"+tokenHash+"'\nWHERE NOT EXISTS (SELECT 1 FROM early_storefront.operator_links WHERE revoked_at IS NULL);";
+ const url=location.origin+'/operator/claim#token='+encodeURIComponent(token);
+ $('sql').value=sql;$('link').textContent=url;$('result').hidden=false;
+ $('copy-sql').onclick=()=>copy(sql);
+ $('copy-link').onclick=()=>copy(url);
+ $('message').textContent='Private link generated. Complete steps 2 and 3 before closing this page.';
+ $('generate').disabled=true;
+});
+</script></body></html>
