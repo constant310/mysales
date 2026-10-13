@@ -92,8 +92,8 @@ function render(){
  if(!visible.length)grid.append(elem('p',data.length?'No matching products. Try another search.':'No published products yet.'));
  for(const p of visible){
   const card=elem('article','');card.className='item';
-  if(p.image_path){const img=document.createElement('img');img.src=p.image_path;img.alt=p.name;img.loading='lazy';card.append(img);}
-  else{const placeholder=elem('div','🛍');placeholder.className='empty-img';card.append(placeholder);}
+  if(p.image_path){const img=document.createElement('img');img.src=p.image_path;img.alt='Photo of '+p.name;img.loading='lazy';img.decoding='async';img.onerror=()=>{const fallback=elem('div','📷');fallback.className='empty-img';img.replaceWith(fallback);};card.append(img);}
+  else{const placeholder=elem('div','📷');placeholder.className='empty-img';card.append(placeholder);}
   const inside=elem('div','');inside.className='inside';
   const category=elem('div',p.category||'Shop collection');category.className='category';inside.append(category,elem('h3',p.name));
   if(p.description){const desc=elem('p',p.description);desc.className='description';inside.append(desc);}
