@@ -10,6 +10,7 @@ const routes={
  '/api/merchant/logout':'./api/merchant/logout.mjs',
  '/api/merchant/claim':'./api/merchant/claim.mjs',
  '/api/merchant/products':'./api/merchant/products.mjs',
+ '/api/merchant/export':'./api/merchant/export.mjs',
  '/api/merchant/restock':'./api/merchant/restock.mjs',
  '/api/merchant/publish':'./api/merchant/publish.mjs',
  '/api/merchant/confirm-sale':'./api/merchant/confirm-sale.mjs',
