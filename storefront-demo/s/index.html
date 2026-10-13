@@ -296,7 +296,7 @@ function exampleImage(name){
 
 const $=id=>document.getElementById(id);
 const feed=$('feed'),cart=new Map();
-let products=[],visible=[],store=null,isDemo=false,activeIndex=0,chosenQty=1,toastTimer=0,statusTimer=0,observer=null,sheetProduct=null,currentView='home',searchText='',categoryFilter='';
+let products=[],visible=[],store=null,isDemo=false,activeIndex=0,chosenQty=1,toastTimer=0,statusTimer=0,observer=null,sheetProduct=null,currentView='home',searchText='',categoryFilter='',homeScrollY=0,hasInternalExploreEntry=false;
 const slug=new URLSearchParams(location.search).get('slug')||location.pathname.split('/').filter(Boolean)[1]||'';
 const defaultWhatsApp='Hello {store_name}, I would like to enquire about:\n\n{items}\n\nEstimated subtotal: {subtotal}\nPlease confirm availability and final price.\n{customer_note}';
 const cash=value=>'₦'+Number(value||0).toLocaleString('en-NG');
@@ -479,22 +479,58 @@ document.addEventListener('keydown',event=>{
  if(event.key==='Escape'&&$('bottom-bar').classList.contains('open'))closeSheet(true);
  else if(event.key==='Escape'&&$('drawer').classList.contains('open'))closeCart();
 });
-function switchView(name,id=null){
+function switchView(name,id=null,historyMode='push'){
  if(name!=='home'&&name!=='explore')return;
+ const fromHome=currentView==='home';
+ if(name==='explore'&&fromHome)homeScrollY=$('home-view').scrollTop;
  closeSheet(false);closeCart(false);
  currentView=name;
- $('home-view').hidden=name!=='home';$('explore-view').hidden=name!=='explore';
- $('nav-home').classList.toggle('active',name==='home');$('nav-explore').classList.toggle('active',name==='explore');
+ $('home-view').hidden=name!=='home';
+ $('explore-view').hidden=name!=='explore';
+ $('bottom-nav').hidden=name==='explore';
+ $('nav-home').classList.toggle('active',name==='home');
+ $('nav-explore').classList.toggle('active',name==='explore');
  $('nav-home').setAttribute('aria-current',name==='home'?'page':'false');
  $('nav-explore').setAttribute('aria-current',name==='explore'?'page':'false');
+ if(historyMode==='push'&&name==='explore'&&fromHome){
+  const url=new URL(location.href);url.searchParams.set('view','explore');
+  history.pushState({mySalesStoreView:'explore'},'',url);
+  hasInternalExploreEntry=true;
+ }
+ if(historyMode==='replace'){
+  const url=new URL(location.href);
+  if(name==='explore')url.searchParams.set('view','explore');
+  else url.searchParams.delete('view');
+  history.replaceState({mySalesStoreView:name},'',url);
+  hasInternalExploreEntry=false;
+ }
  if(name==='explore'){
   let index=id?visible.findIndex(p=>p.id===id):activeIndex;
   if(index<0||index>=visible.length)index=0;
   activate(index);
   requestAnimationFrame(()=>{feed.scrollTop=index*feed.clientHeight;});
- }else $('home-view').scrollTop=0;
+ }else{
+  hasInternalExploreEntry=false;
+  requestAnimationFrame(()=>{$('home-view').scrollTop=homeScrollY;});
+ }
 }
-$('nav-home').onclick=()=>switchView('home');
+function backFromExplore(){
+ if($('filter-dialog').open){$('filter-dialog').close();return;}
+ if($('drawer').classList.contains('open')){closeCart();return;}
+ if($('bottom-bar').classList.contains('open')){closeSheet(true);return;}
+ if(hasInternalExploreEntry){history.back();return;}
+ // Deep-linked Explore: return to referring page where possible,
+ // otherwise show the same store's Home without losing the store slug.
+ if(document.referrer&&history.length>1){history.back();return;}
+ switchView('home',null,'replace');
+}
+$('explore-back').onclick=backFromExplore;
+window.addEventListener('popstate',()=>{
+ const next=new URLSearchParams(location.search).get('view')==='explore'?'explore':'home';
+ switchView(next,null,'none');
+ hasInternalExploreEntry=next==='explore'&&history.state?.mySalesStoreView==='explore';
+});
+$('nav-home').onclick=()=>switchView('home',null,'replace');
 $('nav-explore').onclick=()=>switchView('explore');
 $('explore-cta').onclick=()=>switchView('explore');
 $('see-explore').onclick=()=>switchView('explore');
@@ -524,14 +560,52 @@ function renderHomeGrid(){
 }
 function applyFilters(){
  $('search').value=searchText;$('home-search').value=searchText;
- $('category').value=categoryFilter;$('category-home').value=categoryFilter;
+ const selected=Boolean(categoryFilter);
+ for(const id of ['filter-home','filter-explore']){
+  $(id).setAttribute('aria-pressed',String(selected));
+  $(id).querySelector('.filter-dot').hidden=!selected;
+  $(id).setAttribute('aria-label',selected?'Filter category: '+categoryFilter:'Filter products by category');
+ }
  const search=searchText.toLowerCase().trim();
  visible=products.filter(p=>(!categoryFilter||p.category===categoryFilter)&&
   [p.name,p.category,p.description].some(v=>String(v||'').toLowerCase().includes(search)));
  renderFeed();renderHomeGrid();
 }
 for(const id of ['search','home-search'])$(id).addEventListener('input',e=>{searchText=e.target.value;applyFilters();});
-for(const id of ['category','category-home'])$(id).addEventListener('change',e=>{categoryFilter=e.target.value;applyFilters();});
+const filterDialog=$('filter-dialog');
+const filterForm=$('filter-form');
+function buildFilterOptions(){
+ const host=$('filter-options');host.replaceChildren();
+ const categories=[...new Set(products.map(p=>p.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+ const options=[{value:'',label:'All categories'},...categories.map(name=>({value:name,label:name}))];
+ for(const option of options){
+  const label=elem('label','');label.className='filter-option';
+  const caption=elem('span',option.label);
+  const input=document.createElement('input');input.type='radio';input.name='category';input.value=option.value;
+  input.checked=categoryFilter===option.value;
+  label.append(caption,input);host.append(label);
+ }
+}
+function openFilters(){
+ buildFilterOptions();
+ filterDialog.showModal();
+}
+$('filter-home').onclick=openFilters;
+$('filter-explore').onclick=openFilters;
+$('filter-close').onclick=()=>filterDialog.close();
+$('filter-clear').onclick=()=>{categoryFilter='';applyFilters();filterDialog.close();};
+filterForm.onsubmit=e=>{
+ e.preventDefault();
+ const chosen=filterForm.querySelector('input[name="category"]:checked');
+ categoryFilter=chosen?.value||'';
+ applyFilters();filterDialog.close();
+};
+filterDialog.addEventListener('click',event=>{
+ if(event.target!==filterDialog)return;
+ const rect=filterDialog.getBoundingClientRect();
+ if(event.clientY<rect.top||event.clientY>rect.bottom||event.clientX<rect.left||event.clientX>rect.right)
+  filterDialog.close();
+});
 
 $('send').onclick=()=>{
  if(isDemo||!cart.size)return;
@@ -566,12 +640,8 @@ $('send').onclick=()=>{
    $('business-whatsapp').hidden=false;
   }
   $('home-demo').hidden=!isDemo;
-  const categories=[...new Set(products.map(p=>p.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-  for(const id of ['category','category-home']){
-   for(const name of categories){const opt=elem('option',name);opt.value=name;$(id).append(opt);}
-  }
   applyFilters();renderCart();
-  if(new URLSearchParams(location.search).get('view')==='explore')switchView('explore');
+  if(new URLSearchParams(location.search).get('view')==='explore')switchView('explore',null,'none');
  }catch(error){
   const page=elem('div','');page.className='no-results';
   const content=elem('div','');content.append(elem('strong','Unable to open the store'),elem('p',error.message));
