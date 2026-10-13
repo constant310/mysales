@@ -270,8 +270,9 @@ test('Explore hides bottom navigation and the back button preserves previous Hom
  assert.match(catalogue,/history\.pushState/);
  assert.match(catalogue,/history\.back\(\)/);
  assert.match(catalogue,/addEventListener\('popstate'/);
- assert.match(catalogue,/homeScrollY=\$\('home-view'\)\.scrollTop/);
+ assert.match(catalogue,/homeScrollY=\$\('home-scroll'\)\.scrollTop/);
  assert.match(catalogue,/scrollTop=homeScrollY/);
+ assert.match(catalogue,/id="home-scroll"/);
  assert.match(catalogue,/#explore-view \.reel\{height:100dvh/);
 });
 
@@ -290,4 +291,16 @@ test('Compact filter icon opens accessible category modal from Home or Explore',
  assert.match(catalogue,/function applyFilters/);
  assert.doesNotMatch(catalogue,/id="category-home"/);
  assert.doesNotMatch(catalogue,/id="category"/);
+});
+
+test('bottom navigation is physically nested inside Home and absent from Explore subtree',async()=>{
+ const catalogue=await read('s/index.html');
+ const homeStart=catalogue.indexOf('<section id="home-view"');
+ const nav=catalogue.indexOf('<nav id="bottom-nav"');
+ const explore=catalogue.indexOf('<section id="explore-view"');
+ assert.ok(homeStart!==-1&&nav>homeStart&&explore>nav);
+ assert.match(catalogue,/#home-view\.home-view\{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0\}/);
+ assert.match(catalogue,/#home-view \.home-scroll\{flex:1;min-height:0;overflow-y:auto/);
+ assert.match(catalogue,/#home-view #bottom-nav\{position:relative/);
+ assert.match(catalogue,/id="explore-back"/);
 });
