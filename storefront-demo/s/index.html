@@ -120,22 +120,37 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 @media(min-width:1024px){.grid-products{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:490px){.brandbar{padding:15px 16px}.business-hero{border-radius:20px}.hero-inner{padding:27px 22px}.hero-actions{gap:11px}.collection{padding-top:29px}.grid-products{gap:10px}.grid-content{padding:11px 10px 10px}.grid-title{font-size:.87rem;min-height:36px}.grid-add{font-size:.8rem;min-height:42px}.grid-price{font-size:1.02rem}.search-field{height:47px;padding:0 11px}.icon-control{height:47px;width:45px}.home-tools{gap:7px}.purchase-sheet{padding-left:16px;padding-right:16px}.sheet-actions button{font-size:.78rem}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
+
+/* Quiet, consistent icon system: functional icons only, no decorative cart/arrow overload. */
+.icon-control{background:#fff;border-color:#e0eae3;box-shadow:none;border-radius:11px;color:#386249}
+.icon-control svg{width:21px;height:21px;stroke-width:1.85}
+#filter-home[aria-pressed="true"]{background:#eef9f1;color:#13753a;border-color:#abd8b9}
+#home-cart .cart-count{font-size:.7rem}
+.search-field svg{color:#7d9182;stroke-width:1.85}
+.hero-whatsapp{gap:10px;padding:11px 14px;background:#ffffff12}
+.hero-whatsapp svg{width:18px;height:18px;stroke-width:1.85}
+.shop-cta{padding-inline:19px}
+.grid-add{gap:0;font-size:.87rem;letter-spacing:.002em;border-radius:10px;background:#16833f;min-height:46px}
+.grid-add svg{display:none!important}
+.sheet-actions #sheet-add{background:#16833f}
+.checkout svg,#sheet-enquire svg{width:19px;height:19px;stroke-width:1.85}
+@media(max-width:490px){.grid-add{font-size:.82rem;min-height:44px}.hero-whatsapp{font-size:.8rem}}
 </style></head><body><div class="site">
 <header class="brandbar"><a class="brand" href="/" aria-label="mySales home"><span class="brand-mark" aria-hidden="true">mS</span><span>mySales</span></a><span class="brand-note">Online storefront</span></header>
 <main>
 <section class="business-hero" aria-labelledby="business-name"><div class="hero-inner">
 <div class="kicker">Welcome to our store</div><h1 id="business-name">Our business</h1>
 <p id="business-description">Browse our products and prices.</p>
-<a id="business-whatsapp" class="hero-whatsapp" target="_blank" rel="noopener noreferrer" href="#" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 11.5a8.5 8.5 0 0 1-12.3 7.5L3 21l2-5.3a8.5 8.5 0 1 1 15.5-4.2Z"/><path d="M8.5 8.6c.6 3 2.4 4.8 5.3 5.6"/></svg><span id="business-number"></span><span aria-hidden="true">↗</span></a>
-<div class="hero-actions"><a class="shop-cta" href="#products">Browse products <span aria-hidden="true">↓</span></a><span id="business-count" class="product-stat"></span></div>
+<a id="business-whatsapp" class="hero-whatsapp" target="_blank" rel="noopener noreferrer" href="#" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 11.5a8.4 8.4 0 0 1-12.1 7.2L3 21l2-5.4a8.4 8.4 0 1 1 15.4-4.1Z"/><path d="M8.4 9.1c.8 2.6 2.4 4.3 5.3 5"/></svg><span id="business-number"></span></a>
+<div class="hero-actions"><a class="shop-cta" href="#products">Browse products</a><span id="business-count" class="product-stat"></span></div>
 <a id="home-demo" href="/create/" hidden>Create your own storefront free →</a>
 </div></section>
 <section id="products" class="collection" aria-labelledby="products-title">
 <div class="collection-head"><div><h2 id="products-title">Our collection</h2><p id="grid-count">Browse what’s available</p></div></div>
 <div class="home-tools">
-<label class="search-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16.2 16.2 4.6 4.6"/></svg><input id="home-search" type="search" aria-label="Search products" placeholder="Search products…" autocomplete="off"></label>
-<button id="filter-home" class="icon-control" type="button" aria-label="Filter products by category" aria-haspopup="dialog" aria-controls="filter-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M7 12h10m-7 5h4"/><path d="M16 5v4M10 10v4M15 15v4"/></svg><span id="filter-dot" class="filter-dot" hidden></span></button>
-<button type="button" id="home-cart" class="icon-control" aria-label="Open enquiry basket"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1"/><circle cx="19" cy="20" r="1"/><path d="M2 3h3l2.4 11.5a2 2 0 0 0 2 1.5h9.8a2 2 0 0 0 2-1.6L22.5 7H6"/></svg><span id="home-count" class="cart-count">0</span></button>
+<label class="search-field"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.2"/><path d="m16.1 16.1 4.5 4.5"/></svg><input id="home-search" type="search" aria-label="Search products" placeholder="Search products…" autocomplete="off"></label>
+<button id="filter-home" class="icon-control" type="button" aria-label="Filter products by category" aria-haspopup="dialog" aria-controls="filter-dialog"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 17h16M4 12h16"/><circle cx="9" cy="7" r="2.4" fill="white"/><circle cx="16" cy="17" r="2.4" fill="white"/><circle cx="12" cy="12" r="2.4" fill="white"/></svg><span id="filter-dot" class="filter-dot" hidden></span></button>
+<button type="button" id="home-cart" class="icon-control" aria-label="Open enquiry basket"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 8.5h15L21 21H3L4.5 8.5Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg><span id="home-count" class="cart-count">0</span></button>
 </div>
 <div id="grid-products" class="grid-products" aria-live="polite"></div>
 <p class="powered">Powered by <strong>mySales Storefronts</strong></p>
@@ -145,7 +160,7 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 <div class="drawer-header"><h2 id="drawer-title">Your enquiry basket <span id="cart-title-count"></span></h2><button id="close-cart" class="close-button" type="button" aria-label="Close basket">×</button></div>
 <div class="drawer-body"><div id="cart-lines"></div><div class="total"><span>Estimated subtotal</span><strong id="cart-total">₦0</strong></div>
 <label class="drawer-label" for="customer-note">Message to seller (optional)</label><textarea id="customer-note" maxlength="300" placeholder="Questions or delivery details…"></textarea>
-<button type="button" id="send" class="checkout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 11.5a8.5 8.5 0 0 1-12.3 7.5L3 21l2-5.3a8.5 8.5 0 1 1 15.5-4.2Z"/><path d="M8.5 8.6c.6 3 2.4 4.8 5.3 5.6"/></svg><span id="send-label">Send WhatsApp enquiry</span></button>
+<button type="button" id="send" class="checkout"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 11.5a8.4 8.4 0 0 1-12.1 7.2L3 21l2-5.4a8.4 8.4 0 1 1 15.4-4.1Z"/><path d="M8.4 9.1c.8 2.6 2.4 4.3 5.3 5"/></svg><span id="send-label">Send WhatsApp enquiry</span></button>
 <p id="checkout-help" class="help">The seller confirms availability and final prices. No payment is collected here.</p><a id="demo-signup" href="/create/" hidden>Create your own free store →</a>
 </div></aside>
 <div id="sheet-backdrop" class="sheet-backdrop"></div>
@@ -153,7 +168,7 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 <div class="sheet-head"><img id="sheet-thumb" class="sheet-thumb" alt="Selected product photo"><div class="sheet-title"><small id="sheet-category">Product</small><h2 id="sheet-name">Product</h2><strong id="sheet-price">₦0</strong></div><button id="sheet-close" class="close-button" type="button" aria-label="Close product options">×</button></div>
 <p id="sheet-description" class="sheet-description" hidden></p>
 <div class="qty-row"><label>Quantity</label><div class="counter"><button id="minus" type="button" aria-label="Decrease quantity">−</button><span id="qty" aria-live="polite">1</span><button id="plus" type="button" aria-label="Increase quantity">+</button></div></div>
-<div class="sheet-actions"><button id="sheet-add" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="20" r="1"/><circle cx="18" cy="20" r="1"/><path d="M2 3h3l2.4 11h12l2-8H6"/><path d="M17 1v8m-4-4h8"/></svg>Add to cart</button><button id="sheet-enquire" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 11.5a8.5 8.5 0 0 1-12.3 7.5L3 21l2-5.3a8.5 8.5 0 1 1 15.5-4.2Z"/><path d="M8.5 8.6c.6 3 2.4 4.8 5.3 5.6"/></svg>Enquire now</button></div>
+<div class="sheet-actions"><button id="sheet-add" type="button">Add to cart</button><button id="sheet-enquire" type="button"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 11.5a8.4 8.4 0 0 1-12.1 7.2L3 21l2-5.4a8.4 8.4 0 1 1 15.4-4.1Z"/><path d="M8.4 9.1c.8 2.6 2.4 4.3 5.3 5"/></svg>Enquire now</button></div>
 <p class="sheet-help">This is an enquiry, not an online payment. The seller confirms availability.</p>
 </section>
 <dialog id="filter-dialog" class="filter-dialog" aria-labelledby="filter-title">
@@ -201,7 +216,7 @@ const slug=legacyRoute?(new URLSearchParams(location.search).get('slug')||routeP
 const lookupParam=legacyRoute?'slug':'handle';
 const currency=n=>'₦'+Number(n||0).toLocaleString('en-NG');
 const defaultWhatsApp='Hello {store_name}, I would like to enquire about:\n\n{items}\n\nEstimated subtotal: {subtotal}\nPlease confirm availability and final price.\n{customer_note}';
-const CART_SVG="<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"8\" cy=\"20\" r=\"1\"/><circle cx=\"18\" cy=\"20\" r=\"1\"/><path d=\"M2 3h3l2.4 11h12l2-8H6\"/><path d=\"M17 1v8m-4-4h8\"/></svg>";
+const CART_SVG="<svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4.5 8.5h15L21 21H3L4.5 8.5Z\"/><path d=\"M9 9V6a3 3 0 0 1 6 0v3\"/></svg>";
 const PHOTO_SVG="<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"2.5\" y=\"3.5\" width=\"19\" height=\"17\" rx=\"2\"/><circle cx=\"8\" cy=\"9\" r=\"2\"/><path d=\"m4.5 18 5.5-6 4.5 3 3.2-4 3.3 4\"/></svg>";
 let store=null,products=[],visible=[],isDemo=false,categoryFilter='',searchText='',selectedProduct=null,selectedQuantity=1,lastSheetButton=null,toastTimeout=null,statusTimeout=null;
 const cart=new Map();
@@ -251,7 +266,7 @@ function renderProducts(){
   const category=node('small',p.category||'Product');category.className='grid-category';details.append(category);
   const u=unitOf(p),price=node('strong',u?currency(u.price):'Ask price');price.className='grid-price';details.append(price);
   const add=node('button');add.type='button';add.className='grid-add';add.disabled=!u;add.setAttribute('aria-label','Add '+p.name+' to cart');
-  add.innerHTML=CART_SVG+'<span>Add to cart</span>';add.onclick=()=>openSheet(p,add);
+  add.textContent='Add to cart';add.onclick=()=>openSheet(p,add);
   details.append(add);card.append(details);fragment.append(card);
  }
  host.append(fragment);
