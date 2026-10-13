@@ -67,6 +67,17 @@ aside{margin:22px 0;border-radius:13px;box-shadow:none}
 .banner-inner{padding:9px 20px;font-size:.8rem}.banner a{padding:9px 12px;font-size:.8rem}
 footer{margin:20px 0}
 @media(max-width:690px){header.hero{padding:19px 15px!important}.hero h1{font-size:1.85rem}.top-inner{padding:10px 14px}.banner-inner{padding:9px 14px}.grid{gap:9px}.inside{padding:10px}.tools{gap:9px}.item h3{font-size:.86rem}.item .description{font-size:.72rem}}
+
+.basket-note{display:block;margin-top:15px;margin-bottom:6px;font-size:.8rem;font-weight:750;color:#374151}
+#customer-note{width:100%;resize:vertical;min-height:66px;padding:10px 12px;border:1px solid #E2E9E3;border-radius:10px;font:inherit;font-size:.83rem}
+#customer-note:focus{outline:2px solid #16A34A44;border-color:#16A34A}
+.add-toast{position:fixed;z-index:45;left:50%;bottom:22px;transform:translate(-50%,16px);display:flex;align-items:center;gap:9px;background:#1E3325;color:#fff;box-shadow:0 12px 32px #11291844;padding:11px 13px;border-radius:12px;font-size:.83rem;font-weight:700;max-width:calc(100vw - 24px);width:max-content;opacity:0;visibility:hidden;transition:opacity .2s ease,transform .2s ease,visibility .2s}
+.add-toast.visible{opacity:1;transform:translate(-50%,0);visibility:visible}
+.toast-check{background:#16A34A;border-radius:50%;width:23px;height:23px;display:inline-grid;place-items:center;flex:none;font-weight:900}
+#toast-message{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:270px}
+#toast-basket{border:0;background:#DFF8E5;color:#133D25;border-radius:7px;padding:8px;font-weight:900;white-space:nowrap;font-size:.76rem}
+@media(max-width:600px){.add-toast{bottom:13px;font-size:.75rem;gap:7px}#toast-message{max-width:160px}#toast-basket{padding:7px 8px}}
+@media(prefers-reduced-motion:reduce){.add-toast{transition:none}}
 </style></head><body>
 <div class="top"><div class="top-inner"><a class="brand" href="/" aria-label="mySales home"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="shopbag">Storefronts · by mySales</span></div></div>
 <div class="banner" id="demo-banner"><div class="banner-inner"><span>Like this store? Make one for your business.</span><a href="/create/">Create yours →</a></div></div>
@@ -77,13 +88,25 @@ footer{margin:20px 0}
 <div id="products" class="grid"></div>
 <aside id="basket" hidden><div class="cart-head"><h2>My enquiry basket <span id="count">0</span></h2><span style="font-size:1.2rem">🛒</span></div>
 <div id="cart"><p class="empty-cart">Tap “Add” on a product you like.</p></div>
+<label class="basket-note" for="customer-note">Add a note for the seller (optional)</label><textarea id="customer-note" rows="2" maxlength="300" placeholder="e.g. Please confirm delivery to Effurun"></textarea>
 <button id="send" class="primary" disabled>Send enquiry on WhatsApp →</button>
 <p style="color:#8a9c91;font-size:.75rem;line-height:1.5">Products are enquiries, not paid orders. Your merchant will confirm prices and availability. No payment is collected here.</p>
 </aside>
 <footer>Powered by <strong>mySales Storefronts</strong> · <a href="/create/">Create your own store</a></footer>
 </main>
+<div id="add-toast" class="add-toast" role="status" aria-live="polite" aria-atomic="true"><span class="toast-check" aria-hidden="true">✓</span><span id="toast-message">Added</span><button type="button" id="toast-basket">View basket</button></div>
 <script type="module">
-const $=id=>document.getElementById(id),cart=new Map();let data=[],isDemo=false;
+const $=id=>document.getElementById(id),cart=new Map();let data=[],isDemo=false,toastTimer=0;
+const defaultWhatsApp='Hello {store_name}, I would like to enquire about:\n\n{items}\n\nEstimated subtotal: {subtotal}\nPlease confirm availability and final price.\n{customer_note}';
+function showAdded(name){
+ const toast=$('add-toast');$('toast-message').textContent=name+' added to basket';
+ toast.classList.add('visible');clearTimeout(toastTimer);
+ toastTimer=setTimeout(()=>toast.classList.remove('visible'),2600);
+}
+$('toast-basket').onclick=()=>{
+ $('add-toast').classList.remove('visible');
+ $('basket').scrollIntoView({behavior:'smooth',block:'center'});
+};
 const slug=new URLSearchParams(location.search).get('slug')||location.pathname.split('/').filter(Boolean)[1]||'';
 // Show the demo-to-store invitation before waiting for a cold-started API.
 if(/demo/i.test(slug)){$('demo-banner').classList.add('visible');}
@@ -153,7 +176,7 @@ function render(){
     if(stock>0&&used()+Number(u.factor)>stock){$('notice').textContent='Only '+stock+' available. Enquire for more.';return;}
     const item=cart.get(key)||{productId:p.id,factor:Number(u.factor),name:p.name,unit:u.name,price:Number(u.price),quantity:0};
     item.quantity++;cart.set(key,item);renderCart();render();
-    $('notice').textContent=p.name+' added to your enquiry basket.';
+    showAdded(p.name);
    };buy.append(add);inside.append(buy);
   }
   card.append(inside);grid.append(card);
@@ -177,8 +200,13 @@ function render(){
    if(isDemo)return;
    const number=String(j.store.whatsapp||'').replace(/\D/g,'');
    if(!/^[1-9]\d{7,14}$/.test(number)){$('notice').textContent='Merchant WhatsApp is unavailable. Please contact the store.';return;}
-   const lines=['Hello, I saw your mySales store '+j.store.name+'. I would like to enquire about:',...Array.from(cart.values()).map(v=>v.quantity+' × '+v.name+' ('+v.unit+') — '+cash(v.price*v.quantity)),'Please confirm availability and total.'];
-   location.href='https://wa.me/'+number+'?text='+encodeURIComponent(lines.join('\n'));
+   const items=Array.from(cart.values()).map(v=>v.quantity+' × '+v.name+' ('+v.unit+') — '+cash(v.price*v.quantity)).join('\n');
+   const subtotal=Array.from(cart.values()).reduce((sum,v)=>sum+v.quantity*v.price,0);
+   const note=$('customer-note').value.trim();
+   const replacements={store_name:j.store.name,items,subtotal:cash(subtotal),customer_note:note?'Customer note: '+note:''};
+   const template=typeof j.store.whatsapp_template==='string'&&j.store.whatsapp_template.trim()?j.store.whatsapp_template:defaultWhatsApp;
+   const message=template.replace(/\{(store_name|items|subtotal|customer_note)\}/g,(_,name)=>replacements[name]).trim();
+   location.href='https://wa.me/'+number+'?text='+encodeURIComponent(message);
   };
   render();renderCart();
  }catch(err){$('notice').textContent=err.message;}
