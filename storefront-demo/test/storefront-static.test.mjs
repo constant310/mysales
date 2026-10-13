@@ -179,3 +179,44 @@ test('full-screen customer shopping preserves basket, stock checks, and WhatsApp
  assert.match(catalogue,/id="add-toast"/);
  assert.match(catalogue,/id="toast-basket"/);
 });
+
+test('storefront opens on the merchant Home grid and can navigate to immersive Explore',async()=>{
+ const catalogue=await read('s/index.html');
+ assert.match(catalogue,/id="home-view"/);
+ assert.match(catalogue,/id="explore-view" hidden/);
+ assert.match(catalogue,/id="business-name"/);
+ assert.match(catalogue,/id="business-description"/);
+ assert.match(catalogue,/id="grid-products"/);
+ assert.match(catalogue,/id="nav-home"/);
+ assert.match(catalogue,/id="nav-explore"/);
+ assert.match(catalogue,/function switchView/);
+ assert.match(catalogue,/function renderHomeGrid/);
+ assert.match(catalogue,/switchView\('explore',p\.id\)/);
+});
+test('both views share category filtering and the same enquiry basket',async()=>{
+ const catalogue=await read('s/index.html');
+ assert.match(catalogue,/id="category-home"/);
+ assert.match(catalogue,/id="category"/);
+ assert.match(catalogue,/id="home-cart"/);
+ assert.match(catalogue,/id="open-cart"/);
+ assert.match(catalogue,/id="home-count"/);
+ assert.match(catalogue,/id="cart-count"/);
+ assert.match(catalogue,/function applyFilters/);
+ assert.match(catalogue,/categoryFilter/);
+ assert.match(catalogue,/home-count'\)\.textContent/);
+});
+test('purchase controls appear on demand with clear add and enquiry actions',async()=>{
+ const catalogue=await read('s/index.html');
+ assert.match(catalogue,/id="sheet-backdrop"/);
+ assert.match(catalogue,/id="bottom-bar"/);
+ assert.match(catalogue,/\.bottom-bar\.open/);
+ assert.match(catalogue,/transform:translateY\(120%\)/);
+ assert.match(catalogue,/id="sheet-close"/);
+ assert.match(catalogue,/id="add-main"/);
+ assert.match(catalogue,/id="sheet-enquire"/);
+ assert.match(catalogue,/function openSheet/);
+ assert.match(catalogue,/function closeSheet/);
+ assert.match(catalogue,/closeSheet\(false\)/);
+ assert.doesNotMatch(catalogue,/id="like"/);
+ assert.doesNotMatch(catalogue,/id="share"/);
+});
