@@ -1,7 +1,9 @@
 import {setDefaultCACertificates,getCACertificates} from 'node:tls';
+import {readFileSync} from 'node:fs';
 // Node 24 does not always include the system CA store by default.
 // Keep TLS verification enabled while adding system-trusted CAs.
-setDefaultCACertificates([...getCACertificates('default'),...getCACertificates('system')]);
+const supabaseRootCA=readFileSync(new URL('./certs/supabase-root-2021.crt',import.meta.url),'utf8');
+setDefaultCACertificates([...getCACertificates('default'),...getCACertificates('system'),supabaseRootCA]);
 import http from 'node:http';
 import pg from 'pg';
 const {Pool} = pg;
