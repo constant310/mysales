@@ -58,3 +58,40 @@ test('Customer WhatsApp enquiry cannot deduct inventory',async()=>{
  assert.match(storefront,/wa\.me/);
  assert.doesNotMatch(storefront,/\/api\/merchant\/confirm-sale/);
 });
+
+
+test('Visitors can create stores directly from the public demo without an ERP login',async()=>{
+ const landing=await read('index.html');
+ const catalogue=await read('s/index.html');
+ const create=await read('create/index.html');
+ const proxy=await read('render-server.mjs');
+ assert.match(landing,/href="\/create\/"/);
+ assert.match(catalogue,/id="demo-banner"/);
+ assert.match(catalogue,/href="\/create\/"/);
+ assert.match(create,/fetch\('\/api\/signup'/);
+ assert.match(create,/managementLink/);
+ assert.match(proxy,/\/api\/signup/);
+ assert.match(proxy,/early-storefront-signup/);
+});
+
+test('Public store registration issues scoped private tokens without operator privileges',async()=>{
+ const signup=await read('supabase/functions/early-storefront-signup/index.ts');
+ assert.match(signup,/tokenHash/);
+ assert.match(signup,/management_links/);
+ assert.match(signup,/status\)/);
+ assert.match(signup,/draft/);
+ assert.match(signup,/pg_advisory_xact_lock/);
+ assert.doesNotMatch(signup,/operator_links/);
+ assert.doesNotMatch(signup,/SUPABASE_SERVICE_ROLE_KEY/);
+});
+
+test('First product flow is photo-first and does not expose unit conversion jargon',async()=>{
+ const manager=await read('manage/index.html');
+ assert.match(manager,/Add a product photo/);
+ assert.match(manager,/Product name/);
+ assert.match(manager,/Selling price/);
+ assert.match(manager,/Optional details & stock/);
+ assert.match(manager,/post\('publish'/);
+ assert.match(manager,/post\('store-settings'/);
+ assert.doesNotMatch(manager,/Pieces per selling unit/);
+});
