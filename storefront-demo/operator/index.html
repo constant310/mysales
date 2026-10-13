@@ -1,0 +1,32 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Operator · mySales Early Storefront</title>
+<style>body{font-family:system-ui;margin:0;color:#1b3440;background:#f3f7f8}header{background:#113d4a;color:white;padding:20px max(18px,calc((100vw - 980px)/2));display:flex;justify-content:space-between;align-items:center}main{max-width:980px;margin:25px auto;padding:0 16px}.card{background:white;border-radius:15px;padding:22px;border:1px solid #dce5e7;margin-bottom:20px}label{display:block;margin:12px 0 6px}input,textarea{display:block;width:100%;box-sizing:border-box;font:inherit;padding:12px;border:1px solid #bdccd0;border-radius:8px}button{background:#087a7d;color:white;border:0;padding:11px 15px;border-radius:8px;cursor:pointer}button:disabled{opacity:.5}.row{padding:13px 0;border-top:1px solid #e5ebed}.actions{display:flex;gap:8px;flex-wrap:wrap}.danger{background:#a32929}code{overflow-wrap:anywhere}a{color:#056969}.muted{color:#657881}</style></head><body>
+<header><strong>mySales · Private Operator</strong><button id="logout">Close session</button></header>
+<main><p id="status" role="status">Checking private operator access…</p><div id="main" hidden>
+<section class="card"><h1>Create a merchant storefront</h1><p class="muted">The owner will receive a permanent, revocable private link. No merchant signup or password.</p>
+<form id="create">
+<label>Business name<input name="name" required maxlength="150" placeholder="e.g. Ada Beauty Store"></label>
+<label>Store URL slug<input name="slug" required maxlength="80" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="e.g. ada-beauty-store"></label>
+<label>WhatsApp number (international format)<input name="whatsapp" required placeholder="+2348012345678"></label>
+<label>About this business<textarea name="description" maxlength="2000"></textarea></label>
+<button>Create store & private link</button></form>
+<div id="newlink" hidden><h2>New management link</h2><p>Send this privately to the merchant. It will not appear in the store list again.</p><p><a id="private" target="_blank" rel="noreferrer"></a></p><button id="copy" type="button">Copy private link</button></div></section>
+<section class="card"><h2>Existing stores</h2><p class="muted">Rotating a private link immediately invalidates the previous links and sessions for that store.</p><div id="stores">Loading…</div></section></div></main>
+<script type="module">
+const $=id=>document.getElementById(id),status=$('status'),list=$('stores');
+const text=(tag,t)=>{const e=document.createElement(tag);e.textContent=String(t);return e;};
+async function api(path,options={}){const r=await fetch('/api/operator/'+path,{cache:'no-store',credentials:'same-origin',...options});const j=await r.json();if(!r.ok)throw Error(j.error||'Request failed');return j;}
+function showLink(link){$('newlink').hidden=false;$('private').href=link;$('private').textContent=link;$('copy').onclick=async()=>{try{await navigator.clipboard.writeText(link);status.textContent='Link copied. Send privately.';}catch{status.textContent='Copy the private link shown above.';}};}
+async function action(body){return api('stores',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});}
+async function refresh(){const {stores}=await api('stores');list.replaceChildren();if(!stores.length)list.append(text('p','No stores yet.'));
+for(const s of stores){const box=text('div','');box.className='row';box.append(text('strong',s.name+' · '+s.slug),text('p',s.product_count+' products · '+s.status+' · '+s.whatsapp));
+const a=text('a','Open public store');a.href='/s/?slug='+encodeURIComponent(s.slug);a.target='_blank';box.append(a);
+const actions=text('div','');actions.className='actions';
+const rotate=text('button','Replace private management link');rotate.onclick=async()=>{if(!confirm('Replace private link? All previous links and merchant sessions will stop working.'))return;rotate.disabled=true;try{const r=await action({action:'rotate',storeId:s.id});showLink(r.managementLink);status.textContent='A new private management link was issued.';}catch(e){status.textContent=e.message;}finally{rotate.disabled=false;}};
+const pub=text('button',s.status==='published'?'Unpublish store':'Publish store');pub.onclick=async()=>{pub.disabled=true;try{await action({action:'publish-store',storeId:s.id,published:s.status!=='published'});await refresh();}catch(e){status.textContent=e.message;pub.disabled=false;}};
+actions.append(rotate,pub);box.append(actions);list.append(box);
+}}
+$('create').onsubmit=async e=>{e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');b.disabled=true;const details=Object.fromEntries(new FormData(f));try{const r=await action({action:'create',...details});showLink(r.managementLink);f.reset();status.textContent='Store created. Private link ready to send.';await refresh();}catch(err){status.textContent=err.message;}finally{b.disabled=false;}};
+$('logout').onclick=async()=>{try{await api('logout',{method:'POST'});location.reload();}catch(e){status.textContent=e.message;}};
+(async()=>{try{await api('me');$('main').hidden=false;status.textContent='Secure operator access enabled.';await refresh();}catch(e){status.textContent='Private operator access required. Open your saved operator link.';}})();
+</script></body></html>
