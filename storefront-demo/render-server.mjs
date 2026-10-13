@@ -86,6 +86,9 @@ http.createServer(async(req,res)=>{
     return;
    }catch(error){
     console.error('Supabase backend proxy failed:',error?.message);
+    // If a streaming client disconnects, headers may already have been sent.
+    // Never try to write a second JSON response over a broken response.
+    if(res.headersSent){res.destroy();return;}
     return json(res,503,{error:'Storefront temporarily unavailable'});
    }
   }
