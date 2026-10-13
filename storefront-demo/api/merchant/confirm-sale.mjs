@@ -1,4 +1,5 @@
-import {Pool} from 'pg';
+import pg from 'pg';
+const {Pool} = pg;
 import {merchantFromRequest,safeOrigin} from '../../server/http-auth.mjs';
 const pool=new Pool({connectionString:process.env.EARLY_STOREFRONT_DATABASE_URL,ssl:{rejectUnauthorized:true}});
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
