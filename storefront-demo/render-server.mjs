@@ -2,7 +2,7 @@ import http from 'node:http';
 import {readFile,stat} from 'node:fs/promises';
 import {resolve,extname,sep} from 'node:path';
 const root=resolve('storefront-demo');
-const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.webp':'image/webp'};
+const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml','.ico':'image/x-icon'};
 const routes={
  '/api/store':'./api/store.mjs',
  '/api/discover':'./api/discover.mjs',
@@ -35,6 +35,7 @@ http.createServer(async(req,res)=>{
   }
   let path=url.pathname;
   if(path==='/')path='/index.html';
+  if(path==='/discover'||path==='/discover/')path='/discover/index.html';
   if(path==='/manage'||path==='/manage/')path='/manage/index.html';
   if(path==='/manage/claim')path='/manage/claim.html';
   if(path==='/s'||path==='/s/'||/^\/s\/[a-z0-9-]+\/?$/.test(path))path='/s/index.html';
@@ -46,6 +47,8 @@ http.createServer(async(req,res)=>{
   res.setHeader('X-Content-Type-Options','nosniff');
   res.setHeader('Referrer-Policy','no-referrer');
   if(path.startsWith('/manage'))res.setHeader('Cache-Control','no-store');
+  res.setHeader('Content-Security-Policy',"frame-ancestors 'none'; base-uri 'self'; object-src 'none'");
+  res.setHeader('X-Frame-Options','DENY');
   res.end(bytes);
  }catch(error){console.error('Request error',error?.message);if(!res.headersSent)res.status(500).end('Server error');}
 }).listen(Number(process.env.PORT)||10000,'0.0.0.0',()=>console.log('Early Storefront server ready'));
