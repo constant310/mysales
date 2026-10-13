@@ -1,5 +1,6 @@
 // Trusted operator CLI only. Never expose this action as a public HTTP endpoint.
-import {Pool} from 'pg';
+import pg from 'pg';
+const {Pool} = pg;
 import {issueManagementLink} from '../server/management-links.mjs';
 const [slug,name,whatsapp,origin]=process.argv.slice(2);
 if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug||'')||!name||name.length>150||!/^[0-9+]{9,17}$/.test(whatsapp||'')||!origin?.startsWith('https://')){
