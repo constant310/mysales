@@ -1,5 +1,6 @@
 import http from 'node:http';
-import {Pool} from 'pg';
+import pg from 'pg';
+const {Pool} = pg;
 import {readFile,stat} from 'node:fs/promises';
 import {resolve,extname,sep} from 'node:path';
 const root=resolve('storefront-demo');
