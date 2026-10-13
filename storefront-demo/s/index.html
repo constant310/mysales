@@ -281,7 +281,6 @@ function createSlide(p,i){
  const copy=elem('div','');copy.className='reel-copy';
  const tag=elem('div','');tag.className='store-tag';
  tag.append(elem('span',store?.name||'Store'));
- if(!isDemo){const verified=elem('span','✓');verified.className='verified';verified.setAttribute('aria-label','Listed store');tag.append(verified);}
  copy.append(tag);
  const title=elem('h1',p.name);copy.append(title);
  if(p.description)copy.append(elem('p',p.description));
