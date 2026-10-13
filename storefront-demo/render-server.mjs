@@ -1,3 +1,7 @@
+import {setDefaultCACertificates,getCACertificates} from 'node:tls';
+// Node 24 does not always include the system CA store by default.
+// Keep TLS verification enabled while adding system-trusted CAs.
+setDefaultCACertificates([...getCACertificates('default'),...getCACertificates('system')]);
 import http from 'node:http';
 import pg from 'pg';
 const {Pool} = pg;
