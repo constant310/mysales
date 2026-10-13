@@ -3,7 +3,7 @@ import {createClient} from 'npm:@supabase/supabase-js@2';
 
 const origin = 'https://mysales-early-storefront-branch.onrender.com';
 const url = Deno.env.get('SUPABASE_DB_URL');
-const sql = url ? postgres(url, { max: 4, prepare: false, connect_timeout: 7, idle_timeout: 15 }) : null;
+const sql = url ? postgres(url, { max: 2, prepare: false, connect_timeout: 7, idle_timeout: 10 }) : null;
 const headers = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer' };
 const out = (status: number, value: unknown, extra: Record<string,string> = {}) =>
   new Response(JSON.stringify(value), { status, headers: {...headers,...extra} });
@@ -16,9 +16,29 @@ const textVal = (v: unknown, max: number, required = false) =>
   typeof v === 'string' && v.length <= max && (!required || !!v.trim());
 const bodyJson = async (req: Request): Promise<Record<string,unknown>> => {
   if (!(req.headers.get('content-type')||'').toLowerCase().startsWith('application/json')) throw new Error('JSON required');
-  const obj = await req.json();
-  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) throw new Error('Invalid JSON');
-  return obj;
+  const maxBytes=65536;
+  const declared=Number(req.headers.get('content-length')||0);
+  if(declared>maxBytes)throw new Error('Request too large');
+  const reader=req.body?.getReader();
+  if(!reader)throw new Error('Invalid JSON');
+  const chunks:Uint8Array[]=[];
+  let total=0;
+  try {
+    while(true){
+      const {done,value}=await reader.read();
+      if(done)break;
+      total+=value.byteLength;
+      if(total>maxBytes){await reader.cancel();throw new Error('Request too large');}
+      chunks.push(value);
+    }
+  }finally{reader.releaseLock();}
+  const bytes=new Uint8Array(total);let offset=0;
+  for(const part of chunks){bytes.set(part,offset);offset+=part.byteLength;}
+  let obj:unknown;
+  try{obj=JSON.parse(new TextDecoder().decode(bytes));}
+  catch{throw new Error('Invalid JSON');}
+  if(!obj || typeof obj !== 'object' || Array.isArray(obj))throw new Error('Invalid JSON');
+  return obj as Record<string,unknown>;
 };
 async function merchant(request: Request) {
   const match = /^Bearer ([A-Za-z0-9_-]{43})$/.exec(request.headers.get('authorization')||'');
@@ -33,15 +53,18 @@ async function merchant(request: Request) {
 }
 const productQuery = (storeId: string, publishedOnly: boolean) =>
   sql!`select p.id,p.name,p.description,p.category,p.image_path,p.base_unit,p.published,
-   coalesce(st.quantity_base,0) as stock,
-   coalesce(json_agg(json_build_object('id',u.id,'name',u.name,'factor',u.factor,'price',u.price_ngn))
-     filter(where u.id is not null and u.active=true),'[]'::json) as units
+   coalesce(st.quantity_base,0) as stock,coalesce(u.units,'[]'::json) as units
    from early_storefront.products p
    left join early_storefront.stock st on st.product_id=p.id and st.store_id=p.store_id
-   left join early_storefront.units u on u.product_id=p.id and u.store_id=p.store_id
+   left join lateral (
+     select json_agg(json_build_object('id',su.id,'name',su.name,'factor',su.factor,'price',su.price_ngn)
+       order by su.created_at,su.id) as units
+     from early_storefront.units su
+     where su.product_id=p.id and su.store_id=p.store_id and su.active=true
+   ) u on true
    where p.store_id=${storeId} and p.archived_at is null
      and (${!publishedOnly}::boolean or p.published=true)
-   group by p.id,st.quantity_base order by p.created_at desc`;
+   order by p.created_at desc,p.id desc`;
 async function operator(request: Request) {
  const match=/^Bearer ([A-Za-z0-9_-]{43})$/.exec(request.headers.get('authorization')||'');
  if(!match)return false;
@@ -74,7 +97,7 @@ Deno.serve(async (request: Request) => {
           or exists (select 1 from early_storefront.products x where x.store_id=s.id and x.published=true and x.archived_at is null
             and (x.name ilike ${pattern} or x.category ilike ${pattern})))
         group by s.id order by s.name asc limit 100`;
-      return out(200,{stores:rows,source:'live'});
+      return out(200,{stores:rows,source:'live'},{'cache-control':'public, max-age=6, stale-while-revalidate=15'});
     }
     if (pathname === '/api/store' && request.method === 'GET') {
       const slug=query.get('slug')||'';
@@ -84,9 +107,11 @@ Deno.serve(async (request: Request) => {
       if (!stores.length) return out(404,{error:'Store not found'});
       const {id,...store}=stores[0];
       const products=await productQuery(id,true);
-      return out(200,{store,products});
+      return out(200,{store,products},{'cache-control':'public, max-age=6, stale-while-revalidate=15'});
     }
     if(pathname.startsWith('/api/operator/')) {
+      const requestedOrigin=request.headers.get('origin');
+      if(request.method!=='GET' && requestedOrigin && requestedOrigin!==origin) return out(403,{error:'Invalid origin'});
       if(!(await operator(request)))return out(401,{error:'Private operator link required'});
       if(pathname==='/api/operator/me' && request.method==='GET')
         return out(200,{authenticated:true});
@@ -290,6 +315,7 @@ Deno.serve(async (request: Request) => {
     const message = error instanceof Error ? error.message : String(error);
     if (/Insufficient stock|Selling unit not found|Invalid sale request|Product not found/.test(message))
       return out(409,{error:message});
+    if(message==='Request too large')return out(413,{error:'Request body must be 64 KB or smaller'});
     if (/Invalid JSON|JSON required|Unexpected token|not valid JSON/.test(message))
       return out(400,{error:'Invalid JSON body'});
     console.error('Storefront Edge DB request failed:',message);
