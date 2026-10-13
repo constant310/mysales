@@ -10,6 +10,7 @@ const allowed=new Set([
  '/api/merchant/restock','/api/merchant/publish','/api/merchant/confirm-sale',
  '/api/merchant/export','/api/merchant/update-product',
  '/api/merchant/archive-product','/api/merchant/store-settings','/api/merchant/upload-image',
+ '/api/operator/me','/api/operator/stores',
 ]);
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml','.ico':'image/x-icon'};
 const json=(res,status,body)=>{res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(body));};
@@ -79,13 +80,15 @@ http.createServer(async(req,res)=>{
   if(path==='/discover'||path==='/discover/')staticPath='/discover/index.html';
   if(path==='/manage'||path==='/manage/')staticPath='/manage/index.html';
   if(path==='/manage/claim')staticPath='/manage/claim.html';
+  if(path==='/operator'||path==='/operator/')staticPath='/operator/index.html';
+  if(path==='/operator/claim')staticPath='/operator/claim.html';
   if(path==='/s'||path==='/s/'||/^\/s\/[a-z0-9-]+\/?$/.test(path))staticPath='/s/index.html';
   const file=resolve(root,'.'+staticPath);
   if(!file.startsWith(root+sep))return json(res,403,{error:'Forbidden'});
   if(!Object.hasOwn(mime,extname(file)))return json(res,404,{error:'Not found'});
   const bytes=await readFile(file);
   res.setHeader('Content-Type',mime[extname(file)]);
-  if(path.startsWith('/manage'))res.setHeader('Cache-Control','no-store');
+  if(path.startsWith('/manage')||path.startsWith('/operator'))res.setHeader('Cache-Control','no-store');
   return res.end(bytes);
  }catch(error){
   console.error('Request failed',error?.message);
