@@ -1,7 +1,8 @@
 // Passwordless merchant access: server-only. A management link is a bearer secret.
 // Store only its SHA-256 hash; issue it via a trusted operator workflow, never a public route.
 import { randomBytes, createHash } from 'node:crypto';
-import { Pool } from 'pg';
+import pg from 'pg';
+const {Pool} = pg;
 import { generateSessionToken, hashSessionToken, merchantSessionCookie } from './merchant-auth.mjs';
 
 const pool = new Pool({
