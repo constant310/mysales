@@ -89,6 +89,35 @@ const slug=new URLSearchParams(location.search).get('slug')||location.pathname.s
 if(/demo/i.test(slug)){$('demo-banner').classList.add('visible');}
 const elem=(tag,text)=>{const e=document.createElement(tag);e.textContent=String(text);return e;};
 const cash=v=>'₦'+Number(v||0).toLocaleString('en-NG');
+
+function exampleImage(name){
+ // Only fictional demo catalogues receive illustrative visuals. Never substitute
+ // a stock photo for a real merchant's missing product photo.
+ const exact={
+  'Instant Coffee 100g':'https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=480&q=75',
+  'Black Tea 25 Bags':'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=480&q=75',
+  'A5 Notebook':'https://images.unsplash.com/photo-1531346878377-a5be20888e57?w=480&q=75'
+ };
+ if(exact[name])return exact[name];
+ const text=String(name||'Sample product');
+ const seed=[...text].reduce((a,c)=>(a*31+c.charCodeAt(0))%9973,1);
+ const hues=['#D8EBD7','#FBE8D1','#E0EAF4','#F7E1E9','#E5EAD5'];
+ const paper=hues[seed%hues.length];
+ const title=text.split(' ').reduce((o,part)=>{const last=o[o.length-1];if(!last||last.length+part.length>19)o.push(part);else o[o.length-1]+=' '+part;return o;},[]).slice(0,2);
+ const xml=str=>String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+ const svg='<svg xmlns="http://www.w3.org/2000/svg" width="480" height="430" viewBox="0 0 480 430">'+
+ '<rect width="480" height="430" fill="'+paper+'"/><ellipse cx="240" cy="346" rx="131" ry="23" fill="#1D3420" opacity=".09"/>'+
+ '<rect x="142" y="75" width="196" height="258" rx="15" fill="#FFFFFF" stroke="#CCD8CC" stroke-width="3"/>'+
+ '<rect x="160" y="92" width="160" height="48" rx="8" fill="#1C8220"/>'+
+ '<text x="240" y="122" text-anchor="middle" font-size="16" fill="white" font-weight="700" font-family="Arial,sans-serif">mySales DEMO</text>'+
+ '<rect x="165" y="168" width="150" height="3" rx="2" fill="#C1D7C4"/>'+
+ '<circle cx="240" cy="222" r="37" fill="'+paper+'"/>'+
+ '<path d="M218 222h44m-22-22v44" stroke="#1C8220" stroke-width="7" stroke-linecap="round" opacity=".38"/>'+
+ title.map((line,i)=>'<text x="240" y="'+(278+i*24)+'" text-anchor="middle" fill="#233629" font-size="18" font-weight="700" font-family="Arial,sans-serif">'+xml(line)+'</text>').join('')+
+ '</svg>';
+ return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+}
+
 function renderCart(){
  $('cart').replaceChildren();let count=0,total=0;
  for(const [key,v] of cart){
@@ -108,7 +137,8 @@ function render(){
  if(!visible.length)grid.append(elem('p',data.length?'No matching products. Try another search.':'No published products yet.'));
  for(const p of visible){
   const card=elem('article','');card.className='item';
-  if(p.image_path){const img=document.createElement('img');img.src=p.image_path;img.alt='Photo of '+p.name;img.loading='lazy';img.decoding='async';img.onerror=()=>{const fallback=elem('div','📷');fallback.className='empty-img';img.replaceWith(fallback);};card.append(img);}
+  const picture=p.image_path||(isDemo?exampleImage(p.name):'');
+  if(picture){const img=document.createElement('img');img.src=picture;img.alt=(p.image_path?'Photo of ':'Illustrative example of ')+p.name;img.loading='lazy';img.decoding='async';img.onerror=()=>{if(isDemo&&img.src!==exampleImage(p.name)){img.src=exampleImage(p.name);return;}const fallback=elem('div','📷');fallback.className='empty-img';img.replaceWith(fallback);};card.append(img);}
   else{const placeholder=elem('div','📷');placeholder.className='empty-img';card.append(placeholder);}
   const inside=elem('div','');inside.className='inside';
   const category=elem('div',p.category||'Shop collection');category.className='category';inside.append(category,elem('h3',p.name));
@@ -138,7 +168,7 @@ function render(){
   isDemo=/demo/i.test(slug)||/TEST STORE/i.test(j.store.description||'');
   $('name').textContent=j.store.name;$('description').textContent=j.store.description||'See what we have available and send us your favourites.';
   document.title=j.store.name+' | mySales';$('section-title').textContent=data.length+' product'+(data.length===1?'':'s')+' to explore';
-  $('notice').textContent=isDemo?'Demo catalogue · These are example products. Orders are disabled.':data.length?'See something you like? Add it to your enquiry basket.':'This shop has not added products yet.';
+  $('notice').textContent=isDemo?'Demo catalogue · Illustrative product pictures and sample prices. Orders are disabled.':data.length?'See something you like? Add it to your enquiry basket.':'This shop has not added products yet.';
   $('type').textContent=isDemo?'Live preview · Example store':'Welcome to '+j.store.name;
   if(isDemo){$('demo-banner').classList.add('visible');$('send').textContent='Demo only · Orders disabled';}
   const cats=[...new Set(data.map(p=>p.category).filter(Boolean))];for(const c of cats){const option=elem('option',c);option.value=c;$('category').append(option);}
