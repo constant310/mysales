@@ -66,4 +66,11 @@ http.createServer(async(req,res)=>{
   res.setHeader('X-Frame-Options','DENY');
   res.end(bytes);
  }catch(error){console.error('Request error',error?.message);if(!res.headersSent)res.status(500).end('Server error');}
-}).listen(Number(process.env.PORT)||10000,'0.0.0.0',()=>console.log('Early Storefront server ready'));
+}).listen(Number(process.env.PORT)||10000,'0.0.0.0',()=>{
+ console.log('Early Storefront server ready');
+ if(healthPool){
+  healthPool.query('select 1 from early_storefront.stores limit 0')
+   .then(()=>console.log('Early Storefront PostgreSQL schema connection verified'))
+   .catch(error=>console.error('Early Storefront PostgreSQL schema connection failed',error?.code||error?.message));
+ }
+});
