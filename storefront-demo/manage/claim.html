@@ -29,13 +29,13 @@ history.replaceState(null,'',location.pathname);
 if(!token || !/^[A-Za-z0-9_-]{43}$/.test(token)){
  status.textContent='This management link is missing or invalid. Ask your store administrator for a new link.';
 }else{
- status.textContent='Your private link is ready. Select below to access your store.';
+ status.textContent='Your private link is ready. You can reuse this same link any time. Keep it private.';
  button.hidden=false;
  button.addEventListener('click',async()=>{
   button.disabled=true;status.textContent='Opening your store securely…';
   try{
    const response=await fetch('/api/merchant/claim',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',cache:'no-store',body:JSON.stringify({token})});
-   if(!response.ok){status.textContent='This link has expired, was already used, or has been revoked. Request a new link.';button.hidden=true;return;}
+   if(!response.ok){status.textContent='This private link is invalid or has been revoked. Ask your store administrator for a replacement.';button.hidden=true;return;}
    location.replace('/manage/');
   }catch{status.textContent='Unable to connect. Check your internet and try again.';button.disabled=false;}
  });
