@@ -1,48 +1,58 @@
 <!doctype html><html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#073f3a">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#1C8220">
 <title>Online store | mySales</title><meta name="description" content="Browse products, find prices and enquire directly on WhatsApp.">
 <style>
-:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f7f9f5;color:#173730}
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f7f9f5;color:#374151}
 *{box-sizing:border-box}body{margin:0;padding:0 0 25px}button,input,select{font:inherit}button{cursor:pointer}
-.top{background:#063c36;color:white}.top-inner{max-width:1130px;margin:auto;padding:17px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.brand{font-size:1.25rem;font-weight:900;letter-spacing:-.055em}.brand b{color:#2fd6ab}.shopbag{font-size:.82rem;color:#c4e5d8}
-.banner{display:none;background:#def8e9;color:#0d6757;border-bottom:1px solid #c4edd8}
+.top{background:#133d25;color:white}.top-inner{max-width:1130px;margin:auto;padding:17px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{font-size:1.25rem;font-weight:900;letter-spacing:-.055em}.brand b{color:#16a34a}.shopbag{font-size:.82rem;color:#e7f8ed}
+.banner{display:none;background:#f0fdf4;color:#15803d;border-bottom:1px solid #d5f4de}
 .banner.visible{display:block}.banner-inner{max-width:1130px;margin:auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;font-size:.85rem;font-weight:700}
-.banner a{display:inline-block;text-decoration:none;background:#087e6d;border-radius:10px;padding:10px 15px;color:#fff;font-weight:900}
-header.hero{background:linear-gradient(120deg,#063d38 0%,#0c6f65 100%);color:white;padding:40px 20px 44px}
-.hero-inner{max-width:1080px;margin:auto}.subhead{text-transform:uppercase;letter-spacing:.16em;color:#8bdfc7;font-size:.7rem;font-weight:900}
+.banner a{display:inline-block;text-decoration:none;background:#1c8220;border-radius:10px;padding:10px 15px;color:#fff;font-weight:900}
+header.hero{background:linear-gradient(120deg,#133d25 0%,#15803d 100%);color:white;padding:40px 20px 44px}
+.hero-inner{max-width:1080px;margin:auto}.subhead{text-transform:uppercase;letter-spacing:.16em;color:#baf0ca;font-size:.7rem;font-weight:900}
 h1{font-size:clamp(2rem,5vw,3.35rem);line-height:1.1;letter-spacing:-.055em;max-width:850px;margin:10px 0}
-.hero p{color:#d3eee6;line-height:1.55;font-size:1rem;max-width:650px}
+.hero p{color:#e7f8ed;line-height:1.55;font-size:1rem;max-width:650px}
 main{max-width:1120px;padding:23px 20px;margin:auto}
 .tools{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:17px}
 .tools strong{font-size:1rem}.filters{display:flex;gap:9px;flex-wrap:wrap}
-input,select{padding:12px 13px;border:1px solid #d4e3da;border-radius:12px;min-height:45px;outline:0;background:white}
-input:focus,select:focus{border-color:#0b9e83}
+input,select{padding:12px 13px;border:1px solid #e5e7eb;border-radius:12px;min-height:45px;outline:0;background:white}
+input:focus,select:focus{border-color:#16a34a}
 #search{min-width:min(260px,100%)}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
 .item{min-width:0;display:flex;flex-direction:column;background:#fff;border-radius:17px;overflow:hidden;border:1px solid #e6eae4;box-shadow:0 5px 18px #133c2910}
 .item img,.empty-img{width:100%;aspect-ratio:1.05;object-fit:cover;display:grid;place-items:center;background:#e4f3e9}
 .empty-img{font-size:2.8rem}.inside{padding:15px;display:flex;flex-direction:column;flex:1}
-.category{font-size:.69rem;text-transform:uppercase;letter-spacing:.07em;color:#0e8c77;font-weight:850}
-.item h3{font-size:1.02rem;line-height:1.3;margin:6px 0 5px}.description{font-size:.81rem;color:#71877f;line-height:1.45;margin:2px 0 9px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.stock{font-size:.7rem;color:#8b9b91;margin:5px 0 11px}.buy{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-top:auto;padding-top:12px;border-top:1px solid #f0f2ef;flex-wrap:wrap}
-.price{font-weight:900;color:#145f50}.buy button,button.primary{border:0;background:#087a6d;color:white;border-radius:10px;padding:10px 12px;font-weight:850}
-.buy button:disabled{background:#a9bdb6}.buy small{font-size:.68rem;color:#6d867e}
+.category{font-size:.69rem;text-transform:uppercase;letter-spacing:.07em;color:#15803d;font-weight:850}
+.item h3{font-size:1.02rem;line-height:1.3;margin:6px 0 5px}.description{font-size:.81rem;color:#6b7280;line-height:1.45;margin:2px 0 9px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.stock{font-size:.7rem;color:#6b7280;margin:5px 0 11px}.buy{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-top:auto;padding-top:12px;border-top:1px solid #f0f2ef;flex-wrap:wrap}
+.price{font-weight:900;color:#15803d}.buy button,button.primary{border:0;background:#1c8220;color:white;border-radius:10px;padding:10px 12px;font-weight:850}
+.buy button:disabled{background:#d1d5db}.buy small{font-size:.68rem;color:#6b7280}
 aside{background:#fff;border:1px solid #e2e9e3;border-radius:18px;padding:22px;margin:29px 0;box-shadow:0 5px 20px #183f2b0a}
 .cart-head{display:flex;justify-content:space-between;gap:10px;align-items:center}aside h2{margin:0 0 12px;font-size:1.2rem;letter-spacing:-.03em}
-.empty-cart{font-size:.86rem;color:#71877f}.line{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f1f4f0;padding:10px 0;gap:15px;flex-wrap:wrap}.line strong{font-size:.85rem}
-.line small{color:#68857b}.remove{border:1px solid #d8e6de;background:white;border-radius:8px;padding:5px 8px;color:#8d5045}
-#send{margin-top:18px;padding:14px 18px;width:100%;max-width:370px}#send:disabled{background:#9db4a8}
-#notice{min-height:23px;color:#56776d;font-size:.86rem;line-height:1.5}
-.demo-foot{display:none;background:#e7f7ed;padding:25px;border-radius:17px;text-align:center;margin:25px 0}
-.demo-foot h2{margin:4px 0;font-size:1.55rem;letter-spacing:-.035em}.demo-foot p{color:#50786a}.demo-foot a{text-decoration:none;display:inline-block;background:#08796b;color:#fff;border-radius:12px;padding:15px 19px;font-weight:850}
-footer{font-size:.75rem;text-align:center;color:#779087;margin:30px 0}
+.empty-cart{font-size:.86rem;color:#6b7280}.line{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f1f4f0;padding:10px 0;gap:15px;flex-wrap:wrap}.line strong{font-size:.85rem}
+.line small{color:#6b7280}.remove{border:1px solid #e5e7eb;background:white;border-radius:8px;padding:5px 8px;color:#8d5045}
+#send{margin-top:18px;padding:14px 18px;width:100%;max-width:370px}#send:disabled{background:#94a3a2}
+#notice{min-height:23px;color:#6b7280;font-size:.86rem;line-height:1.5}
+.demo-foot{display:none;background:#f0fdf4;padding:25px;border-radius:17px;text-align:center;margin:25px 0}
+.demo-foot h2{margin:4px 0;font-size:1.55rem;letter-spacing:-.035em}.demo-foot p{color:#6b7280}.demo-foot a{text-decoration:none;display:inline-block;background:#1c8220;color:#fff;border-radius:12px;padding:15px 19px;font-weight:850}
+footer{font-size:.75rem;text-align:center;color:#6b7280;margin:30px 0}
 #floating{display:none}
 @media(max-width:1050px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:690px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.top-inner{padding:14px 15px}main{padding:18px 12px}.hero{padding:27px 16px!important}.inside{padding:11px}.item h3{font-size:.88rem}.description{font-size:.73rem}.buy{align-items:start}.buy button{padding:9px 11px;font-size:.8rem}.filters{width:100%}#search{min-width:0;flex:1}.tools strong{width:100%}aside{padding:16px}#floating.visible{display:block;position:fixed;z-index:8;bottom:13px;left:12px;right:12px;background:#087a6b;color:white;border-radius:13px;box-shadow:0 9px 32px #104a4180;text-align:center;text-decoration:none;padding:15px;font-weight:900;font-size:.93rem}body.demo{padding-bottom:80px}}
+@media(max-width:690px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.top-inner{padding:14px 15px}main{padding:18px 12px}.hero{padding:27px 16px!important}.inside{padding:11px}.item h3{font-size:.88rem}.description{font-size:.73rem}.buy{align-items:start}.buy button{padding:9px 11px;font-size:.8rem}.filters{width:100%}#search{min-width:0;flex:1}.tools strong{width:100%}aside{padding:16px}#floating.visible{display:block;position:fixed;z-index:8;bottom:13px;left:12px;right:12px;background:#1c8220;color:white;border-radius:13px;box-shadow:0 9px 32px #133d2580;text-align:center;text-decoration:none;padding:15px;font-weight:900;font-size:.93rem}body.demo{padding-bottom:80px}}
 @media(max-width:360px){.grid{grid-template-columns:1fr}.buy{align-items:center}}
+
+.top{background:#133D25}.brand{color:#fff;text-decoration:none;display:inline-flex;gap:9px;align-items:center}
+.brand .mark{display:inline-grid;place-items:center;background:#16A34A;color:white;width:32px;height:32px;border-radius:9px;font-size:1rem;letter-spacing:-.13em;padding-right:3px;font-weight:950}
+.brand .wordmark{font-size:1.13rem;letter-spacing:-.06em;font-weight:900;color:#fff}
+.shopbag{color:#D4EBD8}.banner{background:#F0FDF4;color:#15803D;border-bottom:1px solid #CCF1D6}
+.banner a,.demo-foot a,.buy button,button.primary{background:#1C8220}.banner a:hover,.demo-foot a:hover,.buy button:hover:not(:disabled){background:#15803D}
+header.hero{background:linear-gradient(120deg,#133D25,#1C8220)}
+.item{border-color:#E5E7EB}.price{color:#15803D}.category{color:#15803D}
+footer a{color:#1C8220;font-weight:800;text-decoration:none}
+#floating{background:#1C8220}
 </style></head><body>
-<div class="top"><div class="top-inner"><span class="brand">my<b>Sales</b>.</span><span class="shopbag">🛍️ Browse & enquire</span></div></div>
-<div class="banner" id="demo-banner"><div class="banner-inner"><span>👋 Like this demo? You can have a storefront for your own business.</span><a href="/create/">Create my free store →</a></div></div>
+<div class="top"><div class="top-inner"><a class="brand" href="/" aria-label="mySales home"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="shopbag">Storefronts · by mySales</span></div></div>
+<div class="banner" id="demo-banner"><div class="banner-inner"><span>This sample storefront was created with mySales. Create one for your business.</span><a href="/create/">Create my free store →</a></div></div>
 <header class="hero"><div class="hero-inner"><div class="subhead" id="type">Welcome to our shop</div><h1 id="name">Store catalogue</h1><p id="description">Explore our products and contact us on WhatsApp to order.</p></div></header>
 <main>
 <div class="tools"><strong id="section-title">Explore products</strong><div class="filters"><input id="search" type="search" placeholder="Search products…" aria-label="Search products"><select id="category" aria-label="Product category"><option value="">All categories</option></select></div></div>
@@ -53,8 +63,8 @@ footer{font-size:.75rem;text-align:center;color:#779087;margin:30px 0}
 <button id="send" class="primary" disabled>Send enquiry on WhatsApp →</button>
 <p style="color:#8a9c91;font-size:.75rem;line-height:1.5">Products are enquiries, not paid orders. Your merchant will confirm prices and availability. No payment is collected here.</p>
 </aside>
-<div class="demo-foot" id="demo-foot"><div style="font-size:1.9rem">✨</div><h2>Want a shop just like this?</h2><p>Build yours in minutes, add products from your phone, and share one link everywhere.</p><a href="/create/">Create my free store →</a></div>
-<footer>Powered by <strong>mySales</strong> · Simple storefronts for growing businesses</footer>
+<div class="demo-foot" id="demo-foot"><div style="font-size:1.9rem">✨</div><h2>Your business could look this good online.</h2><p>mySales helps you build your own storefront, upload products from your phone and share one link with customers.</p><a href="/create/">Create my free store →</a></div>
+<footer>Powered by <strong>mySales Storefronts</strong> · <a href="/create/">Create your own store</a></footer>
 </main><a href="/create/" id="floating">✨ Create your own store — it's free →</a>
 <script type="module">
 const $=id=>document.getElementById(id),cart=new Map();let data=[],isDemo=false;
