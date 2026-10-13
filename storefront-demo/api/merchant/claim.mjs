@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   const token = req.body?.token;
   try {
     const session = await redeemManagementLink(token);
-    if (!session) return res.status(401).json({ error: 'Link invalid, expired or already used' });
+    if (!session) return res.status(401).json({ error: 'Private management link invalid or revoked' });
     res.setHeader('Set-Cookie', session.setCookie);
     return res.status(200).json({ ok: true, storeId: session.storeId });
   } catch (error) {
