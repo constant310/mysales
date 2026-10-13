@@ -22,12 +22,32 @@ Deno.serve(async request=>{
   return response(415,{error:'JSON required'});
  if(Number(request.headers.get('content-length')||0)>6000)return response(413,{error:'Request too large'});
  try{
-  const data=await request.json();
+  // Enforce the actual request-body size, including chunked requests with no Content-Length.
+  const cap=6000;
+  const reader=request.body?.getReader();
+  if(!reader)return response(400,{error:'Invalid request'});
+  const chunks:Uint8Array[]=[];let used=0;
+  try{
+   while(true){
+    const part=await reader.read();
+    if(part.done)break;
+    used+=part.value.byteLength;
+    if(used>cap){await reader.cancel();return response(413,{error:'Request too large'});}
+    chunks.push(part.value);
+   }
+  }finally{reader.releaseLock();}
+  const incoming=new Uint8Array(used);let cursor=0;
+  for(const chunk of chunks){incoming.set(chunk,cursor);cursor+=chunk.byteLength;}
+  let data:unknown;
+  try{data=JSON.parse(new TextDecoder().decode(incoming));}
+  catch{return response(400,{error:'Invalid JSON'});}
+
   if(!data||typeof data!=='object'||Array.isArray(data))return response(400,{error:'Invalid request'});
-  if(data.website)return response(400,{error:'Invalid request'});
-  const name=typeof data.name==='string'?data.name.trim():'';
-  const description=typeof data.description==='string'?data.description.trim():'';
-  const raw=typeof data.whatsapp==='string'?data.whatsapp.trim():'';
+  const fields=data as Record<string,unknown>;
+  if(fields.website)return response(400,{error:'Invalid request'});
+  const name=typeof fields.name==='string'?fields.name.trim():'';
+  const description=typeof fields.description==='string'?fields.description.trim():'';
+  const raw=typeof fields.whatsapp==='string'?fields.whatsapp.trim():'';
   let number=raw.replace(/[\s()-]/g,'');
   if(/^0[789]\d{9}$/.test(number))number='+234'+number.slice(1);
   if(/^234[789]\d{9}$/.test(number))number='+'+number;
