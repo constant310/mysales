@@ -197,10 +197,37 @@ main{max-width:870px;padding-top:19px}
 @media(max-width:700px){.settings-form-grid{grid-template-columns:1fr;gap:0}.settings-field input,.settings-field select,.settings-field textarea{font-size:16px}}
 @media(max-width:500px){.settings-hub{margin-top:22px;gap:11px}.settings-intro{padding:1px 3px 5px}.settings-intro h2{font-size:1.41rem}.settings-summary{padding:15px 14px;gap:11px}.settings-icon{width:41px;height:41px;border-radius:11px}.settings-title strong{font-size:.89rem}.settings-title small{font-size:.73rem}.settings-content{margin:0 14px;padding:17px 0 18px}.settings-access-actions{grid-template-columns:1fr;gap:9px}.settings-action-row .settings-primary{min-width:150px}.whatsapp-actions{display:grid;grid-template-columns:1fr 1fr}.whatsapp-actions #whatsapp-save{grid-column:1/-1}.whatsapp-actions #reset-whatsapp{grid-column:auto;justify-self:center}.whatsapp-actions #preview-whatsapp{grid-column:1}.settings-card{border-radius:14px}}
 @media(prefers-reduced-motion:reduce){.settings-chevron{transition:none}}
+
+.access-recovery{max-width:490px;margin:38px auto 25px;background:#fff;border:1px solid #deeadf;border-radius:21px;padding:30px;box-shadow:0 12px 33px #173d2010;text-align:left}
+.access-recovery[hidden]{display:none!important}
+.recovery-symbol{display:grid;place-items:center;background:#eaf8ed;border-radius:13px;height:51px;width:51px;font-size:1.35rem}
+.access-recovery h1{font-size:1.55rem;letter-spacing:-.048em;line-height:1.2;color:#233e2b;margin:19px 0 10px}
+.access-recovery>p{font-size:.87rem;line-height:1.65;color:#6c8171}
+.access-recovery label{font-size:.8rem;font-weight:850;margin:20px 0 7px}
+#recover-link{font-size:16px;width:100%;min-height:50px}
+#recover-button{display:block;width:100%;margin-top:13px;min-height:49px}
+#retry-access{display:block;width:100%;margin-top:12px}
+#retry-access[hidden]{display:none}
+.recovery-note{font-size:.74rem!important;background:#f4faf5;border:1px solid #e2efe4;border-radius:12px;padding:12px;margin-top:22px}
+.recovery-secondary{text-align:center;margin:17px 0 0}
+@media(max-width:500px){.access-recovery{margin:20px auto;padding:23px 19px;border-radius:16px}.access-recovery h1{font-size:1.42rem}}
 </style></head><body>
 <header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Storefront Manager</span>
 <button id="exit" class="head-btn">Close private access</button></header>
 <main><p id="notice" role="status" aria-live="polite">Opening your store…</p>
+<section id="access-recovery" class="access-recovery" aria-labelledby="recovery-heading" hidden>
+ <div class="recovery-symbol" aria-hidden="true">🔐</div>
+ <h1 id="recovery-heading">Reconnect to your store</h1>
+ <p id="recovery-message">Open your saved private manager link to continue editing. Your products and store details are still saved.</p>
+ <form id="recover-form">
+  <label for="recover-link">Paste your private management link</label>
+  <input id="recover-link" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste the private link you saved" required>
+  <button class="btn" type="submit" id="recover-button">Open my store →</button>
+ </form>
+ <button class="btn btn-outline" id="retry-access" type="button" hidden>Try connecting again</button>
+ <p class="recovery-note">Your private link is the key to your store. Do not share it publicly. On a shared phone, use “Close private access” when finished.</p>
+ <p class="recovery-secondary"><a href="/">Back to mySales</a></p>
+</section>
 <div id="app" hidden>
 <section class="hero"><div class="eyebrow" id="state">Your online store</div>
 <h1 id="store-title">Welcome to your store</h1><p id="greeting">Let's get your first product online.</p>
@@ -329,7 +356,37 @@ main{max-width:870px;padding-top:19px}
 </dialog>
 <div id="manager-toast" class="manager-toast" role="status" aria-live="polite"><span aria-hidden="true">✓</span> <strong id="manager-toast-message">Product added</strong></div>
 <script type="module">
-const token=sessionStorage.getItem('mysales_private_management_token')||'';
+const managerTokenKey='mysales_private_management_token';
+const validManagerToken=value=>/^[A-Za-z0-9_-]{43}$/.test(value||'');
+const readManagerToken=()=>{
+ const fragment=new URLSearchParams(location.hash.slice(1)).get('token')||'';
+ if(validManagerToken(fragment))return fragment;
+ for(const storage of [sessionStorage,localStorage]){
+  try{const candidate=storage.getItem(managerTokenKey);if(validManagerToken(candidate))return candidate;}catch{}
+ }
+ return '';
+};
+const rememberManagerToken=value=>{
+ for(const storage of [sessionStorage,localStorage]){
+  try{storage.setItem(managerTokenKey,value);}catch{}
+ }
+};
+const forgetManagerToken=()=>{
+ for(const storage of [sessionStorage,localStorage]){
+  try{storage.removeItem(managerTokenKey);}catch{}
+ }
+};
+const parsePrivateLink=input=>{
+ const raw=String(input||'').trim();
+ if(validManagerToken(raw))return raw;
+ try{
+  const link=new URL(raw,location.origin);
+  if(link.origin!==location.origin)return '';
+  const value=new URLSearchParams(link.hash.slice(1)).get('token')||'';
+  return validManagerToken(value)?value:'';
+ }catch{return '';}
+};
+let token=readManagerToken();
 const $=id=>document.getElementById(id),notice=$('notice'),list=$('products');
 let currentStore=null,products=[],isAdding=new URLSearchParams(location.search).has('welcome'),managerToastTimer=0;
 function showManagerToast(message){
@@ -352,11 +409,11 @@ const node=(tag,value)=>{const n=document.createElement(tag);n.textContent=Strin
 function say(message,problem=false){notice.textContent=message;notice.style.color=problem?'#af3f32':'#15803d';}
 function currency(value){return '₦'+Number(value||0).toLocaleString('en-NG');}
 async function api(path,options={}){
- if(!/^[A-Za-z0-9_-]{43}$/.test(token))throw Error('Open your private management link again.');
+ if(!validManagerToken(token))throw Error('Your private access is not available in this tab.');
  const h=new Headers(options.headers||{});h.set('Authorization','Bearer '+token);
  const r=await fetch('/api/merchant/'+path,{...options,headers:h,cache:'no-store'});
  const j=await r.json().catch(()=>({}));
- if(!r.ok)throw Error(j.error||'Could not save. Try again.');
+ if(!r.ok){const error=new Error(j.error||'Could not save. Try again.');error.status=r.status;throw error;}
  return j;
 }
 const post=(path,data)=>api(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
@@ -720,18 +777,70 @@ settingsForm.onsubmit=async e=>{
 $('share').onclick=()=>copy(publicUrl());
 $('copy-manager').onclick=()=>copy(location.origin+'/manage/claim#token='+encodeURIComponent(token));
 $('export').onclick=async()=>{const b=$('export');b.disabled=true;try{const data=await api('export');const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='mysales-store-backup.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);say('Backup downloaded.');}catch(err){say(err.message,true);}finally{b.disabled=false;}};
-$('exit').onclick=()=>{sessionStorage.removeItem('mysales_private_management_token');location.replace('/manage/claim');};
-try{
- const identity=await api('me');currentStore=identity.store;
- const form=$('settings');form.elements.namedItem('name').value=currentStore.name;
- form.elements.namedItem('description').value=currentStore.description||'';
- form.elements.namedItem('whatsapp').value=currentStore.whatsapp;
- form.elements.namedItem('status').value=currentStore.status;
- $('whatsapp-template').value=currentStore.whatsapp_template||defaultWhatsApp;
- businessBaseline=businessValues();whatsappBaseline=$('whatsapp-template').value;
- updateBusinessSave();updateWhatsAppSave();
- updateHero();$('app').hidden=false;
- say(new URLSearchParams(location.search).has('welcome')?'Welcome! Add your first product to launch your store.':'Your private store manager is ready.');
- await refresh();
-}catch(err){say('Could not open your store: '+err.message,true);}
+$('exit').onclick=()=>{
+ forgetManagerToken();
+ history.replaceState(null,'',location.pathname);
+ location.replace('/manage/');
+};
+function showAccessRecovery(message,{retry=false}={}){
+ $('app').hidden=true;
+ $('access-recovery').hidden=false;
+ $('recovery-message').textContent=message;
+ $('retry-access').hidden=!retry;
+ notice.textContent='';
+}
+async function openManager(){
+ if(!validManagerToken(token)){
+  showAccessRecovery('Your private access is not available in this browser tab. Paste your saved private management link to reopen your store. Your products have not been removed.');
+  return;
+ }
+ notice.textContent='Opening your store…';
+ try{
+  const identity=await api('me');
+  currentStore=identity.store;
+  rememberManagerToken(token);
+  if(location.hash)history.replaceState(null,'',location.pathname+location.search);
+  const form=$('settings');
+  form.elements.namedItem('name').value=currentStore.name;
+  form.elements.namedItem('description').value=currentStore.description||'';
+  form.elements.namedItem('whatsapp').value=currentStore.whatsapp;
+  form.elements.namedItem('status').value=currentStore.status;
+  $('whatsapp-template').value=currentStore.whatsapp_template||defaultWhatsApp;
+  businessBaseline=businessValues();whatsappBaseline=$('whatsapp-template').value;
+  updateBusinessSave();updateWhatsAppSave();
+  updateHero();
+  $('access-recovery').hidden=true;$('app').hidden=false;
+  say(new URLSearchParams(location.search).has('welcome')?'Welcome! Add your first product to launch your store.':'Your private store manager is ready.');
+  try{await refresh();}catch(error){say('Your store is open, but products could not load. Refresh to try again: '+error.message,true);}
+ }catch(error){
+  if(error.status===401||error.status===403){
+   forgetManagerToken();token='';
+   showAccessRecovery('This private link is invalid or no longer active. If you have another saved management link, paste it below.');
+  }else{
+   showAccessRecovery('We could not connect to your store right now. Your access is still saved; please retry. '+error.message,{retry:true});
+  }
+ }
+}
+$('retry-access').onclick=()=>openManager();
+$('recover-form').onsubmit=async event=>{
+ event.preventDefault();
+ const candidate=parsePrivateLink($('recover-link').value);
+ if(!candidate){
+  $('recovery-message').textContent='That does not look like a valid mySales private link. Paste the complete link you saved when creating the store.';
+  return;
+ }
+ const button=$('recover-button');button.disabled=true;button.textContent='Verifying access…';
+ try{
+  // Check the capability before persisting it on this device.
+  const result=await fetch('/api/merchant/me',{headers:{Authorization:'Bearer '+candidate},cache:'no-store'});
+  if(!result.ok)throw Error(result.status===401||result.status===403?'This private link is not active. Check that you copied the complete link.':'The store could not be reached. Please try again.');
+  token=candidate;rememberManagerToken(token);
+  $('recover-link').value='';
+  history.replaceState(null,'',location.pathname+location.search);
+  await openManager();
+ }catch(error){
+  $('recovery-message').textContent=error.message;
+ }finally{button.disabled=false;button.textContent='Open my store →';}
+};
+openManager();
 </script></body></html>
