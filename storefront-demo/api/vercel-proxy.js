@@ -7,7 +7,7 @@ const allowed=new Set([
  '/api/merchant/restock','/api/merchant/publish','/api/merchant/confirm-sale',
  '/api/merchant/export','/api/merchant/update-product',
  '/api/merchant/archive-product','/api/merchant/store-settings','/api/merchant/upload-image',
- '/api/operator/me','/api/operator/stores'
+ '/api/operator/me','/api/operator/stores','/api/operator/analytics','/api/activity'
 ]);
 function fail(res,status,message){return res.status(status).json({error:message});}
 export default async function handler(req,res){
@@ -43,6 +43,7 @@ export default async function handler(req,res){
  const headers={};
  if(req.headers.authorization)headers.authorization=req.headers.authorization;
  if(req.headers['content-type'])headers['content-type']=req.headers['content-type'];
+ if(targetPath==='/api/activity')headers.origin='https://store.mysalesofficial.com';
  // We validate the browser's Origin above, then omit it upstream. The
  // existing Render/Supabase service accepts only its own origin for writes.
  // Forwarding the Vercel Origin directly would make every write fail.
