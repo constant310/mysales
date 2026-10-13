@@ -95,7 +95,21 @@ label{margin-top:15px}input,textarea{min-height:49px;padding:12px;border-radius:
 <script type="module">
 const $=id=>document.getElementById(id);
 let managementLink='';
-const savedToken=sessionStorage.getItem('mysales_private_management_token')||'';
+const managerTokenKey='mysales_private_management_token';
+const rememberToken=value=>{
+ for(const storage of [sessionStorage,localStorage]){
+  try{storage.setItem(managerTokenKey,value);}catch{}
+ }
+};
+const getSavedToken=()=>{
+ for(const storage of [sessionStorage,localStorage]){
+  try{const saved=storage.getItem(managerTokenKey);
+   if(/^[A-Za-z0-9_-]{43}$/.test(saved||''))return saved;
+  }catch{}
+ }
+ return '';
+};
+const savedToken=getSavedToken();
 if(/^[A-Za-z0-9_-]{43}$/.test(savedToken)){
  const existing=document.createElement('div');
  existing.style.cssText='background:#e8f8ef;border:1px solid #bde9d3;border-radius:13px;padding:14px;margin-bottom:16px;line-height:1.6;font-size:.85rem;color:#16582a';
@@ -130,8 +144,8 @@ $('continue').onclick=()=>{
  const token=new URL(managementLink).hash.slice(1);
  const value=new URLSearchParams(token).get('token');
  if(!value||!/^[A-Za-z0-9_-]{43}$/.test(value)){$('done-message').textContent='Private access link invalid. Save it and contact support.';return;}
- sessionStorage.setItem('mysales_private_management_token',value);
- location.href='/manage/?welcome=1';
+ rememberToken(value);
+ location.href='/manage/?welcome=1#token='+encodeURIComponent(value);
 };
 </script>
 </body></html>
