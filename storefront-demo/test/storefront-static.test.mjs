@@ -114,3 +114,13 @@ test('both public and management endpoints are scoped to merchant stores',async(
  assert.ok(edge.includes('where store_id=${id}'));
  assert.ok(edge.includes('l.revoked_at is null'));
 });
+
+
+test('proxy streams responses and exposes safe upstream timing diagnostics',async()=>{
+ const server=await read('render-server.mjs');
+ assert.ok(server.includes('Readable.fromWeb(response.body)'));
+ assert.ok(server.includes('upstreamDurationMs'));
+ assert.ok(server.includes('Server-Timing'));
+ assert.ok(server.includes("console.warn('Storefront upstream issue',path"));
+ assert.doesNotMatch(server,/console\.warn\([^\n]*authorization/i);
+});
