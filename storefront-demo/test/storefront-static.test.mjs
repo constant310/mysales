@@ -25,8 +25,11 @@ test('Merchant never needs a password, receives a reusable private-link capabili
  const claim=await read('manage/claim.html');
  const manager=await read('manage/index.html');
  assert.match(claim,/location\.hash/);
- assert.match(claim,/sessionStorage\.setItem\('mysales_private_management_token'/);
- assert.match(manager,/sessionStorage\.getItem\('mysales_private_management_token'/);
+ assert.match(claim,/storage\.setItem\(key,token\)/);
+ assert.match(claim,/\[sessionStorage,localStorage\]/);
+ assert.match(manager,/storage\.getItem\(managerTokenKey\)/);
+ assert.match(manager,/localStorage/);
+ assert.match(manager,/id="access-recovery"/);
  assert.match(manager,/Authorization.*Bearer/);
  assert.match(manager,/upload-image/);
  assert.match(manager,/update-product/);
@@ -331,4 +334,40 @@ test('business and WhatsApp settings save only when edited',async()=>{
  assert.match(manager,/businessBaseline=businessValues\(\)/);
  assert.match(manager,/whatsappBaseline=\$\('whatsapp-template'\)\.value/);
  assert.match(manager,/settingsForm\.checkValidity\(\)/);
+});
+
+test('private link is only cleared after successful verification, never before retry',async()=>{
+ const claim=await read('manage/claim.html');
+ const manager=await read('manage/index.html');
+ assert.match(claim,/if\(!r\.ok\)throw Error/);
+ assert.match(claim,/if\(persisted\)\{/);
+ assert.match(claim,/history\.replaceState\(null,'',location\.pathname\)/);
+ assert.match(claim,/location\.replace\('\/manage\/#token='/);
+ assert.doesNotMatch(claim,/history\.replaceState\(null,'',location\.pathname\);\s*async function enter/);
+ assert.match(manager,/if\(location\.hash\)history\.replaceState/);
+ assert.match(manager,/await api\('me'\)/);
+ assert.match(manager,/rememberManagerToken\(token\)/);
+});
+test('merchant can recover access by pasting their private link without sharing it publicly',async()=>{
+ const manager=await read('manage/index.html');
+ assert.match(manager,/id="access-recovery"/);
+ assert.match(manager,/id="recover-link"/);
+ assert.match(manager,/id="recover-form"/);
+ assert.match(manager,/id="retry-access"/);
+ assert.match(manager,/function showAccessRecovery/);
+ assert.match(manager,/const parsePrivateLink=input=>/);
+ assert.match(manager,/link\.origin!==location\.origin/);
+ assert.match(manager,/const result=await fetch\('\/api\/merchant\/me'/);
+ assert.match(manager,/Authorization:'Bearer '\+candidate/);
+ assert.match(manager,/forgetManagerToken\(\)/);
+ assert.match(manager,/sessionStorage,localStorage/);
+ assert.doesNotMatch(manager,/localStorage\.setItem\([^)]*currentStore/);
+});
+test('signup remembers private access on the merchant device',async()=>{
+ const signup=await read('create/index.html');
+ assert.match(signup,/const getSavedToken=/);
+ assert.match(signup,/const rememberToken=/);
+ assert.match(signup,/\[sessionStorage,localStorage\]/);
+ assert.match(signup,/rememberToken\(value\)/);
+ assert.match(signup,/\/manage\/\?welcome=1#token=/);
 });
