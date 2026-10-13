@@ -168,6 +168,12 @@ button{-webkit-tap-highlight-color:transparent}a{color:inherit;text-decoration:n
 @media(min-width:600px){#explore-view .reel{height:calc(95dvh - 73px);min-height:calc(95dvh - 73px)}.home-head{padding-top:17px}}
 @media(max-width:370px){.home-tools{gap:4px}.home-filter select{width:75px}.home-filter{padding:0 3px}.grid-content{padding:9px}.category-select{padding:0 4px}.category-select select{width:59px}.sheet-actions button{font-size:.75rem}.business-hero{padding:24px 20px}}
 .business-whatsapp{display:inline-block;margin-top:13px;font-size:.79rem;color:#E8FAED;border:1px solid #ffffff6e;background:#ffffff13;border-radius:9px;padding:9px 12px;font-weight:800}
+/* The tab bar belongs to Home itself, never to the global storefront shell. */
+#home-view.home-view{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0}
+#home-view .home-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:12px}
+#home-view #bottom-nav{position:relative;inset:auto;flex:none;z-index:12;width:100%;box-shadow:0 -4px 17px #061c1028}
+#home-view[hidden],#bottom-nav[hidden]{display:none!important}
+
 
 /* Explore is immersive; Home owns the bottom tabs. */
 #explore-view .feed{top:0;bottom:0}
@@ -217,7 +223,7 @@ button{-webkit-tap-highlight-color:transparent}a{color:inherit;text-decoration:n
 <body>
 <div class="site" id="site">
 
-<section id="home-view" class="home-view" aria-label="Business homepage"><header class="home-head"><a class="home-logo" href="/"><span class="mark">mS</span>mySales</a><small>Online store</small></header>
+<section id="home-view" class="home-view" aria-label="Business homepage"><div id="home-scroll" class="home-scroll"><header class="home-head"><a class="home-logo" href="/"><span class="mark">mS</span>mySales</a><small>Online store</small></header>
 <section class="business-hero"><div class="kicker">Welcome to our store</div><h1 id="business-name">Our business</h1><p id="business-description">Explore our products and prices.</p><a id="business-whatsapp" class="business-whatsapp" href="#" target="_blank" rel="noopener noreferrer" hidden>WhatsApp: <span id="business-number"></span> ↗</a>
 <div class="hero-actions"><button id="explore-cta" type="button">Explore products →</button><small id="business-count"></small></div><a href="/create/" id="home-demo" hidden>Create your free storefront →</a></section>
 <section class="collection"><div class="collection-head"><div><h2>Our collection</h2><small id="grid-count">All products</small></div><button type="button" id="see-explore">See all →</button></div>
@@ -225,7 +231,7 @@ button{-webkit-tap-highlight-color:transparent}a{color:inherit;text-decoration:n
 <button class="filter-trigger home-filter-button" type="button" id="filter-home" aria-label="Filter products by category" aria-haspopup="dialog" aria-controls="filter-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M7 12h10m-7 5h4"/><path d="M16 5v4M10 10v4M15 15v4"/></svg><span class="filter-dot" hidden></span></button>
 <button type="button" id="home-cart" class="home-cart" aria-label="Open basket">🛒<span id="home-count" class="cart-count">0</span></button></div>
 <div id="grid-products" class="grid-products"></div><p class="home-footer">Powered by <strong>mySales Storefronts</strong></p>
-</section></section><section id="explore-view" hidden>
+</section></div><nav id="bottom-nav" class="bottom-nav" aria-label="Store navigation"><button id="nav-home" class="nav-item active" type="button" aria-current="page"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10h-6v-6H9v6H3V10Z"/></svg><span>Home</span></button><button id="nav-explore" class="nav-item" type="button"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg><span>Explore</span></button></nav></section><section id="explore-view" hidden>
 <div id="feed" class="feed" tabindex="0" aria-label="Scroll vertically through products"><div class="loading"><div><strong>Opening this storefront…</strong><p>Loading products and pictures.</p></div></div></div>
 <div class="top-search"><button id="explore-back" class="explore-back" type="button" aria-label="Back to previous view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><label class="search-wrap" for="search">
 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.1"/><path d="m16.3 16.3 4.6 4.6"/></svg>
@@ -245,7 +251,7 @@ button{-webkit-tap-highlight-color:transparent}a{color:inherit;text-decoration:n
 <div class="sheet-line"><strong>Quantity</strong>
 <div class="qty-control" aria-label="Quantity selector"><button type="button" id="minus" aria-label="Decrease quantity">−</button><span id="qty" aria-live="polite">1</span><button type="button" id="plus" aria-label="Increase quantity">+</button></div></div><div class="sheet-line"><strong>Price</strong><div class="bottom-price"><strong id="price">₦0</strong><small id="unit-label">/ piece</small></div></div>
 <div class="sheet-actions"><button class="add-bottom" type="button" id="add-main"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="20" r="1"/><circle cx="19" cy="20" r="1"/><path d="M1 2h3l3 13h13l2-9H6"/><path d="M17 2v8m-4-4h8"/></svg>Add to cart</button><button class="sheet-enquire" type="button" id="sheet-enquire"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 1-11.4 7.2L3 20l1.8-5.6A8 8 0 1 1 20 11Z"/><path d="M8 9c.4 3 2 4.5 5 5.4"/></svg>Enquire now</button></div><p class="sheet-hint">The seller confirms availability before payment.</p>
-</div><nav id="bottom-nav" class="bottom-nav" aria-label="Store navigation"><button id="nav-home" class="nav-item active" type="button" aria-current="page"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10h-6v-6H9v6H3V10Z"/></svg><span>Home</span></button><button id="nav-explore" class="nav-item" type="button"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg><span>Explore</span></button></nav>
+</div>
 
 <dialog id="filter-dialog" class="filter-dialog" aria-labelledby="filter-heading">
  <div class="filter-head"><div><span class="filter-eyebrow">Explore products</span><h2 id="filter-heading">Filter products</h2></div><button type="button" class="filter-close" id="filter-close" aria-label="Close filters">×</button></div>
@@ -484,7 +490,7 @@ document.addEventListener('keydown',event=>{
 function switchView(name,id=null,historyMode='push'){
  if(name!=='home'&&name!=='explore')return;
  const fromHome=currentView==='home';
- if(name==='explore'&&fromHome)homeScrollY=$('home-view').scrollTop;
+ if(name==='explore'&&fromHome)homeScrollY=$('home-scroll').scrollTop;
  closeSheet(false);closeCart(false);
  currentView=name;
  $('home-view').hidden=name!=='home';
@@ -513,7 +519,7 @@ function switchView(name,id=null,historyMode='push'){
   requestAnimationFrame(()=>{feed.scrollTop=index*feed.clientHeight;});
  }else{
   hasInternalExploreEntry=false;
-  requestAnimationFrame(()=>{$('home-view').scrollTop=homeScrollY;});
+  requestAnimationFrame(()=>{$('home-scroll').scrollTop=homeScrollY;});
  }
 }
 function backFromExplore(){
