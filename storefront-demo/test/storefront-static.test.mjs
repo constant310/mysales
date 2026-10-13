@@ -195,8 +195,8 @@ test('storefront opens on the merchant Home grid and can navigate to immersive E
 });
 test('both views share category filtering and the same enquiry basket',async()=>{
  const catalogue=await read('s/index.html');
- assert.match(catalogue,/id="category-home"/);
- assert.match(catalogue,/id="category"/);
+ assert.match(catalogue,/id="filter-home"/);
+ assert.match(catalogue,/id="filter-explore"/);
  assert.match(catalogue,/id="home-cart"/);
  assert.match(catalogue,/id="open-cart"/);
  assert.match(catalogue,/id="home-count"/);
@@ -259,4 +259,35 @@ test('secure product update saves stock and visibility atomically with audited a
  assert.match(edge,/manual_adjustment/);
  assert.match(edge,/where id=\$\{b\.productId\} and store_id=\$\{id\}/);
  assert.match(edge,/await sql\.begin/);
+});
+
+test('Explore hides bottom navigation and the back button preserves previous Home position',async()=>{
+ const catalogue=await read('s/index.html');
+ assert.match(catalogue,/id="explore-back"/);
+ assert.match(catalogue,/id="bottom-nav"/);
+ assert.match(catalogue,/\$\('bottom-nav'\)\.hidden=name==='explore'/);
+ assert.match(catalogue,/function backFromExplore\(\)/);
+ assert.match(catalogue,/history\.pushState/);
+ assert.match(catalogue,/history\.back\(\)/);
+ assert.match(catalogue,/addEventListener\('popstate'/);
+ assert.match(catalogue,/homeScrollY=\$\('home-view'\)\.scrollTop/);
+ assert.match(catalogue,/scrollTop=homeScrollY/);
+ assert.match(catalogue,/#explore-view \.reel\{height:100dvh/);
+});
+
+test('Compact filter icon opens accessible category modal from Home or Explore',async()=>{
+ const catalogue=await read('s/index.html');
+ assert.match(catalogue,/id="filter-home"[^>]*aria-haspopup="dialog"/);
+ assert.match(catalogue,/id="filter-explore"[^>]*aria-haspopup="dialog"/);
+ assert.match(catalogue,/id="filter-dialog"[^>]*aria-labelledby="filter-heading"/);
+ assert.match(catalogue,/id="filter-options"/);
+ assert.match(catalogue,/id="filter-clear"/);
+ assert.match(catalogue,/id="filter-apply"/);
+ assert.match(catalogue,/function buildFilterOptions/);
+ assert.match(catalogue,/filterDialog\.showModal\(\)/);
+ assert.match(catalogue,/filterDialog\.close\(\)/);
+ assert.match(catalogue,/categoryFilter=chosen\?\.value\|\|''/);
+ assert.match(catalogue,/function applyFilters/);
+ assert.doesNotMatch(catalogue,/id="category-home"/);
+ assert.doesNotMatch(catalogue,/id="category"/);
 });
