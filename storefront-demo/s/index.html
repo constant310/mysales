@@ -269,9 +269,9 @@ function openCart(){
  $('overlay').classList.add('open');$('drawer').classList.add('open');
  $('drawer').setAttribute('aria-hidden','false');$('close-cart').focus({preventScroll:true});
 }
-function closeCart(){
+function closeCart(restore=true){
  $('overlay').classList.remove('open');$('drawer').classList.remove('open');
- $('drawer').setAttribute('aria-hidden','true');$('open-cart').focus({preventScroll:true});
+ $('drawer').setAttribute('aria-hidden','true');if(restore)(currentView==='home'?$('home-cart'):$('open-cart')).focus({preventScroll:true});
 }
 $('open-cart').onclick=openCart;
 $('close-cart').onclick=closeCart;
@@ -412,10 +412,10 @@ function closeSheet(restore=false){
 }
 function openSheet(p){
  if(!p||!unitOf(p)){notice('This product cannot be added right now.');return;}
- closeCart();sheetProduct=p;chosenQty=1;
+ closeCart(false);sheetProduct=p;chosenQty=1;
  $('sheet-name').textContent=p.name;$('sheet-category').textContent=p.category||'Product';
- const image=$('sheet-thumb');image.src=p.image_path||(isDemo?exampleImage(p.name):'');
- image.style.display=image.src?'block':'none';image.alt='Product photo: '+p.name;
+ const image=$('sheet-thumb');const picture=p.image_path||(isDemo?exampleImage(p.name):'');
+ if(picture){image.src=picture;image.style.display='block';}else{image.removeAttribute('src');image.style.display='none';}image.alt='Product photo: '+p.name;
  image.onerror=()=>{if(isDemo&&image.dataset.fallback!=='1'){image.dataset.fallback='1';image.src=exampleImage(p.name);return;}image.style.display='none';};
  image.dataset.fallback='0';
  updateToolbar();$('sheet-backdrop').classList.add('open');
@@ -431,7 +431,7 @@ document.addEventListener('keydown',event=>{
 });
 function switchView(name,id=null){
  if(name!=='home'&&name!=='explore')return;
- closeSheet(false);closeCart();
+ closeSheet(false);closeCart(false);
  currentView=name;
  $('home-view').hidden=name!=='home';$('explore-view').hidden=name!=='explore';
  $('nav-home').classList.toggle('active',name==='home');$('nav-explore').classList.toggle('active',name==='explore');
