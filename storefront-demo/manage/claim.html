@@ -23,21 +23,44 @@ button{background:#1C8220}button:hover{background:#15803D}a{color:#15803D}
 <p><a href="/">Back to mySales</a></p></main>
 <script type="module">
 const status=document.querySelector('#status'),button=document.querySelector('#retry'),spinner=document.querySelector('#spinner');
-const token=new URLSearchParams(location.hash.slice(1)).get('token')||'';
-history.replaceState(null,'',location.pathname);
+const key='mysales_private_management_token';
+const valid=value=>/^[A-Za-z0-9_-]{43}$/.test(value||'');
+const fromLink=new URLSearchParams(location.hash.slice(1)).get('token')||'';
+let token=valid(fromLink)?fromLink:'';
+if(!token){
+ for(const storage of [sessionStorage,localStorage]){
+  try{const saved=storage.getItem(key);if(valid(saved)){token=saved;break;}}catch{}
+ }
+}
 async function enter(){
- if(!/^[A-Za-z0-9_-]{43}$/.test(token)){
-  status.textContent='This private link is missing or invalid. Open the link you saved when you created your store.';
-  spinner.hidden=true;return;
+ if(!valid(token)){
+  status.textContent='Your private link is missing. Open your saved management link, or paste it on the store recovery page.';
+  spinner.hidden=true;button.hidden=false;button.textContent='Recover private access';
+  button.onclick=()=>location.assign('/manage/');
+  return;
  }
  button.hidden=true;button.disabled=true;spinner.hidden=false;
- status.textContent='Verifying your access…';
+ status.textContent='Verifying your private store link…';
  try{
   const r=await fetch('/api/merchant/me',{headers:{Authorization:'Bearer '+token},cache:'no-store'});
-  if(!r.ok)throw Error(r.status===401?'This private link is invalid or has been revoked.':'Could not connect to your store.');
-  sessionStorage.setItem('mysales_private_management_token',token);
-  location.replace('/manage/');
- }catch(e){spinner.hidden=true;status.textContent=e.message+' Please retry or contact mySales for a replacement link.';button.hidden=false;button.disabled=false;}
+  if(!r.ok)throw Error((r.status===401||r.status===403)?'This private link has been revoked or is invalid.':'Temporary connection issue. Your link is still available.');
+  let persisted=false;
+  for(const storage of [sessionStorage,localStorage]){
+   try{storage.setItem(key,token);persisted=true;}catch{}
+  }
+  // Scrub the capability only after verification succeeds.
+  // If storage is unavailable, deliver it to the manager via URL fragment,
+  // which is never sent in the HTTP request.
+  if(persisted){
+   history.replaceState(null,'',location.pathname);
+   location.replace('/manage/');
+  }else location.replace('/manage/#token='+encodeURIComponent(token));
+ }catch(e){
+  spinner.hidden=true;
+  status.textContent=e.message+' You can retry without losing your private link.';
+  button.hidden=false;button.disabled=false;button.textContent='Try again';
+ }
 }
-button.addEventListener('click',enter);enter();
+button.addEventListener('click',enter);
+enter();
 </script></body></html>
