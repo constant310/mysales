@@ -238,18 +238,37 @@ Deno.serve(async (request: Request) => {
     }
     if (pathname === '/api/merchant/update-product' && request.method==='POST') {
       const b=await bodyJson(request);
+      // Authenticated, store-scoped atomic edit with audited stock adjustments.
+      const hasStock=b.stock!==undefined;
+      const hasPublished=b.published!==undefined;
       if (!uuid.test(String(b.productId||'')) || !textVal(b.name,150,true) ||
         !textVal(b.description??'',2000) || !textVal(b.category??'',80) ||
-        !goodInt(b.price,0,10000000000) || !uuid.test(String(b.unitId||'')))
+        !goodInt(b.price,0,10000000000) || !uuid.test(String(b.unitId||'')) ||
+        (hasStock&&!goodInt(b.stock,0,10000000)) ||
+        (hasPublished&&typeof b.published!=='boolean'))
         return out(400,{error:'Invalid product changes'});
       const changed=await sql.begin(async tx => {
         const prod=await tx`update early_storefront.products set name=${String(b.name).trim()},
-          description=${b.description??''},category=${b.category??''}
+          description=${b.description??''},category=${b.category??''},
+          published=case when ${hasPublished} then ${hasPublished?b.published:false} else published end
           where id=${b.productId} and store_id=${id} and archived_at is null returning id`;
         if (!prod.length) return false;
         const unit=await tx`update early_storefront.units set price_ngn=${Number(b.price)}
           where id=${b.unitId} and product_id=${b.productId} and store_id=${id} returning id`;
         if (!unit.length) throw new Error('Selling unit not found');
+        if(hasStock){
+          const existing=await tx`select quantity_base from early_storefront.stock
+            where store_id=${id} and product_id=${b.productId} for update`;
+          if(!existing.length) throw new Error('Product inventory not found');
+          const amount=Number(b.stock);
+          const difference=amount-Number(existing[0].quantity_base);
+          if(difference!==0){
+            await tx`update early_storefront.stock set quantity_base=${amount}
+              where store_id=${id} and product_id=${b.productId}`;
+            await tx`insert into early_storefront.stock_movements(store_id,product_id,delta_base,reason)
+              values(${id},${b.productId},${difference},'manual_adjustment')`;
+          }
+        }
         return true;
       });
       return changed?out(200,{ok:true}):out(404,{error:'Product not found'});
