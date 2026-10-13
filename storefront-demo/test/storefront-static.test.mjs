@@ -487,3 +487,36 @@ test('immersive feed keeps product photos fully visible with stable mobile contr
  assert.match(page,/const REEL_CHECK_ICON=/);
  assert.doesNotMatch(page,/\.reel-media \.grid-image\{[^}]*object-fit:cover/);
 });
+
+
+test('official mySales store origin is allowed consistently by proxy and both Edge functions',async()=>{
+ const proxy=await read('render-server.mjs');
+ const signup=await read('supabase/functions/early-storefront-signup/index.ts');
+ const backend=await read('supabase/functions/early-storefront-backend/index.ts');
+ const official='https://store.mysalesofficial.com';
+ const legacy='https://mysales-early-storefront-branch.onrender.com';
+ for(const source of [proxy,signup,backend]){
+  assert.ok(source.includes(official),'Expected official origin in every backend layer');
+  assert.ok(source.includes(legacy),'Existing Render links must continue working');
+ }
+ assert.match(proxy,/if\(origin && !allowedOrigins\.has\(origin\)\)return json\(res,403,\{error:'Invalid origin'\}\)/);
+ assert.match(signup,/if\(origin&&!trustedOrigins\.has\(origin\)\)return response\(403,\{error:'Invalid origin'\}\)/);
+ assert.match(backend,/requestedOrigin && !trustedOrigins\.has\(requestedOrigin\)/);
+ assert.match(signup,/managementLink:\(origin&&trustedOrigins\.has\(origin\)\?origin:primaryOrigin\)/);
+ assert.match(backend,/managementUrl\(token,request\)/);
+ assert.match(signup,/publicUrl:'\/'\+encodeURIComponent\(result\.store\.public_handle\)/);
+});
+test('origin controls accept trusted domains, reject arbitrary sites and keep private links on originating domain',async()=>{
+ const signup=await read('supabase/functions/early-storefront-signup/index.ts');
+ const proxy=await read('render-server.mjs');
+ const backend=await read('supabase/functions/early-storefront-backend/index.ts');
+ for(const source of [signup,proxy,backend])assert.doesNotMatch(source,/'access-control-allow-origin':'\*'/);
+ const official='https://store.mysalesofficial.com';
+ const legacy='https://mysales-early-storefront-branch.onrender.com';
+ const trusted=new Set([official,legacy]);
+ assert.equal(trusted.has(official),true);
+ assert.equal(trusted.has(legacy),true);
+ assert.equal(trusted.has('https://example.org'),false);
+ assert.equal(trusted.has('https://store.mysalesofficial.com.evil.tld'),false);
+ assert.equal(trusted.has('http://store.mysalesofficial.com'),false);
+});
