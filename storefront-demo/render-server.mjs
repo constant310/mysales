@@ -115,6 +115,10 @@ http.createServer(async(req,res)=>{
   if(path==='/operator/claim')staticPath='/operator/claim.html';
   if(path==='/operator/setup')staticPath='/operator/setup.html';
   if(path==='/s'||path==='/s/'||/^\/s\/[a-z0-9-]+\/?$/.test(path))staticPath='/s/index.html';
+  // Clean customer storefronts: /business-name (without /s or ?slug).
+  // Static application routes above always take precedence.
+  if(staticPath===path && /^\/[a-z0-9]+(?:-[a-z0-9]+)*\/?$/.test(path))
+    staticPath='/s/index.html';
   const file=resolve(root,'.'+staticPath);
   if(!file.startsWith(root+sep))return json(res,403,{error:'Forbidden'});
   if(!Object.hasOwn(mime,extname(file)))return json(res,404,{error:'Not found'});
