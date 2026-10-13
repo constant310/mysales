@@ -36,7 +36,9 @@ test('Operator POST calls reject cross-site origins',async()=>{
 });
 test('Migration handoff stays read-only and preserves exact historic source keys',async()=>{
  const source=await read('server/migration-export.mjs');
+ const bundle=await read('scripts/prepare-migration.mjs');
  assert.match(source,/idempotency key/);
  assert.match(source,/sourceProductId/);
- assert.match(source,/target/);
+ assert.match(bundle,/dryRunOnly:true/);
+ assert.match(bundle,/proposedDestination:\{businessId:targetBusinessId,branchName\}/);
 });
