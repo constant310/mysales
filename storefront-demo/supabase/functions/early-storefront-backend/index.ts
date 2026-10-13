@@ -92,7 +92,7 @@ Deno.serve(async (request: Request) => {
     if (pathname === '/api/discover' && request.method === 'GET') {
       const q = (query.get('q')||'').trim().slice(0,80);
       const pattern = '%'+q.replace(/[\\%_]/g,'\\$&')+'%';
-      const rows = await sql`select s.slug,s.name,s.description,count(distinct p.id)::int as product_count,
+      const rows = await sql`select s.slug,s.public_handle,s.name,s.description,count(distinct p.id)::int as product_count,
         coalesce(json_agg(distinct p.category) filter(where p.category<>''),'[]'::json) as categories
         from early_storefront.stores s
         join early_storefront.products p on p.store_id=s.id and p.published=true and p.archived_at is null
