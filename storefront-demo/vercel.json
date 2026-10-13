@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/vercel-proxy.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "**/*.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/vercel-proxy.js?path=$1"
+    },
+    {
+      "src": "/$",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/(create|discover|manage|operator)/?",
+      "dest": "/$1/index.html"
+    },
+    {
+      "src": "/manage/claim/?",
+      "dest": "/manage/claim.html"
+    },
+    {
+      "src": "/operator/claim/?",
+      "dest": "/operator/claim.html"
+    },
+    {
+      "src": "/operator/setup/?",
+      "dest": "/operator/setup.html"
+    },
+    {
+      "src": "/s/?",
+      "dest": "/s/index.html"
+    },
+    {
+      "src": "/s/[a-z0-9-]+/?",
+      "dest": "/s/index.html"
+    },
+    {
+      "src": "/[a-z0-9]+(?:-[a-z0-9]+)*/?",
+      "dest": "/s/index.html"
+    },
+    {
+      "handle": "filesystem"
+    }
+  ]
+}
