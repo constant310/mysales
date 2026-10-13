@@ -399,7 +399,7 @@ test('operator only enters a business name and never needs a manual slug',async(
  assert.doesNotMatch(operator,/name="slug"/);
  assert.doesNotMatch(operator,/s\.name\+' · '\+s\.slug/);
  assert.match(operator,/name="name"/);
- assert.match(edge,/const internalSlug=base\+'-'+crypto\.randomUUID/);
+ assert.match(edge,/const internalSlug=base\+'-'\+crypto\.randomUUID/);
  assert.match(edge,/values\(\$\{internalSlug\}/);
  assert.doesNotMatch(edge,/String\(b\.slug/);
 });
