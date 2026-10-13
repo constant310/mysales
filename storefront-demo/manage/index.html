@@ -211,6 +211,22 @@ main{max-width:870px;padding-top:19px}
 .recovery-note{font-size:.74rem!important;background:#f4faf5;border:1px solid #e2efe4;border-radius:12px;padding:12px;margin-top:22px}
 .recovery-secondary{text-align:center;margin:17px 0 0}
 @media(max-width:500px){.access-recovery{margin:20px auto;padding:23px 19px;border-radius:16px}.access-recovery h1{font-size:1.42rem}}
+
+/* Clear breathing room between the store actions and merchant products. */
+#app>.hero{margin-bottom:32px}
+#product-section,#add-section{scroll-margin-top:22px}
+#product-section{margin-top:0}
+.settings-summary{gap:12px;min-height:76px;padding:16px 18px}
+.settings-icon{background:#edf8f1;color:#198048;width:37px;height:37px;border-radius:10px}
+.settings-icon svg{width:21px;height:21px;display:block}
+.settings-chevron{display:grid;place-items:center;font-size:0;width:22px;height:22px;margin-left:4px;transition:transform .18s}
+.settings-chevron svg{width:20px;height:20px;color:#658472}
+.settings-card[open] .settings-chevron{transform:rotate(180deg)}
+.settings-title strong{font-size:.93rem}
+.settings-title small{font-size:.74rem;line-height:1.55}
+.product-chevron{display:grid;place-items:center;color:#6c9078}
+.product-chevron svg{height:20px;width:20px}
+@media(max-width:600px){#app>.hero{margin-bottom:27px}.settings-summary{padding:15px 14px;gap:12px}.settings-icon{width:35px;height:35px;border-radius:10px}.settings-chevron{width:20px;height:20px}}
 </style></head><body>
 <header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Storefront Manager</span>
 <button id="exit" class="head-btn" hidden>Close private access</button></header>
@@ -260,9 +276,9 @@ main{max-width:870px;padding-top:19px}
 
   <details id="settings-panel" class="settings-card">
     <summary class="settings-summary">
-      <span class="settings-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/><path d="m15 16 4-4 2 2-4 4-3 1 1-3Z"/></svg></span>
+      <span class="settings-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18l-1.3-5.8A2 2 0 0 0 17.7 3H6.3a2 2 0 0 0-2 1.2L3 10Z"/><path d="M4 10v10h16V10"/><path d="M9 20v-7h6v7"/><path d="M3 10c0 2 3 3 4.5 1.5C9 13 11 12 12 10c1 2 3 3 4.5 1.5C18 13 21 12 21 10"/></svg></span>
       <span class="settings-title"><strong>Business details</strong><small>Store name, WhatsApp, description and visibility</small></span>
-      <span class="settings-chevron" aria-hidden="true">⌄</span>
+      <span class="settings-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
     </summary>
     <div class="settings-content">
       <form id="settings">
@@ -279,9 +295,9 @@ main{max-width:870px;padding-top:19px}
 
   <details id="whatsapp-panel" class="settings-card">
     <summary class="settings-summary">
-      <span class="settings-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5a8 8 0 0 1-11.7 7L3 20.5l2-5.2A8 8 0 1 1 20 11.5Z"/><path d="M8.4 8.8c.6 2.9 2.2 4.6 5.2 5.5"/></svg></span>
+      <span class="settings-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 11.5a8.4 8.4 0 0 1-12.1 7.3L3 21l2-5.4a8.4 8.4 0 1 1 15.4-4.1Z"/><path d="M8.7 8.8c.5 2.7 2.3 4.5 5 5.1"/></svg></span>
       <span class="settings-title"><strong>WhatsApp enquiry message</strong><small>Personalise the message customers send you</small></span>
-      <span class="settings-chevron" aria-hidden="true">⌄</span>
+      <span class="settings-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
     </summary>
     <div class="settings-content">
       <form id="whatsapp-form">
@@ -300,9 +316,9 @@ main{max-width:870px;padding-top:19px}
 
   <details id="access-panel" class="settings-card">
     <summary class="settings-summary">
-      <span class="settings-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v3"/></svg></span>
+      <span class="settings-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg></span>
       <span class="settings-title"><strong>Private access &amp; backup</strong><small>Secure your editing link and save a copy</small></span>
-      <span class="settings-chevron" aria-hidden="true">⌄</span>
+      <span class="settings-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
     </summary>
     <div class="settings-content">
       <div class="settings-security-note"><span aria-hidden="true">🔒</span><p><strong>Keep your management link private.</strong> Anyone who has it can edit your products and store details. Only share it with someone you trust.</p></div>
@@ -456,7 +472,7 @@ function renderProduct(p){
  const status=node('p',(p.published?'Visible':'Hidden')+' · '+(Number(p.stock)>0?Number(p.stock)+' in stock':'Enquiry-only')+(p.image_path?'':' · No photo'));
  status.className='meta';content.append(status);
  open.append(content);
- const arrow=node('span','›');arrow.className='product-chevron';arrow.setAttribute('aria-hidden','true');open.append(arrow);
+ const arrow=node('span','');arrow.className='product-chevron';arrow.setAttribute('aria-hidden','true');arrow.innerHTML="<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.9\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m9 18 6-6-6-6\"/></svg>";open.append(arrow);
  open.onclick=()=>openProductDialog(p.id);
  card.append(open);list.append(card);
 }
