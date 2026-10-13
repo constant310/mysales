@@ -1,44 +1,32 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="referrer" content="no-referrer">
-<meta http-equiv="Cache-Control" content="no-store">
-<title>Open your store management | mySales</title>
-<style>
-:root{font-family:system-ui,-apple-system,sans-serif;color:#17202a;background:#f5f7fa}
-*{box-sizing:border-box}body{min-height:100vh;margin:0;display:grid;place-items:center;padding:20px}
-main{background:white;border:1px solid #e6eaf0;border-radius:18px;padding:30px;max-width:460px;width:100%;box-shadow:0 14px 45px #17202a12}
-h1{font-size:1.5rem;margin:0 0 12px}p{line-height:1.6;color:#536174}
-button{background:#116f76;border:0;color:white;border-radius:10px;padding:14px 18px;font:inherit;font-weight:650;width:100%;cursor:pointer}
-button:disabled{opacity:.6;cursor:wait}a{color:#116f76}
-</style>
-</head>
-<body><main>
-<h1>Manage your store</h1>
-<p id="status" role="status">Checking your private management link…</p>
-<button id="claim" hidden>Open my dashboard</button>
-</main>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer"><meta http-equiv="Cache-Control" content="no-store">
+<title>mySales | Private store access</title>
+<style>:root{font-family:system-ui,-apple-system,sans-serif;color:#193038;background:#f5f8f9}
+*{box-sizing:border-box}body{min-height:100vh;display:grid;place-items:center;margin:0;padding:20px}
+main{width:min(100%,470px);background:white;border:1px solid #dde6e9;border-radius:18px;padding:30px}
+h1{margin:0 0 12px}p{line-height:1.6}button{font:inherit;background:#087a7d;color:white;border:0;border-radius:10px;padding:13px 18px;width:100%;cursor:pointer}button:disabled{opacity:.5}
+small{color:#617980}</style></head>
+<body><main><h1>Your private store link</h1><p id="status" role="status">Checking your link…</p>
+<button id="open" hidden>Open my store manager</button>
+<p><small>Your private link stays valid until the storefront operator revokes or replaces it. Anyone with the link can manage your store, so don't share it publicly.</small></p></main>
 <script type="module">
-const status=document.getElementById('status');
-const button=document.getElementById('claim');
-const params=new URLSearchParams(location.hash.replace(/^#/, ''));
-const token=params.get('token');
-// Remove bearer secret from the address bar immediately.
+const status=document.querySelector('#status'),button=document.querySelector('#open');
+const token=new URLSearchParams(location.hash.slice(1)).get('token');
 history.replaceState(null,'',location.pathname);
-if(!token || !/^[A-Za-z0-9_-]{43}$/.test(token)){
- status.textContent='This management link is missing or invalid. Ask your store administrator for a new link.';
+if(!token||!/^[A-Za-z0-9_-]{43}$/.test(token)){
+ status.textContent='This link is missing or incorrect. Request your private management link.';
 }else{
- status.textContent='Your private link is ready. You can reuse this same link any time. Keep it private.';
+ status.textContent='This link can be reused whenever you need to update your products or prices.';
  button.hidden=false;
  button.addEventListener('click',async()=>{
-  button.disabled=true;status.textContent='Opening your store securely…';
+  button.disabled=true;status.textContent='Verifying private access…';
   try{
-   const response=await fetch('/api/merchant/claim',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',cache:'no-store',body:JSON.stringify({token})});
-   if(!response.ok){status.textContent='This private link is invalid or has been revoked. Ask your store administrator for a replacement.';button.hidden=true;return;}
+   const response=await fetch('/api/merchant/me',{headers:{Authorization:'Bearer '+token},cache:'no-store'});
+   if(!response.ok){status.textContent='This link has been revoked or is invalid. Request a new private link.';button.hidden=true;return;}
+   sessionStorage.setItem('mysales_private_management_token',token);
    location.replace('/manage/');
-  }catch{status.textContent='Unable to connect. Check your internet and try again.';button.disabled=false;}
+  }catch{status.textContent='Could not connect. Please retry.';button.disabled=false;}
  });
 }
-</script>
-</body></html>
+</script></body></html>
