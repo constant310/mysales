@@ -66,7 +66,7 @@ test('Visitors can create stores directly from the public demo without an ERP lo
  const create=await read('create/index.html');
  const proxy=await read('render-server.mjs');
  assert.match(landing,/href="\/create\/"/);
- assert.match(catalogue,/id="demo-banner"/);
+ assert.match(catalogue,/id="demo-chip"/);
  assert.match(catalogue,/href="\/create\/"/);
  assert.match(create,/fetch\('\/api\/signup'/);
  assert.match(create,/managementLink/);
@@ -146,6 +146,36 @@ test('focused landing and demo do not show competing marketing messages',async()
  assert.doesNotMatch(home,/faq/);
  assert.doesNotMatch(catalogue,/id="floating"/);
  assert.doesNotMatch(catalogue,/id="demo-foot"/);
- assert.match(catalogue,/id="basket" hidden/);
+ assert.match(catalogue,/id="drawer"/);
+ assert.match(catalogue,/id="cart-count"/);
  assert.match(catalogue,/exampleImage/);
+});
+
+test('full-screen storefront matches requested reels-inspired mobile layout without social controls',async()=>{
+ const catalogue=await read('s/index.html');
+ assert.match(catalogue,/scroll-snap-type:y mandatory/);
+ assert.match(catalogue,/reel-img/);
+ assert.match(catalogue,/id="rail-add"/);
+ assert.match(catalogue,/id="rail-enquire"/);
+ assert.match(catalogue,/id="add-main"/);
+ assert.match(catalogue,/id="price"/);
+ assert.match(catalogue,/id="qty"/);
+ assert.match(catalogue,/id="cart-count"/);
+ assert.match(catalogue,/id="search"/);
+ assert.doesNotMatch(catalogue,/id="like"/i);
+ assert.doesNotMatch(catalogue,/id="share"/i);
+});
+
+test('full-screen customer shopping preserves basket, stock checks, and WhatsApp template',async()=>{
+ const catalogue=await read('s/index.html');
+ assert.match(catalogue,/renderCart/);
+ assert.match(catalogue,/showPlaceholder/);
+ assert.match(catalogue,/intersectionRatio/);
+ assert.match(catalogue,/cartQtyFor/);
+ assert.match(catalogue,/stockOf/);
+ assert.match(catalogue,/whatsapp_template/);
+ assert.match(catalogue,/customer-note/);
+ assert.match(catalogue,/https:\/\/wa\.me\//);
+ assert.match(catalogue,/id="add-toast"/);
+ assert.match(catalogue,/id="toast-basket"/);
 });
