@@ -53,6 +53,19 @@ const publicList = async search => {
  );
 };
 
+const OP_COOKIE = "__Host-early_storefront_operator";
+const operatorToken = req => {
+ const part=(req.headers.get("cookie")||"").split(";").map(v=>v.trim()).find(v=>v.startsWith(OP_COOKIE+"="));
+ return part?part.slice(OP_COOKIE.length+1):null;
+};
+const activeOperator = async req => {
+ const token=operatorToken(req);
+ if(!tokenPattern.test(token||""))return false;
+ const rows=await sql.unsafe("select s.link_id from early_storefront.operator_sessions s join early_storefront.operator_links l on l.id=s.link_id where s.token_hash=$1 and s.revoked_at is null and s.expires_at>now() and l.revoked_at is null limit 1",[await sha256(token)]);
+ return !!rows.length;
+};
+const issueStoreLink = token => ORIGIN+"/manage/claim#token="+encodeURIComponent(token);
+
 Deno.serve(async (req) => {
  const u=new URL(req.url);
  const index=u.pathname.indexOf("/early-storefront-gateway/");
@@ -76,6 +89,77 @@ Deno.serve(async (req) => {
    );
    const {id, ...publicStore}=store[0];
    return json(200,{store:publicStore,products:items},{"cache-control":"public, max-age=30"});
+  }
+
+  if(path==="/api/operator/claim" && method==="POST"){
+   if(!validOrigin(req))return json(403,{error:"Invalid origin"});
+   const data=await body(req);
+   if(!tokenPattern.test(data.token||""))return json(401,{error:"Invalid operator link"});
+   const cookieToken=random();
+   const found=await sql.begin(async tx=>{
+    const rows=await tx.unsafe("update early_storefront.operator_links set last_used_at=now() where token_hash=$1 and revoked_at is null returning id",[await sha256(data.token)]);
+    if(!rows.length)return false;
+    await tx.unsafe("insert into early_storefront.operator_sessions(link_id,token_hash,expires_at) values($1,$2,now()+interval '7 days')",[rows[0].id,await sha256(cookieToken)]);
+    return true;
+   });
+   if(!found)return json(401,{error:"Invalid or revoked operator link"});
+   return json(200,{ok:true},{"set-cookie":OP_COOKIE+"="+cookieToken+"; Path=/; Max-Age=604800; HttpOnly; Secure; SameSite=Lax"});
+  }
+  if(path==="/api/operator/logout" && method==="POST"){
+   if(!validOrigin(req))return json(403,{error:"Invalid origin"});
+   const token=operatorToken(req);
+   if(tokenPattern.test(token||""))await sql.unsafe("update early_storefront.operator_sessions set revoked_at=now() where token_hash=$1",[await sha256(token)]);
+   return json(200,{ok:true},{"set-cookie":OP_COOKIE+"=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax"});
+  }
+  if(path==="/api/operator/me" && method==="GET")
+   return (await activeOperator(req))?json(200,{authenticated:true}):json(401,{authenticated:false});
+  if(path==="/api/operator/stores"){
+   if(!(await activeOperator(req)))return json(401,{error:"Private operator access required"});
+   if(method==="GET"){
+    const rows=await sql.unsafe("select s.id,s.slug,s.name,s.description,s.whatsapp,s.status,s.created_at,(select count(*)::int from early_storefront.products p where p.store_id=s.id and p.archived_at is null) as product_count from early_storefront.stores s order by s.created_at desc limit 250");
+    return json(200,{stores:rows});
+   }
+   if(method!=="POST")return json(405,{error:"Method not allowed"});
+   if(!validOrigin(req))return json(403,{error:"Invalid origin"});
+   const data=await body(req);
+   if(data.action==="create"){
+    const {slug,name,whatsapp,description=""}=data;
+    if(typeof slug!=="string"||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)||slug.length>80||
+       typeof name!=="string"||!name.trim()||name.length>150||typeof description!=="string"||description.length>2000||
+       typeof whatsapp!=="string"||! /^\+?[1-9]\d{7,14}$/.test(whatsapp))
+      return json(400,{error:"Check the store name, slug and WhatsApp number"});
+    const privateToken=random();
+    try{
+     const store=await sql.begin(async tx=>{
+      const rows=await tx.unsafe("insert into early_storefront.stores(slug,name,whatsapp,description,status) values($1,$2,$3,$4,'published') returning id,slug,name",[slug,name.trim(),whatsapp,description]);
+      await tx.unsafe("insert into early_storefront.management_links(store_id,token_hash,expires_at) values($1,$2,'infinity'::timestamptz)",[rows[0].id,await sha256(privateToken)]);
+      return rows[0];
+     });
+     return json(201,{store,publicUrl:"/s/?slug="+encodeURIComponent(store.slug),managementLink:issueStoreLink(privateToken)});
+    }catch(e){
+     if(e?.code==="23505")return json(409,{error:"That storefront slug is already in use"});
+     throw e;
+    }
+   }
+   if(data.action==="rotate"){
+    if(!uuid.test(data.storeId||""))return json(400,{error:"Invalid store"});
+    const privateToken=random();
+    const rotated=await sql.begin(async tx=>{
+     const found=await tx.unsafe("select id from early_storefront.stores where id=$1 for update",[data.storeId]);
+     if(!found.length)return false;
+     await tx.unsafe("update early_storefront.management_links set revoked_at=now() where store_id=$1 and revoked_at is null",[data.storeId]);
+     await tx.unsafe("update early_storefront.sessions set revoked_at=now() where store_id=$1 and revoked_at is null",[data.storeId]);
+     await tx.unsafe("insert into early_storefront.management_links(store_id,token_hash,expires_at) values($1,$2,'infinity'::timestamptz)",[data.storeId,await sha256(privateToken)]);
+     return true;
+    });
+    return rotated?json(200,{storeId:data.storeId,managementLink:issueStoreLink(privateToken)}):json(404,{error:"Store not found"});
+   }
+   if(data.action==="publish-store"){
+    if(!uuid.test(data.storeId||"")||typeof data.published!=="boolean")return json(400,{error:"Invalid store request"});
+    const rows=await sql.unsafe("update early_storefront.stores set status=$2 where id=$1 returning id,status",[data.storeId,data.published?"published":"draft"]);
+    return rows.length?json(200,rows[0]):json(404,{error:"Store not found"});
+   }
+   return json(400,{error:"Unknown action"});
   }
 
   if(path==="/api/merchant/claim" && method==="POST"){
