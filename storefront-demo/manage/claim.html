@@ -36,7 +36,7 @@ async function enter(){
  if(!valid(token)){
   status.textContent='Your private link is missing. Open your saved management link, or paste it on the store recovery page.';
   spinner.hidden=true;button.hidden=false;button.textContent='Recover private access';
-  button.onclick=()=>location.assign('/manage/');
+
   return;
  }
  button.hidden=true;button.disabled=true;spinner.hidden=false;
@@ -61,6 +61,6 @@ async function enter(){
   button.hidden=false;button.disabled=false;button.textContent='Try again';
  }
 }
-button.addEventListener('click',enter);
+button.addEventListener('click',()=>{if(!valid(token))location.assign('/manage/');else enter();});
 enter();
 </script></body></html>
