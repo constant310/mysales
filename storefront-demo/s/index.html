@@ -50,27 +50,43 @@ header.hero{background:linear-gradient(120deg,#133D25,#1C8220)}
 .item{border-color:#E5E7EB}.price{color:#15803D}.category{color:#15803D}
 footer a{color:#1C8220;font-weight:800;text-decoration:none}
 #floating{background:#1C8220}
+
+/* Give the merchant's products priority; remove repeated conversion prompts. */
+.top-inner{padding:12px 20px}
+header.hero{padding:25px 20px!important}
+.hero h1{font-size:clamp(1.65rem,4vw,2.5rem);margin:5px 0 7px}
+.hero p{font-size:.9rem;margin:0}
+main{padding-top:18px}
+.tools{margin-bottom:10px}
+.item{border-radius:12px;box-shadow:none}
+.item img,.empty-img{aspect-ratio:1.15}
+.inside{padding:13px}
+#notice{min-height:0;margin:0 0 12px}
+#basket[hidden]{display:none}
+aside{margin:22px 0;border-radius:13px;box-shadow:none}
+.banner-inner{padding:9px 20px;font-size:.8rem}.banner a{padding:9px 12px;font-size:.8rem}
+footer{margin:20px 0}
+@media(max-width:690px){header.hero{padding:19px 15px!important}.hero h1{font-size:1.85rem}.top-inner{padding:10px 14px}.banner-inner{padding:9px 14px}.grid{gap:9px}.inside{padding:10px}.tools{gap:9px}.item h3{font-size:.86rem}.item .description{font-size:.72rem}}
 </style></head><body>
 <div class="top"><div class="top-inner"><a class="brand" href="/" aria-label="mySales home"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="shopbag">Storefronts · by mySales</span></div></div>
-<div class="banner" id="demo-banner"><div class="banner-inner"><span>This sample storefront was created with mySales. Create one for your business.</span><a href="/create/">Create my free store →</a></div></div>
+<div class="banner" id="demo-banner"><div class="banner-inner"><span>Like this store? Make one for your business.</span><a href="/create/">Create yours →</a></div></div>
 <header class="hero"><div class="hero-inner"><div class="subhead" id="type">Welcome to our shop</div><h1 id="name">Store catalogue</h1><p id="description">Explore our products and contact us on WhatsApp to order.</p></div></header>
 <main>
 <div class="tools"><strong id="section-title">Explore products</strong><div class="filters"><input id="search" type="search" placeholder="Search products…" aria-label="Search products"><select id="category" aria-label="Product category"><option value="">All categories</option></select></div></div>
 <p id="notice" role="status">Loading products…</p>
 <div id="products" class="grid"></div>
-<aside><div class="cart-head"><h2>My enquiry basket <span id="count">0</span></h2><span style="font-size:1.2rem">🛒</span></div>
+<aside id="basket" hidden><div class="cart-head"><h2>My enquiry basket <span id="count">0</span></h2><span style="font-size:1.2rem">🛒</span></div>
 <div id="cart"><p class="empty-cart">Tap “Add” on a product you like.</p></div>
 <button id="send" class="primary" disabled>Send enquiry on WhatsApp →</button>
 <p style="color:#8a9c91;font-size:.75rem;line-height:1.5">Products are enquiries, not paid orders. Your merchant will confirm prices and availability. No payment is collected here.</p>
 </aside>
-<div class="demo-foot" id="demo-foot"><div style="font-size:1.9rem">✨</div><h2>Your business could look this good online.</h2><p>mySales helps you build your own storefront, upload products from your phone and share one link with customers.</p><a href="/create/">Create my free store →</a></div>
 <footer>Powered by <strong>mySales Storefronts</strong> · <a href="/create/">Create your own store</a></footer>
-</main><a href="/create/" id="floating">✨ Create your own store — it's free →</a>
+</main>
 <script type="module">
 const $=id=>document.getElementById(id),cart=new Map();let data=[],isDemo=false;
 const slug=new URLSearchParams(location.search).get('slug')||location.pathname.split('/').filter(Boolean)[1]||'';
 // Show the demo-to-store invitation before waiting for a cold-started API.
-if(/demo/i.test(slug)){$('demo-banner').classList.add('visible');$('demo-foot').style.display='block';$('floating').classList.add('visible');document.body.classList.add('demo');}
+if(/demo/i.test(slug)){$('demo-banner').classList.add('visible');}
 const elem=(tag,text)=>{const e=document.createElement(tag);e.textContent=String(text);return e;};
 const cash=v=>'₦'+Number(v||0).toLocaleString('en-NG');
 function renderCart(){
@@ -84,7 +100,7 @@ function renderCart(){
  }
  if(!count){const blank=elem('p','Tap “Add” on a product you like.');blank.className='empty-cart';$('cart').append(blank);}
  else $('cart').append(elem('p','Estimated subtotal: '+cash(total)));
- $('count').textContent=count?'('+count+')':'0';$('send').disabled=!count||isDemo;
+ $('count').textContent=count?'('+count+')':'0';$('send').disabled=!count||isDemo;$('basket').hidden=!count;
 }
 function render(){
  const q=$('search').value.toLowerCase().trim(),cat=$('category').value;const grid=$('products');grid.replaceChildren();
@@ -124,7 +140,7 @@ function render(){
   document.title=j.store.name+' | mySales';$('section-title').textContent=data.length+' product'+(data.length===1?'':'s')+' to explore';
   $('notice').textContent=isDemo?'Demo catalogue · These are example products. Orders are disabled.':data.length?'See something you like? Add it to your enquiry basket.':'This shop has not added products yet.';
   $('type').textContent=isDemo?'Live preview · Example store':'Welcome to '+j.store.name;
-  if(isDemo){$('demo-banner').classList.add('visible');$('demo-foot').style.display='block';$('floating').classList.add('visible');document.body.classList.add('demo');$('send').textContent='Demo only · Orders disabled';}
+  if(isDemo){$('demo-banner').classList.add('visible');$('send').textContent='Demo only · Orders disabled';}
   const cats=[...new Set(data.map(p=>p.category).filter(Boolean))];for(const c of cats){const option=elem('option',c);option.value=c;$('category').append(option);}
   $('search').oninput=render;$('category').onchange=render;
   $('send').onclick=()=>{
