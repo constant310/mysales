@@ -12,7 +12,9 @@ function renderCart(){
 function render(){
  const q=$('search').value.toLowerCase(),cat=$('category').value;$('products').replaceChildren();
  for(const p of data.filter(p=>(!cat||p.category===cat)&&p.name.toLowerCase().includes(q))){
-  const card=add('div','');card.className='item';card.append(add('h3',p.name),add('p',p.description||''),add('small',p.category||'General'));
+  const card=add('div','');card.className='item';
+  if(p.image_path){const photo=document.createElement('img');photo.src=p.image_path;photo.alt=p.name;photo.loading='lazy';photo.style.cssText='width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;margin-bottom:8px';card.append(photo);}
+  card.append(add('h3',p.name),add('p',p.description||''),add('small',p.category||'General'));
   for(const u of p.units){const row=document.createElement('p');row.append(add('span',u.name+' — ₦'+Number(u.price).toLocaleString()+' '));const b=add('button','Add');b.disabled=Number(p.stock)<Number(u.factor);b.onclick=()=>{const key=p.id+':'+u.name;const v=cart.get(key)||{name:p.name,unit:u.name,price:Number(u.price),quantity:0};v.quantity++;cart.set(key,v);renderCart();};row.append(b);card.append(row);}
   $('products').append(card);
  }
