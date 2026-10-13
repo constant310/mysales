@@ -47,7 +47,7 @@ async function merchant(request: Request) {
   const match = /^Bearer ([A-Za-z0-9_-]{43})$/.exec(request.headers.get('authorization')||'');
   if (!match) return null;
   const tokenHash = await hash(match[1]);
-  const found = await sql!`select s.id as store_id,s.slug,s.name,s.description,s.whatsapp,s.status,s.whatsapp_template
+  const found = await sql!`select s.id as store_id,s.slug,s.public_handle,s.name,s.description,s.whatsapp,s.status,s.whatsapp_template
     from early_storefront.management_links l
     join early_storefront.stores s on s.id=l.store_id
     where l.token_hash=${tokenHash} and l.revoked_at is null and l.expires_at>now()
@@ -103,10 +103,16 @@ Deno.serve(async (request: Request) => {
       return out(200,{stores:rows,source:'live'},{'cache-control':'public, max-age=6, stale-while-revalidate=15'});
     }
     if (pathname === '/api/store' && request.method === 'GET') {
+      // Customers use the stable business-name public handle; old ?slug= links work.
+      const handle=query.get('handle')||'';
       const slug=query.get('slug')||'';
-      if (!/^[a-z0-9-]{2,80}$/.test(slug)) return out(400,{error:'Invalid store'});
-      const stores=await sql`select id,slug,name,description,whatsapp,whatsapp_template from early_storefront.stores
-        where slug=${slug} and status='published' limit 1`;
+      const key=handle||slug;
+      if(!/^[a-z0-9-]{2,80}$/.test(key))return out(400,{error:'Invalid store'});
+      const stores=handle
+        ? await sql`select id,slug,public_handle,name,description,whatsapp,whatsapp_template
+          from early_storefront.stores where public_handle=${handle} and status='published' limit 1`
+        : await sql`select id,slug,public_handle,name,description,whatsapp,whatsapp_template
+          from early_storefront.stores where slug=${slug} and status='published' limit 1`;
       if (!stores.length) return out(404,{error:'Store not found'});
       const {id,...store}=stores[0];
       const products=await productQuery(id,true);
@@ -119,7 +125,7 @@ Deno.serve(async (request: Request) => {
       if(pathname==='/api/operator/me' && request.method==='GET')
         return out(200,{authenticated:true});
       if(pathname==='/api/operator/stores' && request.method==='GET') {
-        const stores=await sql`select s.id,s.slug,s.name,s.description,s.whatsapp,s.status,s.created_at,
+        const stores=await sql`select s.id,s.slug,s.public_handle,s.name,s.description,s.whatsapp,s.status,s.created_at,
           (select count(*)::int from early_storefront.products p where p.store_id=s.id and p.archived_at is null) as product_count
           from early_storefront.stores s order by s.created_at desc limit 250`;
         return out(200,{stores});
@@ -138,12 +144,12 @@ Deno.serve(async (request: Request) => {
           const store=await sql.begin(async tx=>{
             const rows=await tx`insert into early_storefront.stores(slug,name,description,whatsapp,status)
               values(${b.slug},${String(b.name).trim()},${b.description??''},${b.whatsapp},'published')
-              returning id,slug,name`;
+              returning id,slug,public_handle,name`;
             await tx`insert into early_storefront.management_links(store_id,token_hash,expires_at)
               values(${rows[0].id},${tokenHash},'infinity'::timestamptz)`;
             return rows[0];
           });
-          return out(201,{store,publicUrl:'/s/?slug='+encodeURIComponent(store.slug),managementLink:managementUrl(token)});
+          return out(201,{store,publicUrl:'/'+encodeURIComponent(store.public_handle),managementLink:managementUrl(token)});
         }
         if(b.action==='rotate'){
           if(!uuid.test(String(b.storeId||'')))return out(400,{error:'Invalid store'});
@@ -183,7 +189,7 @@ Deno.serve(async (request: Request) => {
     if (!actor) return out(401,{error:'Private management link invalid or revoked'});
     const id=actor.store_id as string;
     if (pathname === '/api/merchant/me' && request.method==='GET')
-      return out(200,{authenticated:true,storeId:id,store:{slug:actor.slug,name:actor.name,description:actor.description,whatsapp:actor.whatsapp,status:actor.status,whatsapp_template:actor.whatsapp_template}});
+      return out(200,{authenticated:true,storeId:id,store:{slug:actor.slug,public_handle:actor.public_handle,name:actor.name,description:actor.description,whatsapp:actor.whatsapp,status:actor.status,whatsapp_template:actor.whatsapp_template}});
     if (pathname === '/api/merchant/claim' && request.method==='POST')
       return out(200,{ok:true,storeId:id,reusable:true});
     if (pathname === '/api/merchant/products' && request.method==='GET')
@@ -292,7 +298,7 @@ Deno.serve(async (request: Request) => {
       const changed=await sql`update early_storefront.stores set name=${String(b.name).trim()},
         description=${b.description??''},whatsapp=${b.whatsapp},status=${b.status},
         whatsapp_template=${template??null}
-        where id=${id} and status<>'suspended' returning slug,name,description,whatsapp,status,whatsapp_template`;
+        where id=${id} and status<>'suspended' returning slug,public_handle,name,description,whatsapp,status,whatsapp_template`;
       return changed.length?out(200,{store:changed[0]}):out(404,{error:'Store not found'});
     }
     if (pathname === '/api/merchant/upload-image' && request.method==='POST') {
