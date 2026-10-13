@@ -78,6 +78,11 @@ main{max-width:870px;padding-top:19px}
 #whatsapp-panel code{background:#F0FDF4;padding:2px 5px;border-radius:4px;color:#15803D;font-size:.8rem}
 .message-preview{white-space:pre-wrap;word-break:break-word;line-height:1.55;background:#F6FAF7;border:1px solid #DEEADE;padding:15px;border-radius:10px;font:inherit;font-size:.82rem}
 .message-preview[hidden]{display:none}
+
+.manager-toast{position:fixed;z-index:50;left:50%;bottom:24px;transform:translate(-50%,12px);background:#183C23;color:white;box-shadow:0 12px 38px #152F2540;border-radius:13px;padding:13px 17px;display:flex;gap:11px;align-items:center;max-width:calc(100vw - 28px);font-size:.85rem;visibility:hidden;opacity:0;transition:opacity .2s ease,transform .2s ease,visibility .2s}
+.manager-toast span{display:grid;place-items:center;width:23px;height:23px;border-radius:50%;background:#16A34A;color:white;font-weight:900}
+.manager-toast.visible{opacity:1;transform:translate(-50%,0);visibility:visible}
+@media(prefers-reduced-motion:reduce){.manager-toast{transition:none}}
 </style></head><body>
 <header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Storefront Manager</span>
 <button id="exit" class="head-btn">Close private access</button></header>
@@ -137,10 +142,17 @@ main{max-width:870px;padding-top:19px}
 <div class="actions"><button class="btn btn-outline btn-small" id="copy-manager" type="button">Copy my private manager link</button><button id="export" class="btn btn-outline btn-small" type="button">Download my store backup</button></div>
 </details></section>
 </div></main>
+<div id="manager-toast" class="manager-toast" role="status" aria-live="polite"><span aria-hidden="true">✓</span> <strong id="manager-toast-message">Product added</strong></div>
 <script type="module">
 const token=sessionStorage.getItem('mysales_private_management_token')||'';
 const $=id=>document.getElementById(id),notice=$('notice'),list=$('products');
-let currentStore=null,products=[],isAdding=new URLSearchParams(location.search).has('welcome');
+let currentStore=null,products=[],isAdding=new URLSearchParams(location.search).has('welcome'),managerToastTimer=0;
+function showManagerToast(message){
+ $('manager-toast-message').textContent=message;
+ $('manager-toast').classList.add('visible');
+ clearTimeout(managerToastTimer);
+ managerToastTimer=setTimeout(()=>$('manager-toast').classList.remove('visible'),2600);
+}
 const defaultWhatsApp='Hello {store_name}, I would like to enquire about:\n\n{items}\n\nEstimated subtotal: {subtotal}\nPlease confirm availability and final price.\n{customer_note}';
 function showManagerView(){
  const hasProducts=products.length>0;
@@ -293,6 +305,7 @@ $('add').onsubmit=async e=>{
   $('photo-icon').style.display='block';$('photo-label').textContent='Choose a product photo';
   say(errors.length?'Product saved as a draft or with an issue. '+errors.join(' ')+' Use its photo button below to retry.':
    '🎉 Product and picture added! Share your storefront with customers.',errors.length>0);
+  if(!errors.length)showManagerToast('Product added to your shop');
   isAdding=false;await refresh();
  }catch(err){say('Could not add product: '+err.message,true);}
  finally{button.disabled=false;button.textContent='Add product to my shop →';}
