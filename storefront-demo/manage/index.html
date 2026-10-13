@@ -199,7 +199,7 @@ main{max-width:870px;padding-top:19px}
 @media(prefers-reduced-motion:reduce){.settings-chevron{transition:none}}
 
 .access-recovery{max-width:490px;margin:38px auto 25px;background:#fff;border:1px solid #deeadf;border-radius:21px;padding:30px;box-shadow:0 12px 33px #173d2010;text-align:left}
-.access-recovery[hidden]{display:none!important}
+.access-recovery[hidden],#exit[hidden]{display:none!important}
 .recovery-symbol{display:grid;place-items:center;background:#eaf8ed;border-radius:13px;height:51px;width:51px;font-size:1.35rem}
 .access-recovery h1{font-size:1.55rem;letter-spacing:-.048em;line-height:1.2;color:#233e2b;margin:19px 0 10px}
 .access-recovery>p{font-size:.87rem;line-height:1.65;color:#6c8171}
@@ -213,7 +213,7 @@ main{max-width:870px;padding-top:19px}
 @media(max-width:500px){.access-recovery{margin:20px auto;padding:23px 19px;border-radius:16px}.access-recovery h1{font-size:1.42rem}}
 </style></head><body>
 <header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Storefront Manager</span>
-<button id="exit" class="head-btn">Close private access</button></header>
+<button id="exit" class="head-btn" hidden>Close private access</button></header>
 <main><p id="notice" role="status" aria-live="polite">Opening your store…</p>
 <section id="access-recovery" class="access-recovery" aria-labelledby="recovery-heading" hidden>
  <div class="recovery-symbol" aria-hidden="true">🔐</div>
@@ -783,7 +783,7 @@ $('exit').onclick=()=>{
  location.replace('/manage/');
 };
 function showAccessRecovery(message,{retry=false}={}){
- $('app').hidden=true;
+ $('app').hidden=true;$('exit').hidden=true;
  $('access-recovery').hidden=false;
  $('recovery-message').textContent=message;
  $('retry-access').hidden=!retry;
@@ -809,7 +809,7 @@ async function openManager(){
   businessBaseline=businessValues();whatsappBaseline=$('whatsapp-template').value;
   updateBusinessSave();updateWhatsAppSave();
   updateHero();
-  $('access-recovery').hidden=true;$('app').hidden=false;
+  $('access-recovery').hidden=true;$('app').hidden=false;$('exit').hidden=false;
   say(new URLSearchParams(location.search).has('welcome')?'Welcome! Add your first product to launch your store.':'Your private store manager is ready.');
   try{await refresh();}catch(error){say('Your store is open, but products could not load. Refresh to try again: '+error.message,true);}
  }catch(error){
