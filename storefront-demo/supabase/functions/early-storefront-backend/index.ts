@@ -167,7 +167,7 @@ Deno.serve(async (request: Request) => {
           from early_storefront.stores where created_at >= now()-(${days}::int || ' days')::interval
           group by 1 order by 1`;
         const dailyEvents=await sql`select event_day as day,event_type,count(*)::int as sessions
-          from early_storefront.activity_events where event_day >= current_date - ${since}
+          from early_storefront.activity_events where event_day >= ((now() at time zone 'UTC')::date - ${since}::int)
           group by event_day,event_type order by event_day`;
         const stores=await sql`select s.id,s.name,s.public_handle,s.whatsapp,s.status,s.created_at,
           coalesce(p.product_count,0)::int as product_count,
@@ -183,7 +183,7 @@ Deno.serve(async (request: Request) => {
                       count(*) filter(where event_type='store_view')::int as visits,
                       count(*) filter(where event_type='cart_add')::int as cart_sessions,
                       count(*) filter(where event_type='whatsapp_click')::int as whatsapp_sessions
-                     from early_storefront.activity_events where event_day>=current_date-${since}
+                     from early_storefront.activity_events where event_day >= ((now() at time zone 'UTC')::date - ${since}::int)
                      group by store_id) ev on ev.store_id=s.id
           order by s.created_at desc limit 250`;
         const totals=dailyEvents.reduce((a,r)=>{
