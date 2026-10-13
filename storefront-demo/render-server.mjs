@@ -62,7 +62,7 @@ http.createServer(async(req,res)=>{
     const chunks=[];let total=0;
     for await(const chunk of req){
      total+=chunk.length;
-     if(total>(path==='/api/merchant/upload-image'?2100000:65536))return json(res,413,{error:'Request too large'});
+     if(total>(path==='/api/merchant/upload-image'?2100000:path==='/api/signup'?6000:65536))return json(res,413,{error:'Request too large'});
      chunks.push(chunk);
     }
     body=Buffer.concat(chunks);
