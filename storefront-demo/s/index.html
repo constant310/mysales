@@ -252,6 +252,23 @@ function toast(text){
  $('toast-message').textContent=text;$('add-toast').classList.add('visible');clearTimeout(toastTimeout);
  toastTimeout=setTimeout(()=>$('add-toast').classList.remove('visible'),2500);
 }
+// Optional, privacy-conscious signals. Never send customer details or device fingerprints.
+let activitySessionId='';
+function trackActivity(eventType){
+ if(isDemo||navigator.doNotTrack==='1'||navigator.globalPrivacyControl===true)return;
+ const handle=String(store?.public_handle||'');
+ if(!/^[a-z0-9-]{2,80}$/.test(handle))return;
+ try{
+  if(!activitySessionId){
+   try{activitySessionId=sessionStorage.getItem('mysales_shop_session')||'';}catch{}
+   if(!/^[0-9a-f-]{36}$/i.test(activitySessionId))activitySessionId=crypto.randomUUID();
+   try{sessionStorage.setItem('mysales_shop_session',activitySessionId);}catch{}
+  }
+  void fetch('/api/activity',{method:'POST',cache:'no-store',keepalive:true,
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({handle,eventType,sessionId:activitySessionId})}).catch(()=>{});
+ }catch{}
+}
 function productPhoto(p){return p.image_path||(isDemo?exampleImage(p.name):'');}
 function fillPhoto(host,p,click=null){
  const url=productPhoto(p);
@@ -387,7 +404,7 @@ function addSelected(openBasket=false){
  if(stock>0&&wanted>stock){notify('Only '+stock+' available. Reduce the quantity.');updateSheet();return;}
  const key=keyOf(p,u),item=cart.get(key)||{productId:p.id,name:p.name,unit:u.name,factor:Number(u.factor),price:Number(u.price),quantity:0};
  item.quantity+=selectedQuantity;cart.set(key,item);
- renderCart();closeSheet(false);
+ renderCart();trackActivity('cart_add');closeSheet(false);
  if(openBasket)openCart();else toast(p.name+' added to cart');
 }
 $('sheet-add').onclick=()=>addSelected(false);
@@ -420,6 +437,7 @@ $('send').onclick=()=>{
  const replacement={store_name:store.name,items,subtotal:currency(subtotal),customer_note:note?'Customer note: '+note:''};
  const template=typeof store.whatsapp_template==='string'&&store.whatsapp_template.trim()?store.whatsapp_template:defaultWhatsApp;
  const message=template.replace(/\{(store_name|items|subtotal|customer_note)\}/g,(_,key)=>replacement[key]).trim();
+ trackActivity('whatsapp_click');
  location.href='https://wa.me/'+number+'?text='+encodeURIComponent(message);
 };
 (async()=>{
@@ -442,7 +460,7 @@ $('send').onclick=()=>{
    $('business-whatsapp').href='https://wa.me/'+digits+'?text='+encodeURIComponent('Hello '+store.name+', I found your storefront and have a question.');
    $('business-number').textContent='Chat with us on WhatsApp';$('business-whatsapp').hidden=false;
   }
-  applyFilters();renderCart();
+  applyFilters();renderCart();trackActivity('store_view');
  }catch(error){
   $('business-name').textContent='Store unavailable';
   $('business-description').textContent=error.message;
