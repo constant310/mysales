@@ -1,4 +1,5 @@
-import {Pool} from 'pg';
+import pg from 'pg';
+const {Pool} = pg;
 const pool=new Pool({connectionString:process.env.EARLY_STOREFRONT_DATABASE_URL,ssl:{rejectUnauthorized:true}});
 export async function restock(store,product,amount){
  if(!/^[0-9a-f-]{36}$/i.test(product)||!Number.isSafeInteger(Number(amount))||Number(amount)<1||Number(amount)>10000000)throw Error('Invalid stock');
