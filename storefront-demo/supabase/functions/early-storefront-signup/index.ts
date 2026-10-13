@@ -66,7 +66,7 @@ Deno.serve(async request=>{
    if(existing.length)return {error:'phone'};
    const count=await tx.unsafe("select count(*)::int as total from early_storefront.stores where created_at>=now()-interval '1 hour'");
    if(Number(count[0].total)>=50)return {error:'limit'};
-   const stores=await tx.unsafe("insert into early_storefront.stores(slug,name,description,whatsapp,status) values($1,$2,$3,$4,'draft') returning id,slug,name",[slug,name,description,number]);
+   const stores=await tx.unsafe("insert into early_storefront.stores(slug,name,description,whatsapp,status) values($1,$2,$3,$4,'draft') returning id,slug,public_handle,name",[slug,name,description,number]);
    await tx.unsafe("insert into early_storefront.management_links(store_id,token_hash,expires_at) values($1,$2,'infinity'::timestamptz)",[stores[0].id,tokenHash]);
    return {store:stores[0]};
   });
@@ -76,7 +76,7 @@ Deno.serve(async request=>{
   }
   return response(201,{store:result.store,
    managementLink:allowedOrigin+'/manage/claim#token='+encodeURIComponent(token),
-   publicUrl:'/s/?slug='+encodeURIComponent(slug)});
+   publicUrl:'/'+encodeURIComponent(result.store.public_handle)});
  }catch(e){
   console.error('Storefront signup failed',e instanceof Error?e.message:'Unknown error');
   return response(503,{error:'Could not create your store. Please try again.'});
