@@ -1,4 +1,6 @@
 import http from 'node:http';
+import {Readable} from 'node:stream';
+import {pipeline} from 'node:stream/promises';
 import {readFile} from 'node:fs/promises';
 import {resolve,extname,sep} from 'node:path';
 
@@ -43,7 +45,8 @@ http.createServer(async(req,res)=>{
    }catch(e){console.error('Supabase backend health probe failed',e?.message);return json(res,503,{ok:false,databaseConnected:false,backend:'supabase-edge'});}
   }
   if(allowed.has(path)){
-   res.setHeader('Cache-Control','no-store');
+   const publicRead=path==='/api/store'||path==='/api/discover';
+   res.setHeader('Cache-Control',publicRead?'public, max-age=6, stale-while-revalidate=15':'no-store');
    if(!['GET','POST'].includes(req.method))return json(res,405,{error:'Method not allowed'});
    if(req.method!=='GET'){
     const origin=req.headers.origin;
@@ -64,12 +67,22 @@ http.createServer(async(req,res)=>{
     body=Buffer.concat(chunks);
    }
    try{
-    const {response,raw}=await edgeFetch(path+url.search,req.method,headers,body);
+    // Do not buffer full exports or catalogues inside the Render proxy.
+    // Streaming preserves back-pressure and keeps memory roughly constant.
+    const response=await fetch(edgeBase+path+url.search,{
+     method:req.method,headers,body,redirect:'error',
+     signal:AbortSignal.timeout(path==='/api/merchant/export'?25000:12000)
+    });
     res.statusCode=response.status;
     res.setHeader('Content-Type',response.headers.get('content-type')||'application/json; charset=utf-8');
+    if(publicRead){
+     res.setHeader('Cache-Control',response.headers.get('cache-control')||'public, max-age=6');
+    }
     const disposition=response.headers.get('content-disposition');
     if(disposition)res.setHeader('Content-Disposition',disposition);
-    return res.end(raw);
+    if(!response.body)return res.end();
+    await pipeline(Readable.fromWeb(response.body),res);
+    return;
    }catch(error){
     console.error('Supabase backend proxy failed:',error?.message);
     return json(res,503,{error:'Storefront temporarily unavailable'});
