@@ -1,4 +1,5 @@
-import { Pool } from 'pg';
+import pg from 'pg';
+const {Pool} = pg;
 const pool=new Pool({connectionString:process.env.EARLY_STOREFRONT_DATABASE_URL,ssl:{rejectUnauthorized:true}});
 export async function products(store){
  const {rows}=await pool.query(`select p.id,p.name,p.description,p.category,p.published,p.base_unit,
