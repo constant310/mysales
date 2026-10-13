@@ -194,7 +194,11 @@ function exampleImage(name){
 
 
 const $=id=>document.getElementById(id);
-const slug=new URLSearchParams(location.search).get('slug')||location.pathname.split('/').filter(Boolean)[1]||'';
+// New storefront links are /business-name; older /s/?slug=... links remain usable.
+const routeParts=location.pathname.split('/').filter(Boolean);
+const legacyRoute=routeParts[0]==='s';
+const slug=legacyRoute?(new URLSearchParams(location.search).get('slug')||routeParts[1]||''):(routeParts[0]||'');
+const lookupParam=legacyRoute?'slug':'handle';
 const currency=n=>'₦'+Number(n||0).toLocaleString('en-NG');
 const defaultWhatsApp='Hello {store_name}, I would like to enquire about:\n\n{items}\n\nEstimated subtotal: {subtotal}\nPlease confirm availability and final price.\n{customer_note}';
 const CART_SVG="<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"8\" cy=\"20\" r=\"1\"/><circle cx=\"18\" cy=\"20\" r=\"1\"/><path d=\"M2 3h3l2.4 11h12l2-8H6\"/><path d=\"M17 1v8m-4-4h8\"/></svg>";
@@ -385,7 +389,7 @@ $('send').onclick=()=>{
 (async()=>{
  try{
   if(!/^[a-z0-9-]{2,80}$/.test(slug))throw Error('Invalid store address.');
-  const response=await fetch('/api/store?slug='+encodeURIComponent(slug),{cache:'no-store'});
+  const response=await fetch('/api/store?'+lookupParam+'='+encodeURIComponent(slug),{cache:'no-store'});
   if(!response.ok)throw Error('This store is unavailable. Please try again later.');
   const result=await response.json();
   store=result.store;products=result.products||[];
