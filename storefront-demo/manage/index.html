@@ -24,7 +24,11 @@ async function refresh(){
   box.append(el('small',p.units.map(u=>u.name+': ₦'+Number(u.price).toLocaleString()+' ('+u.factor+' '+p.base_unit+')').join(' | ')));
   const form=document.createElement('form');form.className='flex';const inp=document.createElement('input');inp.type='number';inp.min='1';inp.step='1';inp.placeholder='Add stock in '+p.base_unit;inp.required=true;const btn=el('button','Restock');form.append(inp,btn);
   form.addEventListener('submit',async e=>{e.preventDefault();btn.disabled=true;try{await api('restock',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productId:p.id,amount:Number(inp.value)})});notice.textContent='Stock updated';await refresh();}catch(err){notice.textContent=err.message;}finally{btn.disabled=false;}});
-  box.append(form);list.append(box);
+  box.append(form);
+  const publish=el('button',p.published?'Hide from customers':'Publish to customers');
+  publish.type='button';publish.style.marginLeft='8px';
+  publish.addEventListener('click',async()=>{publish.disabled=true;try{await api('publish',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productId:p.id,published:!p.published})});notice.textContent='Visibility updated';await refresh();}catch(err){notice.textContent=err.message;publish.disabled=false;}});
+  box.append(publish);list.append(box);
  }
 }
 document.getElementById('new').addEventListener('submit',async e=>{
