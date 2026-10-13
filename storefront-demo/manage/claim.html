@@ -1,32 +1,37 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="referrer" content="no-referrer"><meta http-equiv="Cache-Control" content="no-store">
-<title>mySales | Private store access</title>
-<style>:root{font-family:system-ui,-apple-system,sans-serif;color:#193038;background:#f5f8f9}
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow"><meta http-equiv="Cache-Control" content="no-store">
+<title>Opening your mySales store…</title>
+<style>:root{font-family:Inter,system-ui,-apple-system,sans-serif;color:#204538;background:#f4f9f5}
 *{box-sizing:border-box}body{min-height:100vh;display:grid;place-items:center;margin:0;padding:20px}
-main{width:min(100%,470px);background:white;border:1px solid #dde6e9;border-radius:18px;padding:30px}
-h1{margin:0 0 12px}p{line-height:1.6}button{font:inherit;background:#087a7d;color:white;border:0;border-radius:10px;padding:13px 18px;width:100%;cursor:pointer}button:disabled{opacity:.5}
-small{color:#617980}</style></head>
-<body><main><h1>Your private store link</h1><p id="status" role="status">Checking your link…</p>
-<button id="open" hidden>Open my store manager</button>
-<p><small>Your private link stays valid until the storefront operator revokes or replaces it. Anyone with the link can manage your store, so don't share it publicly.</small></p></main>
+main{width:min(100%,440px);background:white;border:1px solid #dfebe2;border-radius:22px;padding:34px;text-align:center;box-shadow:0 15px 55px #194f3414}
+.logo{font-size:1.65rem;font-weight:900;color:#096c5e;letter-spacing:-.06em;margin-bottom:16px}.logo span{color:#11b997}
+h1{font-size:1.55rem;letter-spacing:-.04em;margin:10px 0}p{color:#657d70;line-height:1.55;font-size:.9rem}
+.spinner{display:inline-block;border:4px solid #d5f2e2;border-top-color:#098678;width:42px;height:42px;border-radius:50%;animation:spin .75s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+button{font:inherit;font-weight:850;background:#087d6f;color:white;border:0;border-radius:12px;padding:13px 17px;cursor:pointer;width:100%}
+a{color:#0b7b66}#retry[hidden]{display:none}
+</style></head><body><main>
+<div class="logo">my<span>Sales</span>.</div><div id="spinner" class="spinner" aria-hidden="true"></div>
+<h1>Opening your store</h1><p id="status" role="status">Checking your private link securely…</p>
+<button id="retry" type="button" hidden>Try again</button>
+<p style="font-size:.75rem">Your private manager link gives editing access to your storefront. Keep it safe and do not share it publicly.</p>
+<p><a href="/">Back to mySales</a></p></main>
 <script type="module">
-const status=document.querySelector('#status'),button=document.querySelector('#open');
-const token=new URLSearchParams(location.hash.slice(1)).get('token');
+const status=document.querySelector('#status'),button=document.querySelector('#retry'),spinner=document.querySelector('#spinner');
+const token=new URLSearchParams(location.hash.slice(1)).get('token')||'';
 history.replaceState(null,'',location.pathname);
-if(!token||!/^[A-Za-z0-9_-]{43}$/.test(token)){
- status.textContent='This link is missing or incorrect. Request your private management link.';
-}else{
- status.textContent='This link can be reused whenever you need to update your products or prices.';
- button.hidden=false;
- button.addEventListener('click',async()=>{
-  button.disabled=true;status.textContent='Verifying private access…';
-  try{
-   const response=await fetch('/api/merchant/me',{headers:{Authorization:'Bearer '+token},cache:'no-store'});
-   if(!response.ok){status.textContent='This link has been revoked or is invalid. Request a new private link.';button.hidden=true;return;}
-   sessionStorage.setItem('mysales_private_management_token',token);
-   location.replace('/manage/');
-  }catch{status.textContent='Could not connect. Please retry.';button.disabled=false;}
- });
+async function enter(){
+ if(!/^[A-Za-z0-9_-]{43}$/.test(token)){
+  status.textContent='This private link is missing or invalid. Open the link you saved when you created your store.';
+  spinner.hidden=true;return;
+ }
+ button.hidden=true;button.disabled=true;spinner.hidden=false;
+ status.textContent='Verifying your access…';
+ try{
+  const r=await fetch('/api/merchant/me',{headers:{Authorization:'Bearer '+token},cache:'no-store'});
+  if(!r.ok)throw Error(r.status===401?'This private link is invalid or has been revoked.':'Could not connect to your store.');
+  sessionStorage.setItem('mysales_private_management_token',token);
+  location.replace('/manage/');
+ }catch(e){spinner.hidden=true;status.textContent=e.message+' Please retry or contact mySales for a replacement link.';button.hidden=false;button.disabled=false;}
 }
+button.addEventListener('click',enter);enter();
 </script></body></html>
