@@ -1,47 +1,128 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Store catalogue | mySales</title>
-<style>body{font-family:system-ui;background:#f4f7f7;color:#172d32;margin:0}header{padding:24px;background:#087a7d;color:white}main{max-width:1000px;margin:auto;padding:18px}.toolbar{display:flex;gap:10px;margin:16px 0}input,select{padding:12px;border:1px solid #ccd5d8;border-radius:9px;max-width:100%}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}.item{background:white;border:1px solid #e1e7e9;border-radius:13px;padding:17px}button{background:#087a7d;color:white;padding:10px 14px;border:0;border-radius:9px;cursor:pointer}button:disabled{opacity:.5}aside{background:white;padding:20px;border-radius:13px;margin-top:20px}small{color:#64767a}</style></head><body><header><h1 id="name">Store catalogue</h1><p id="description"></p></header><main><p id="notice" role="status">Loading products…</p><div class="toolbar"><input id="search" placeholder="Search products" aria-label="Search products"><select id="category" aria-label="Category"><option value="">All categories</option></select></div><div id="products" class="grid"></div><aside><h2>Your enquiry <span id="count">0</span></h2><div id="cart"></div><button id="send" disabled>Send order on WhatsApp</button><p><small>Sending an enquiry does not reserve or deduct stock. The merchant confirms availability and sales.</small></p></aside></main>
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#073f3a">
+<title>Online store | mySales</title><meta name="description" content="Browse products, find prices and enquire directly on WhatsApp.">
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;background:#f7f9f5;color:#173730}
+*{box-sizing:border-box}body{margin:0;padding:0 0 25px}button,input,select{font:inherit}button{cursor:pointer}
+.top{background:#063c36;color:white}.top-inner{max-width:1130px;margin:auto;padding:17px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{font-size:1.25rem;font-weight:900;letter-spacing:-.055em}.brand b{color:#2fd6ab}.shopbag{font-size:.82rem;color:#c4e5d8}
+.banner{display:none;background:#def8e9;color:#0d6757;border-bottom:1px solid #c4edd8}
+.banner.visible{display:block}.banner-inner{max-width:1130px;margin:auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;font-size:.85rem;font-weight:700}
+.banner a{display:inline-block;text-decoration:none;background:#087e6d;border-radius:10px;padding:10px 15px;color:#fff;font-weight:900}
+header.hero{background:linear-gradient(120deg,#063d38 0%,#0c6f65 100%);color:white;padding:40px 20px 44px}
+.hero-inner{max-width:1080px;margin:auto}.subhead{text-transform:uppercase;letter-spacing:.16em;color:#8bdfc7;font-size:.7rem;font-weight:900}
+h1{font-size:clamp(2rem,5vw,3.35rem);line-height:1.1;letter-spacing:-.055em;max-width:850px;margin:10px 0}
+.hero p{color:#d3eee6;line-height:1.55;font-size:1rem;max-width:650px}
+main{max-width:1120px;padding:23px 20px;margin:auto}
+.tools{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:17px}
+.tools strong{font-size:1rem}.filters{display:flex;gap:9px;flex-wrap:wrap}
+input,select{padding:12px 13px;border:1px solid #d4e3da;border-radius:12px;min-height:45px;outline:0;background:white}
+input:focus,select:focus{border-color:#0b9e83}
+#search{min-width:min(260px,100%)}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
+.item{min-width:0;display:flex;flex-direction:column;background:#fff;border-radius:17px;overflow:hidden;border:1px solid #e6eae4;box-shadow:0 5px 18px #133c2910}
+.item img,.empty-img{width:100%;aspect-ratio:1.05;object-fit:cover;display:grid;place-items:center;background:#e4f3e9}
+.empty-img{font-size:2.8rem}.inside{padding:15px;display:flex;flex-direction:column;flex:1}
+.category{font-size:.69rem;text-transform:uppercase;letter-spacing:.07em;color:#0e8c77;font-weight:850}
+.item h3{font-size:1.02rem;line-height:1.3;margin:6px 0 5px}.description{font-size:.81rem;color:#71877f;line-height:1.45;margin:2px 0 9px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.stock{font-size:.7rem;color:#8b9b91;margin:5px 0 11px}.buy{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-top:auto;padding-top:12px;border-top:1px solid #f0f2ef;flex-wrap:wrap}
+.price{font-weight:900;color:#145f50}.buy button,button.primary{border:0;background:#087a6d;color:white;border-radius:10px;padding:10px 12px;font-weight:850}
+.buy button:disabled{background:#a9bdb6}.buy small{font-size:.68rem;color:#6d867e}
+aside{background:#fff;border:1px solid #e2e9e3;border-radius:18px;padding:22px;margin:29px 0;box-shadow:0 5px 20px #183f2b0a}
+.cart-head{display:flex;justify-content:space-between;gap:10px;align-items:center}aside h2{margin:0 0 12px;font-size:1.2rem;letter-spacing:-.03em}
+.empty-cart{font-size:.86rem;color:#71877f}.line{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f1f4f0;padding:10px 0;gap:15px;flex-wrap:wrap}.line strong{font-size:.85rem}
+.line small{color:#68857b}.remove{border:1px solid #d8e6de;background:white;border-radius:8px;padding:5px 8px;color:#8d5045}
+#send{margin-top:18px;padding:14px 18px;width:100%;max-width:370px}#send:disabled{background:#9db4a8}
+#notice{min-height:23px;color:#56776d;font-size:.86rem;line-height:1.5}
+.demo-foot{display:none;background:#e7f7ed;padding:25px;border-radius:17px;text-align:center;margin:25px 0}
+.demo-foot h2{margin:4px 0;font-size:1.55rem;letter-spacing:-.035em}.demo-foot p{color:#50786a}.demo-foot a{text-decoration:none;display:inline-block;background:#08796b;color:#fff;border-radius:12px;padding:15px 19px;font-weight:850}
+footer{font-size:.75rem;text-align:center;color:#779087;margin:30px 0}
+#floating{display:none}
+@media(max-width:1050px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:690px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.top-inner{padding:14px 15px}main{padding:18px 12px}.hero{padding:27px 16px!important}.inside{padding:11px}.item h3{font-size:.88rem}.description{font-size:.73rem}.buy{align-items:start}.buy button{padding:9px 11px;font-size:.8rem}.filters{width:100%}#search{min-width:0;flex:1}.tools strong{width:100%}aside{padding:16px}#floating.visible{display:block;position:fixed;z-index:8;bottom:13px;left:12px;right:12px;background:#087a6b;color:white;border-radius:13px;box-shadow:0 9px 32px #104a4180;text-align:center;text-decoration:none;padding:15px;font-weight:900;font-size:.93rem}body.demo{padding-bottom:80px}}
+@media(max-width:360px){.grid{grid-template-columns:1fr}.buy{align-items:center}}
+</style></head><body>
+<div class="top"><div class="top-inner"><span class="brand">my<b>Sales</b>.</span><span class="shopbag">🛍️ Browse & enquire</span></div></div>
+<div class="banner" id="demo-banner"><div class="banner-inner"><span>👋 Like this demo? You can have a storefront for your own business.</span><a href="/create/">Create my free store →</a></div></div>
+<header class="hero"><div class="hero-inner"><div class="subhead" id="type">Welcome to our shop</div><h1 id="name">Store catalogue</h1><p id="description">Explore our products and contact us on WhatsApp to order.</p></div></header>
+<main>
+<div class="tools"><strong id="section-title">Explore products</strong><div class="filters"><input id="search" type="search" placeholder="Search products…" aria-label="Search products"><select id="category" aria-label="Product category"><option value="">All categories</option></select></div></div>
+<p id="notice" role="status">Loading products…</p>
+<div id="products" class="grid"></div>
+<aside><div class="cart-head"><h2>My enquiry basket <span id="count">0</span></h2><span style="font-size:1.2rem">🛒</span></div>
+<div id="cart"><p class="empty-cart">Tap “Add” on a product you like.</p></div>
+<button id="send" class="primary" disabled>Send enquiry on WhatsApp →</button>
+<p style="color:#8a9c91;font-size:.75rem;line-height:1.5">Products are enquiries, not paid orders. Your merchant will confirm prices and availability. No payment is collected here.</p>
+</aside>
+<div class="demo-foot" id="demo-foot"><div style="font-size:1.9rem">✨</div><h2>Want a shop just like this?</h2><p>Build yours in minutes, add products from your phone, and share one link everywhere.</p><a href="/create/">Create my free store →</a></div>
+<footer>Powered by <strong>mySales</strong> · Simple storefronts for growing businesses</footer>
+</main><a href="/create/" id="floating">✨ Create your own store — it's free →</a>
 <script type="module">
 const $=id=>document.getElementById(id),cart=new Map();let data=[],isDemo=false;
 const slug=new URLSearchParams(location.search).get('slug')||location.pathname.split('/').filter(Boolean)[1]||'';
-const add=(tag,text)=>{const e=document.createElement(tag);e.textContent=String(text);return e;};
+const elem=(tag,text)=>{const e=document.createElement(tag);e.textContent=String(text);return e;};
+const cash=v=>'₦'+Number(v||0).toLocaleString('en-NG');
 function renderCart(){
- $('cart').replaceChildren();let count=0;
- for(const v of cart.values()){count+=v.quantity;$('cart').append(add('p',v.quantity+' × '+v.name+' ('+v.unit+') — ₦'+(v.price*v.quantity).toLocaleString()));}
- $('count').textContent=count;$('send').disabled=!count||isDemo;
+ $('cart').replaceChildren();let count=0,total=0;
+ for(const [key,v] of cart){
+  count+=v.quantity;total+=v.price*v.quantity;
+  const line=elem('div','');line.className='line';
+  const info=elem('div','');info.append(elem('strong',v.quantity+' × '+v.name),elem('br',''),elem('small',v.unit+' · '+cash(v.price*v.quantity)));
+  const remove=elem('button','Remove');remove.className='remove';remove.onclick=()=>{cart.delete(key);renderCart();render();};
+  line.append(info,remove);$('cart').append(line);
+ }
+ if(!count){const blank=elem('p','Tap “Add” on a product you like.');blank.className='empty-cart';$('cart').append(blank);}
+ else $('cart').append(elem('p','Estimated subtotal: '+cash(total)));
+ $('count').textContent=count?'('+count+')':'0';$('send').disabled=!count||isDemo;
 }
 function render(){
- const q=$('search').value.toLowerCase(),cat=$('category').value;$('products').replaceChildren();
- for(const p of data.filter(p=>(!cat||p.category===cat)&&p.name.toLowerCase().includes(q))){
-  const card=add('div','');card.className='item';
-  if(p.image_path){const photo=document.createElement('img');photo.src=p.image_path;photo.alt=p.name;photo.loading='lazy';photo.style.cssText='width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;margin-bottom:8px';card.append(photo);}
-  card.append(add('h3',p.name),add('p',p.description||''),add('small',(p.category||'General')+' · '+Number(p.stock)+' '+(p.base_unit||'piece')+' in stock'));
-  for(const u of p.units){
-   const row=document.createElement('p');row.append(add('span',u.name+' — ₦'+Number(u.price).toLocaleString()+' '));
-   const key=p.id+':'+u.name, used=()=>Array.from(cart.values()).filter(v=>v.productId===p.id).reduce((n,v)=>n+v.quantity*v.factor,0);
-   const b=add('button','Add');b.disabled=used()+Number(u.factor)>Number(p.stock);
-   b.onclick=()=>{
-    if(used()+Number(u.factor)>Number(p.stock)){$('notice').textContent='Only '+p.stock+' '+p.base_unit+' currently available.';return;}
-    const v=cart.get(key)||{productId:p.id,factor:Number(u.factor),name:p.name,unit:u.name,price:Number(u.price),quantity:0};
-    v.quantity++;cart.set(key,v);renderCart();render();
-   };
-   row.append(b);card.append(row);
+ const q=$('search').value.toLowerCase().trim(),cat=$('category').value;const grid=$('products');grid.replaceChildren();
+ const visible=data.filter(p=>(!cat||p.category===cat)&&((p.name||'').toLowerCase().includes(q)||(p.description||'').toLowerCase().includes(q)));
+ if(!visible.length)grid.append(elem('p',data.length?'No matching products. Try another search.':'No published products yet.'));
+ for(const p of visible){
+  const card=elem('article','');card.className='item';
+  if(p.image_path){const img=document.createElement('img');img.src=p.image_path;img.alt=p.name;img.loading='lazy';card.append(img);}
+  else{const placeholder=elem('div','🛍');placeholder.className='empty-img';card.append(placeholder);}
+  const inside=elem('div','');inside.className='inside';
+  const category=elem('div',p.category||'Shop collection');category.className='category';inside.append(category,elem('h3',p.name));
+  if(p.description){const desc=elem('p',p.description);desc.className='description';inside.append(desc);}
+  const stock=Number(p.stock)||0;
+  const status=elem('div',stock>0?stock+' available':'Ask us about availability');status.className='stock';inside.append(status);
+  for(const u of p.units||[]){
+   const buy=elem('div','');buy.className='buy';const left=elem('div','');const price=elem('div',cash(u.price));price.className='price';left.append(price,elem('small',u.name));buy.append(left);
+   const key=p.id+':'+u.name,used=()=>Array.from(cart.values()).filter(x=>x.productId===p.id).reduce((n,x)=>n+x.quantity*x.factor,0);
+   const add=elem('button','+ Add');add.disabled=stock>0&&used()+Number(u.factor)>stock;
+   add.onclick=()=>{
+    if(stock>0&&used()+Number(u.factor)>stock){$('notice').textContent='Only '+stock+' available. Enquire for more.';return;}
+    const item=cart.get(key)||{productId:p.id,factor:Number(u.factor),name:p.name,unit:u.name,price:Number(u.price),quantity:0};
+    item.quantity++;cart.set(key,item);renderCart();render();
+    $('notice').textContent=p.name+' added to your enquiry basket.';
+   };buy.append(add);inside.append(buy);
   }
-  $('products').append(card);
+  card.append(inside);grid.append(card);
  }
 }
-try{
- if(!/^[a-z0-9-]{2,80}$/.test(slug))throw Error('Invalid store link');
- const r=await fetch('/api/store?slug='+encodeURIComponent(slug));if(!r.ok)throw Error('Store unavailable');
- const j=await r.json();data=j.products;isDemo=/demo/i.test(slug)||/TEST STORE/i.test(j.store.description||'');$('send').textContent=isDemo?'Demo catalogue — ordering disabled':'Send order on WhatsApp';$('name').textContent=j.store.name;$('description').textContent=j.store.description||'';document.title=j.store.name+' | mySales';
- const cats=[...new Set(data.map(p=>p.category).filter(Boolean))];for(const c of cats){const o=add('option',c);o.value=c;$('category').append(o);}
- $('notice').textContent=isDemo?'DEMO ONLY — fictional products and sample prices. Do not place real orders.':data.length?'Browse products and send an enquiry.':'No published products yet.';
- $('search').oninput=render;$('category').onchange=render;
- $('send').onclick=()=>{
-  if(isDemo)return;
-  const phone=String(j.store.whatsapp||'').replace(/\D/g,'');if(!/^[1-9]\d{7,14}$/.test(phone)){$('notice').textContent='Merchant WhatsApp number is unavailable.';return;}
-  const lines=['Hello, I would like to enquire about these products from '+j.store.name+':',...Array.from(cart.values()).map(v=>v.quantity+' × '+v.name+' ('+v.unit+') — ₦'+(v.price*v.quantity).toLocaleString()),'Please confirm availability and total.'];
-  location.href='https://wa.me/'+phone+'?text='+encodeURIComponent(lines.join('\n'));
- };
- render();
-}catch(e){$('notice').textContent=e.message;}
+(async()=>{
+ try{
+  if(!/^[a-z0-9-]{2,80}$/.test(slug))throw Error('Invalid store link');
+  const r=await fetch('/api/store?slug='+encodeURIComponent(slug),{cache:'no-store'});
+  if(!r.ok)throw Error('Store not available right now');
+  const j=await r.json();data=j.products||[];
+  isDemo=/demo/i.test(slug)||/TEST STORE/i.test(j.store.description||'');
+  $('name').textContent=j.store.name;$('description').textContent=j.store.description||'See what we have available and send us your favourites.';
+  document.title=j.store.name+' | mySales';$('section-title').textContent=data.length+' product'+(data.length===1?'':'s')+' to explore';
+  $('notice').textContent=isDemo?'Demo catalogue · These are example products. Orders are disabled.':data.length?'See something you like? Add it to your enquiry basket.':'This shop has not added products yet.';
+  $('type').textContent=isDemo?'Live preview · Example store':'Welcome to '+j.store.name;
+  if(isDemo){$('demo-banner').classList.add('visible');$('demo-foot').style.display='block';$('floating').classList.add('visible');document.body.classList.add('demo');$('send').textContent='Demo only · Orders disabled';}
+  const cats=[...new Set(data.map(p=>p.category).filter(Boolean))];for(const c of cats){const option=elem('option',c);option.value=c;$('category').append(option);}
+  $('search').oninput=render;$('category').onchange=render;
+  $('send').onclick=()=>{
+   if(isDemo)return;
+   const number=String(j.store.whatsapp||'').replace(/\D/g,'');
+   if(!/^[1-9]\d{7,14}$/.test(number)){$('notice').textContent='Merchant WhatsApp is unavailable. Please contact the store.';return;}
+   const lines=['Hello, I saw your mySales store '+j.store.name+'. I would like to enquire about:',...Array.from(cart.values()).map(v=>v.quantity+' × '+v.name+' ('+v.unit+') — '+cash(v.price*v.quantity)),'Please confirm availability and total.'];
+   location.href='https://wa.me/'+number+'?text='+encodeURIComponent(lines.join('\n'));
+  };
+  render();renderCart();
+ }catch(err){$('notice').textContent=err.message;}
+})();
 </script></body></html>
