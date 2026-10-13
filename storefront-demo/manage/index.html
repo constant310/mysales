@@ -437,7 +437,7 @@ async function copy(value){
  try{await navigator.clipboard.writeText(value);say('Link copied! Share it with your customers.');}
  catch{window.prompt('Copy your link:',value);}
 }
-function publicUrl(){return location.origin+'/s/?slug='+encodeURIComponent(currentStore.slug);}
+function publicUrl(){return location.origin+'/'+encodeURIComponent(currentStore.public_handle||currentStore.slug);}
 function updateHero(){
  const live=currentStore.status==='published';
  $('store-title').textContent=currentStore.name;
