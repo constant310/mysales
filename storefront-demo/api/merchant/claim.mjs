@@ -1,3 +1,4 @@
+import {safeOrigin} from '../../server/http-auth.mjs';
 import { redeemManagementLink } from '../../server/management-links.mjs';
 
 export default async function handler(req, res) {
@@ -10,6 +11,7 @@ export default async function handler(req, res) {
   if (!/^application\/json(?:;|$)/i.test(req.headers['content-type'] ?? '')) {
     return res.status(415).json({ error: 'JSON required' });
   }
+  if(!safeOrigin(req))return res.status(403).json({error:'Invalid origin'});
   const token = req.body?.token;
   try {
     const session = await redeemManagementLink(token);
