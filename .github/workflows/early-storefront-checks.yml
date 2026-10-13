@@ -1,0 +1,20 @@
+name: Early Storefront checks
+on:
+  push:
+    branches: [feature/early-storefront-vercel]
+    paths:
+      - 'storefront-demo/**'
+      - '.github/workflows/early-storefront-checks.yml'
+  workflow_dispatch:
+jobs:
+  storefront-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install storefront dependencies
+        run: npm --prefix storefront-demo install --no-audit --no-fund
+      - name: Run automated storefront tests
+        run: npm --prefix storefront-demo test
