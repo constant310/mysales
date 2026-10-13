@@ -297,8 +297,8 @@ test('product cards use full-width Add to cart buttons with proper SVG icons',as
  assert.match(catalogue,/grid-media/);
  assert.match(catalogue,/grid-title/);
  assert.match(catalogue,/grid-price/);
- assert.match(catalogue,/const cartIcon=/);
- assert.match(catalogue,/const addCartIcon=/);
+ assert.match(catalogue,/id="home-cart"/);
+ assert.match(catalogue,/const CART_SVG=/);
  assert.doesNotMatch(catalogue,/id="like"/i);
  assert.doesNotMatch(catalogue,/id="share"/i);
 });
