@@ -15,7 +15,6 @@ const routes={
  '/api/store':'./api/store.mjs',
  '/api/discover':'./api/discover.mjs',
  '/api/merchant/me':'./api/merchant/me.mjs',
- '/api/merchant/login':'./api/merchant/login.mjs',
  '/api/merchant/logout':'./api/merchant/logout.mjs',
  '/api/merchant/claim':'./api/merchant/claim.mjs',
  '/api/merchant/products':'./api/merchant/products.mjs',
