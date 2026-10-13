@@ -645,27 +645,78 @@ $('add').onsubmit=async e=>{
 };
 $('add-more').onclick=()=>{isAdding=true;showManagerView();$('add-section').scrollIntoView({behavior:'smooth'});$('product-name').focus({preventScroll:true});};
 $('cancel-add').onclick=()=>{isAdding=false;showManagerView();$('product-section').scrollIntoView({behavior:'smooth'});};
+const settingsForm=$('settings'),whatsappForm=$('whatsapp-form');
+const businessFields=['name','whatsapp','description','status'];
+let businessBaseline=null,whatsappBaseline=null;
+function businessValues(){
+ const data=Object.fromEntries(new FormData(settingsForm));
+ return Object.fromEntries(businessFields.map(key=>[key,String(data[key]??'')]));
+}
+function updateBusinessSave(){
+ const values=businessValues();
+ const modified=businessBaseline!==null&&businessFields.some(key=>values[key]!==businessBaseline[key]);
+ $('business-save').disabled=!modified||!settingsForm.checkValidity();
+ $('business-feedback').textContent=modified?'Unsaved changes':'No changes yet';
+ $('business-feedback').style.color=modified?'#16763D':'#829183';
+}
+function updateWhatsAppSave(){
+ const value=$('whatsapp-template').value;
+ const modified=whatsappBaseline!==null&&value!==whatsappBaseline;
+ $('whatsapp-save').disabled=!modified;
+ $('whatsapp-feedback').textContent=modified?'Unsaved changes':'No changes yet';
+ $('whatsapp-feedback').style.color=modified?'#16763D':'#829183';
+}
+settingsForm.addEventListener('input',updateBusinessSave);
+settingsForm.addEventListener('change',updateBusinessSave);
+$('whatsapp-template').addEventListener('input',()=>{
+ $('whatsapp-preview').hidden=true;updateWhatsAppSave();
+});
+const settingAccordions=['settings-panel','whatsapp-panel','access-panel'].map(id=>$(id));
+for(const panel of settingAccordions)panel.addEventListener('toggle',()=>{
+ if(!panel.open)return;
+ for(const other of settingAccordions)if(other!==panel)other.open=false;
+});
+
 const renderSampleMessage=()=>{
  const template=$('whatsapp-template').value||defaultWhatsApp;
  const values={store_name:currentStore.name,items:'1 × Sample product (piece) — ₦5,000',subtotal:'₦5,000',customer_note:''};
  return template.replace(/\{(store_name|items|subtotal|customer_note)\}/g,(_,key)=>values[key]).trim();
 };
 $('preview-whatsapp').onclick=()=>{$('whatsapp-preview').textContent=renderSampleMessage();$('whatsapp-preview').hidden=false;};
-$('reset-whatsapp').onclick=()=>{$('whatsapp-template').value=defaultWhatsApp;$('whatsapp-preview').hidden=true;};
-$('whatsapp-form').onsubmit=async e=>{
- e.preventDefault();const template=$('whatsapp-template').value.trim();
- if(template&&!template.includes('{items}')){say('Include {items} in your WhatsApp message so enquiries show the selected products.',true);return;}
- const b=e.currentTarget.querySelector('[type=submit]');b.disabled=true;
+$('reset-whatsapp').onclick=()=>{$('whatsapp-template').value=defaultWhatsApp;$('whatsapp-preview').hidden=true;updateWhatsAppSave();};
+whatsappForm.onsubmit=async e=>{
+ e.preventDefault();
+ const template=$('whatsapp-template').value.trim();
+ if(!template.includes('{items}')){say('Include {items} so enquiries show the selected products.',true);return;}
+ const button=$('whatsapp-save');button.disabled=true;button.textContent='Saving…';
  try{
   const updated=await post('store-settings',{
    name:currentStore.name,description:currentStore.description||'',whatsapp:currentStore.whatsapp,
-   status:currentStore.status,whatsapp_template:template||null
+   status:currentStore.status,whatsapp_template:template===defaultWhatsApp?null:template
   });
-  currentStore=updated.store;$('whatsapp-preview').hidden=true;
-  say('WhatsApp message saved. New enquiries will use your wording.');$('whatsapp-panel').open=false;
- }catch(err){say(err.message,true);}finally{b.disabled=false;}
+  currentStore=updated.store;
+  $('whatsapp-template').value=currentStore.whatsapp_template||defaultWhatsApp;
+  whatsappBaseline=$('whatsapp-template').value;
+  $('whatsapp-preview').hidden=true;
+  say('WhatsApp message saved.');showManagerToast('WhatsApp message updated');
+  $('whatsapp-panel').open=false;
+ }catch(err){say(err.message,true);}
+ finally{button.textContent='Save message';updateWhatsAppSave();}
 };
-$('settings').onsubmit=async e=>{e.preventDefault();const b=e.currentTarget.querySelector('button[type=submit]');b.disabled=true;try{const data=Object.fromEntries(new FormData(e.currentTarget));const updated=await post('store-settings',data);currentStore=updated.store;updateHero();say('Business details updated.');$('settings-panel').open=false;}catch(err){say(err.message,true);}finally{b.disabled=false;}};
+settingsForm.onsubmit=async e=>{
+ e.preventDefault();
+ if(!settingsForm.checkValidity())return;
+ const button=$('business-save');button.disabled=true;button.textContent='Saving…';
+ try{
+  const data=businessValues();
+  const updated=await post('store-settings',data);
+  currentStore=updated.store;
+  businessBaseline=businessValues();
+  updateHero();say('Business details updated.');showManagerToast('Business details saved');
+  $('settings-panel').open=false;
+ }catch(err){say(err.message,true);}
+ finally{button.textContent='Save changes';updateBusinessSave();}
+};
 $('share').onclick=()=>copy(publicUrl());
 $('copy-manager').onclick=()=>copy(location.origin+'/manage/claim#token='+encodeURIComponent(token));
 $('export').onclick=async()=>{const b=$('export');b.disabled=true;try{const data=await api('export');const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='mysales-store-backup.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);say('Backup downloaded.');}catch(err){say(err.message,true);}finally{b.disabled=false;}};
@@ -677,6 +728,8 @@ try{
  form.elements.namedItem('whatsapp').value=currentStore.whatsapp;
  form.elements.namedItem('status').value=currentStore.status;
  $('whatsapp-template').value=currentStore.whatsapp_template||defaultWhatsApp;
+ businessBaseline=businessValues();whatsappBaseline=$('whatsapp-template').value;
+ updateBusinessSave();updateWhatsAppSave();
  updateHero();$('app').hidden=false;
  say(new URLSearchParams(location.search).has('welcome')?'Welcome! Add your first product to launch your store.':'Your private store manager is ready.');
  await refresh();
