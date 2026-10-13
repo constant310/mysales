@@ -73,6 +73,11 @@ main{max-width:870px;padding-top:19px}
 #product-section .product-list{gap:9px}
 .product{border-radius:11px;box-shadow:none}
 @media(max-width:600px){main{padding:10px 12px 50px}.hero{padding:17px;border-radius:12px;margin-bottom:12px}.hero h1{font-size:1.4rem}.hero .actions .btn{flex:1}.panel{padding:16px;border-radius:12px}.photo-drop{min-height:75px}}
+
+#whatsapp-panel{margin-bottom:10px;border-bottom:1px solid #EDF1EE;padding-bottom:10px}
+#whatsapp-panel code{background:#F0FDF4;padding:2px 5px;border-radius:4px;color:#15803D;font-size:.8rem}
+.message-preview{white-space:pre-wrap;word-break:break-word;line-height:1.55;background:#F6FAF7;border:1px solid #DEEADE;padding:15px;border-radius:10px;font:inherit;font-size:.82rem}
+.message-preview[hidden]{display:none}
 </style></head><body>
 <header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Storefront Manager</span>
 <button id="exit" class="head-btn">Close private access</button></header>
@@ -104,7 +109,23 @@ main{max-width:870px;padding-top:19px}
 <div><h2>Your products <span id="total" style="font-size:.84rem;color:#789589"></span></h2></div><button class="btn btn-outline btn-small" id="add-more" type="button">+ Add</button></div>
 <div id="products" class="product-list"></div></section>
 </div>
-<section class="panel footer-panel"><details id="settings-panel"><summary>⚙️ Change business details</summary>
+<section class="panel footer-panel">
+<details id="whatsapp-panel">
+<summary>WhatsApp enquiry message</summary>
+<p class="muted">Personalise the message customers send when they enquire about your products.</p>
+<form id="whatsapp-form">
+<label for="whatsapp-template">Your message</label>
+<textarea id="whatsapp-template" name="whatsapp_template" rows="7" maxlength="1500" spellcheck="true" aria-describedby="template-help" style="min-height:165px;line-height:1.6"></textarea>
+<p id="template-help" class="hint">Use <code>{store_name}</code>, <code>{items}</code>, <code>{subtotal}</code>, and <code>{customer_note}</code>. Include <code>{items}</code> so customers send the products they chose.</p>
+<div class="inline" style="gap:9px;margin-top:12px">
+<button class="btn btn-small" type="submit">Save WhatsApp message</button>
+<button class="btn btn-outline btn-small" id="preview-whatsapp" type="button">Preview</button>
+<button class="btn btn-outline btn-small" id="reset-whatsapp" type="button">Use default</button>
+</div>
+<pre class="message-preview" id="whatsapp-preview" hidden></pre>
+</form>
+</details>
+<details id="settings-panel"><summary>⚙️ Change business details</summary>
 <form id="settings"><div class="inline" style="gap:14px">
 <div style="flex:1;min-width:180px"><label>Business name<input name="name" maxlength="150" required></label></div>
 <div style="flex:1;min-width:180px"><label>WhatsApp number<input name="whatsapp" maxlength="16" required></label></div></div>
@@ -120,6 +141,7 @@ main{max-width:870px;padding-top:19px}
 const token=sessionStorage.getItem('mysales_private_management_token')||'';
 const $=id=>document.getElementById(id),notice=$('notice'),list=$('products');
 let currentStore=null,products=[],isAdding=new URLSearchParams(location.search).has('welcome');
+const defaultWhatsApp='Hello {store_name}, I would like to enquire about:\n\n{items}\n\nEstimated subtotal: {subtotal}\nPlease confirm availability and final price.\n{customer_note}';
 function showManagerView(){
  const hasProducts=products.length>0;
  const adding=isAdding||!hasProducts;
@@ -277,6 +299,26 @@ $('add').onsubmit=async e=>{
 };
 $('add-more').onclick=()=>{isAdding=true;showManagerView();$('add-section').scrollIntoView({behavior:'smooth'});$('product-name').focus({preventScroll:true});};
 $('cancel-add').onclick=()=>{isAdding=false;showManagerView();$('product-section').scrollIntoView({behavior:'smooth'});};
+const renderSampleMessage=()=>{
+ const template=$('whatsapp-template').value||defaultWhatsApp;
+ const values={store_name:currentStore.name,items:'1 × Sample product (piece) — ₦5,000',subtotal:'₦5,000',customer_note:''};
+ return template.replace(/\{(store_name|items|subtotal|customer_note)\}/g,(_,key)=>values[key]).trim();
+};
+$('preview-whatsapp').onclick=()=>{$('whatsapp-preview').textContent=renderSampleMessage();$('whatsapp-preview').hidden=false;};
+$('reset-whatsapp').onclick=()=>{$('whatsapp-template').value=defaultWhatsApp;$('whatsapp-preview').hidden=true;};
+$('whatsapp-form').onsubmit=async e=>{
+ e.preventDefault();const template=$('whatsapp-template').value.trim();
+ if(template&&!template.includes('{items}')){say('Include {items} in your WhatsApp message so enquiries show the selected products.',true);return;}
+ const b=e.currentTarget.querySelector('[type=submit]');b.disabled=true;
+ try{
+  const updated=await post('store-settings',{
+   name:currentStore.name,description:currentStore.description||'',whatsapp:currentStore.whatsapp,
+   status:currentStore.status,whatsapp_template:template||null
+  });
+  currentStore=updated.store;$('whatsapp-preview').hidden=true;
+  say('WhatsApp message saved. New enquiries will use your wording.');$('whatsapp-panel').open=false;
+ }catch(err){say(err.message,true);}finally{b.disabled=false;}
+};
 $('settings').onsubmit=async e=>{e.preventDefault();const b=e.currentTarget.querySelector('button[type=submit]');b.disabled=true;try{const data=Object.fromEntries(new FormData(e.currentTarget));const updated=await post('store-settings',data);currentStore=updated.store;updateHero();say('Business details updated.');$('settings-panel').open=false;}catch(err){say(err.message,true);}finally{b.disabled=false;}};
 $('share').onclick=()=>copy(publicUrl());
 $('copy-manager').onclick=()=>copy(location.origin+'/manage/claim#token='+encodeURIComponent(token));
@@ -288,6 +330,7 @@ try{
  form.elements.namedItem('description').value=currentStore.description||'';
  form.elements.namedItem('whatsapp').value=currentStore.whatsapp;
  form.elements.namedItem('status').value=currentStore.status;
+ $('whatsapp-template').value=currentStore.whatsapp_template||defaultWhatsApp;
  updateHero();$('app').hidden=false;
  say(new URLSearchParams(location.search).has('welcome')?'Welcome! Add your first product to launch your store.':'Your private store manager is ready.');
  await refresh();
