@@ -25,7 +25,7 @@ async function api(path,options={}){
 function showLink(link){$('newlink').hidden=false;$('private').href=link;$('private').textContent=link;$('copy').onclick=async()=>{try{await navigator.clipboard.writeText(link);status.textContent='Link copied. Send privately.';}catch{status.textContent='Copy the private link shown above.';}};}
 async function action(body){return api('stores',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});}
 async function refresh(){const {stores}=await api('stores');list.replaceChildren();if(!stores.length)list.append(text('p','No stores yet.'));
-for(const s of stores){const box=text('div','');box.className='row';box.append(text('strong',s.name+' · '+s.slug),text('p',s.product_count+' products · '+s.status+' · '+s.whatsapp));
+for(const s of stores){const box=text('div','');box.className='row';box.append(text('strong',s.name),text('p',s.product_count+' products · '+s.status+' · '+s.whatsapp));
 const a=text('a','Open public store');a.href='/'+encodeURIComponent(s.public_handle||s.slug);a.target='_blank';box.append(a);
 const actions=text('div','');actions.className='actions';
 const rotate=text('button','Replace private management link');rotate.onclick=async()=>{if(!confirm('Replace private link? All previous links and merchant sessions will stop working.'))return;rotate.disabled=true;try{const r=await action({action:'rotate',storeId:s.id});showLink(r.managementLink);status.textContent='A new private management link was issued.';}catch(e){status.textContent=e.message;}finally{rotate.disabled=false;}};
