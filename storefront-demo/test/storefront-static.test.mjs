@@ -519,3 +519,51 @@ test('storefront ends after its product grid and footer without a second fullscr
  assert.doesNotMatch(page,/reelQuantities|reelQtyUpdates|renderReels|quickReelAdd/);
  assert.doesNotMatch(page,/scroll-snap-type:y proximity/);
 });
+
+
+test('private admin dashboard shows real metrics and vendor-level drilldown',async()=>{
+ const ui=await read('operator/index.html');
+ const edge=await read('supabase/functions/early-storefront-backend/index.ts');
+ assert.match(ui,/id="metric-stores"/);
+ assert.match(ui,/id="metric-visits"/);
+ assert.match(ui,/id="metric-whatsapp"/);
+ assert.match(ui,/id="metric-cart-rate"/);
+ assert.match(ui,/id="metric-whatsapp-rate"/);
+ assert.match(ui,/id="visits-chart"/);
+ assert.match(ui,/vendor-insights/);
+ assert.match(ui,/View analytics/);
+ assert.match(ui,/insights\\.hidden=!opening/);
+ assert.match(ui,/currentDays\\+' days'/);
+ assert.match(ui,/WhatsApp intent rate/);
+ assert.match(edge,/pathname==='\\/api\\/operator\\/analytics'/);
+ assert.match(edge,/early_storefront\\.activity_events/);
+ assert.match(edge,/early_storefront\\.sales/);
+ assert.match(edge,/if\\(!\\(await operator\\(request\\)\\)\\)return out\\(401/);
+});
+test('resetting vendor access immediately reveals a one-time handoff with copy and WhatsApp',async()=>{
+ const ui=await read('operator/index.html');
+ const edge=await read('supabase/functions/early-storefront-backend/index.ts');
+ assert.match(ui,/id="handoff-dialog"/);
+ assert.match(ui,/id="handoff-link"/);
+ assert.match(ui,/id="handoff-copy"/);
+ assert.match(ui,/id="handoff-whatsapp"/);
+ assert.match(ui,/Reset & get vendor link/);
+ assert.match(ui,/action:'rotate',storeId:s\\.id/);
+ assert.match(ui,/showLink\\(r\\.managementLink,s,\\{rotated:true\\}\\)/);
+ assert.match(ui,/navigator\\.clipboard\\.writeText\\(currentVendorLink\\)/);
+ assert.match(ui,/https:\\/\\/wa\\.me\\//);
+ assert.match(ui,/handoff\\.showModal\\(\\)/);
+ assert.match(ui,/handoffInput\\.value=''/);
+ assert.match(ui,/currentVendorLink=''/);
+ assert.match(ui,/it cannot be retrieved after closing/i);
+ assert.match(edge,/update early_storefront\\.management_links set revoked_at=now\\(\\)/);
+ assert.match(edge,/update early_storefront\\.sessions set revoked_at=now\\(\\)/);
+ assert.match(edge,/managementLink:managementUrl\\(token,request\\)/);
+});
+test('new store creation also gives vendor link immediately without persisting the token',async()=>{
+ const ui=await read('operator/index.html');
+ assert.match(ui,/showLink\\(r\\.managementLink,\\{\\.\\.\\.r\\.store,whatsapp:details\\.whatsapp\\}\\)/);
+ assert.match(ui,/The public customer link stays unchanged/);
+ assert.match(ui,/link cannot be retrieved later/i);
+ assert.doesNotMatch(ui,/localStorage\\.setItem\\([^)]*managementLink/);
+});
