@@ -178,8 +178,13 @@ function renderChart(events,days){
 const handoff=$('handoff-dialog'),handoffInput=$('handoff-link');
 let currentVendorLink='';
 function closeHandoff(){
- if(handoff.open)handoff.close();
+ if(!handoff.open)return;
+ if(currentVendorLink&&!confirm('Have you copied or sent this private management link? It cannot be retrieved after closing.'))return;
+ handoff.close();
 }
+handoff.addEventListener('cancel',event=>{
+ if(currentVendorLink&&!confirm('Have you saved or sent the private vendor link? It cannot be retrieved after closing.'))event.preventDefault();
+});
 handoff.addEventListener('close',()=>{
  // Never persist management capability to analytics, storage or admin records.
  currentVendorLink='';
@@ -272,7 +277,7 @@ function renderStores(){
    cell.append(text('strong',int(value)),text('small',label));insights.append(cell);
   }
   const rate=Number(s.visits)>0?Math.round(100*Number(s.whatsapp_sessions||0)/Number(s.visits)):0;
-  insights.append(text('p','WhatsApp intent rate: '+rate+'% of tracked visits · Last '+period+'. This shows clicks, not confirmed purchases.')).lastChild.className='vendor-insights-note';
+  const insightNote=text('p','WhatsApp intent rate: '+rate+'% of tracked visits · Last '+period+'. This shows clicks, not confirmed purchases.');insightNote.className='vendor-insights-note';insights.append(insightNote);
   const view=text('button','View analytics');view.type='button';view.className='store-analytics-toggle';
   view.setAttribute('aria-expanded','false');
   view.onclick=()=>{
