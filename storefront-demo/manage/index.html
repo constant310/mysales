@@ -244,6 +244,52 @@ main{max-width:870px;padding-top:19px}
 .photo-icon svg,.ph svg{width:25px;height:25px}
 .ph{color:#4c8b62}
 @media(max-width:600px){#product-section .inline{margin-bottom:18px}.settings-summary{min-height:78px;padding:15px 16px;gap:10px}.settings-action-hint{font-size:.7rem}}
+
+/* Vendor product-sharing workspace */
+.product-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+#share-products{background:#eaf8ed;color:#146d36;border-color:#b6dbc1;min-height:42px}
+#share-products:hover{background:#daf2df}
+.share-hint{font-size:.74rem;color:#7c9483;line-height:1.4;margin:3px 0 0}
+.share-single-product{width:100%;border:1px solid #c2e6ce;background:#eef9f1;color:#167638;border-radius:11px;padding:12px;font-size:.83rem;font-weight:900;margin:12px 0 2px}
+.product-share-dialog{border:0;padding:0;border-radius:19px;background:#fff;color:#243d2d;width:min(610px,calc(100vw - 18px));max-height:94dvh;overflow:hidden;margin:auto;box-shadow:0 28px 75px #071b0c75}
+.product-share-dialog[open]{display:flex;flex-direction:column}
+.product-share-dialog::backdrop{background:#06170bb5;backdrop-filter:blur(3px)}
+.product-share-header{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:20px 21px 17px;border-bottom:1px solid #e8eee8}
+.product-share-header h2{font-size:1.23rem;letter-spacing:-.035em;line-height:1.26;margin:4px 0 7px;color:#203c28}
+.product-share-header p{font-size:.78rem;color:#6b8271;line-height:1.45;margin:0}
+.share-eyebrow{font-size:.66rem;font-weight:900;color:#16803b;letter-spacing:.08em}
+.share-close{width:37px;height:37px;border:0;border-radius:50%;background:#f1f6f1;color:#3e5b45;font-size:1.4rem;flex:none}
+.share-body{padding:17px 21px 25px;overflow:auto;min-height:0;overscroll-behavior:contain}
+.share-search-row label{font-size:.77rem;display:block;font-weight:850;color:#45634c;margin-bottom:7px}
+#share-search{border:1px solid #dae7dd;border-radius:10px;width:100%;min-height:44px;padding:10px 12px;font-size:16px;color:#274331}
+.share-select-head{display:flex;gap:13px;align-items:center;margin:12px 0 9px;font-size:.74rem;color:#638069}
+.share-select-head span{flex:1;font-weight:850}
+.share-select-head button{background:transparent;color:#16783d;border:0;font-size:.75rem;font-weight:850;padding:7px 0}
+.share-product-list{border:1px solid #e1eae2;border-radius:12px;max-height:220px;overflow:auto;overscroll-behavior:contain}
+.share-product-option{display:flex;align-items:center;gap:11px;border-bottom:1px solid #edf1ed;min-height:72px;padding:9px 12px;cursor:pointer}
+.share-product-option:last-child{border-bottom:0}
+.share-product-option:has(input:checked){background:#f2faf4}
+.share-product-option input{accent-color:#16823d;width:19px;height:19px;min-width:19px;cursor:pointer}
+.share-product-option img,.share-option-fallback{width:48px;height:48px;object-fit:contain;border-radius:9px;background:#eef6ef;flex:none}
+.share-option-fallback{display:grid;place-items:center;color:#7a9683;font-size:.62rem}
+.share-option-text{flex:1;min-width:0}
+.share-option-text strong{font-size:.85rem;line-height:1.35;color:#294333;display:block;overflow-wrap:anywhere}
+.share-option-text small{display:block;margin-top:3px;font-size:.78rem;font-weight:850;color:#16813e}
+.share-composer{border-top:1px solid #e6eee6;margin-top:18px;padding-top:16px}
+.share-composer h3{margin:0 0 5px;font-size:.96rem;letter-spacing:-.02em}
+.share-composer>p{font-size:.75rem;line-height:1.57;color:#687f70;margin:0 0 13px}
+.share-picture-preview{max-height:250px;min-height:100px;overflow:auto;display:grid;place-items:center;background:#f4f8f4;border:1px dashed #cddfd0;border-radius:12px;padding:10px}
+.share-picture-preview img{width:100%;height:auto;max-height:none;object-fit:contain;border-radius:7px}
+#share-picture-placeholder{font-size:.78rem;color:#819686;padding:20px 12px;text-align:center;line-height:1.6}
+.share-composer .share-note{font-size:.73rem;margin:10px 0 12px;color:#65846d}
+.share-primary,.share-secondary{min-height:45px;padding:11px 9px;border-radius:10px;border:0;font-size:.8rem;font-weight:900}
+.share-primary{background:#1c8220;color:#fff}
+.share-secondary{border:1px solid #cde5d2;background:#fff;color:#167139}
+.share-primary:disabled,.share-secondary:disabled{opacity:.48}
+#share-prepare{width:100%;margin-bottom:8px}
+.share-file-actions,.share-text-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:8px}
+.share-composer .share-explainer{font-size:.72rem;line-height:1.6;margin:17px 0 0;color:#7c8d80}
+@media(max-width:500px){.product-share-dialog{max-height:96dvh;border-radius:15px}.product-share-header{padding:16px 15px 14px}.share-body{padding:14px 15px 19px}.product-share-header h2{font-size:1.08rem}.product-actions{width:100%}.product-actions .btn{flex:1;min-width:100px}.share-select-head{gap:9px}.share-file-actions,.share-text-actions{gap:7px}.share-primary,.share-secondary{font-size:.76rem}}
 </style></head><body>
 <header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Storefront Manager</span>
 <button id="exit" class="head-btn" hidden>Close private access</button></header>
@@ -285,7 +331,7 @@ main{max-width:870px;padding-top:19px}
 <p id="add-note" class="hint">Your product picture, name and price appear together on your storefront.</p>
 </form></section>
 <section class="panel" id="product-section"><div class="inline" style="justify-content:space-between;align-items:center">
-<div><h2>Your products <span id="total" style="font-size:.84rem;color:#789589"></span></h2></div><button class="btn btn-outline btn-small" id="add-more" type="button">Add product</button></div>
+<div><h2>Your products <span id="total" style="font-size:.84rem;color:#789589"></span></h2><p class="share-hint">Pick items to send prices and pictures to customers.</p></div><div class="product-actions"><button class="btn btn-outline btn-small" id="share-products" type="button">Share products</button><button class="btn btn-outline btn-small" id="add-more" type="button">Add product</button></div></div>
 <div id="products" class="product-list"></div></section>
 </div>
 <section class="settings-hub" aria-labelledby="settings-heading">
@@ -367,6 +413,7 @@ main{max-width:870px;padding-top:19px}
         <div><small>Selling unit</small><strong id="dialog-unit"></strong></div>
       </div>
       <div class="modal-description"><h3>Description</h3><p id="dialog-description"></p></div>
+      <button id="share-one-product" type="button" class="share-single-product">Share picture &amp; price with a customer</button>
 
     </div>
     <form id="dialog-form" class="modal-form" hidden>
@@ -386,6 +433,33 @@ main{max-width:870px;padding-top:19px}
       </details>
   </div>
   <div id="dialog-footer" class="modal-footer" hidden><button type="button" id="dialog-cancel" class="btn btn-outline">Cancel</button><button type="submit" form="dialog-form" id="dialog-save" class="btn" disabled>Save changes</button></div>
+</dialog>
+
+<dialog id="product-share-dialog" class="product-share-dialog" aria-modal="true" aria-labelledby="share-heading">
+ <div class="product-share-header">
+  <div><span class="share-eyebrow">VENDOR TOOLS</span><h2 id="share-heading">Share products with a customer</h2><p>Select products to send their pictures, names and prices.</p></div>
+  <button id="share-close" type="button" class="share-close" aria-label="Close product sharing">×</button>
+ </div>
+ <div class="share-body">
+  <div class="share-search-row"><label for="share-search">Find a product</label><input id="share-search" type="search" autocomplete="off" placeholder="Search your products..."></div>
+  <div class="share-select-head"><span id="share-selection-count">0 of 6 selected</span><button type="button" id="share-select-all">Select first 6</button><button type="button" id="share-clear">Clear</button></div>
+  <div id="share-product-list" class="share-product-list" role="group" aria-label="Products to share"></div>
+  <div class="share-composer">
+   <h3>Your picture catalogue</h3><p>Prepare one image containing your selected product photos and prices. Then send it through your phone’s share menu or save it for WhatsApp.</p>
+   <div id="share-picture-preview" class="share-picture-preview"><span id="share-picture-placeholder">Select at least one product to make a picture catalogue.</span><img id="share-picture-image" alt="Preview of the product catalogue image" hidden></div>
+   <p class="share-note" id="share-status" role="status" aria-live="polite">Only selected products will be included.</p>
+   <button type="button" id="share-prepare" class="share-primary" disabled>Prepare picture</button>
+   <div class="share-file-actions">
+    <button type="button" id="share-native" class="share-primary" disabled>Share picture</button>
+    <button type="button" id="share-download" class="share-secondary" disabled>Download picture</button>
+   </div>
+   <div class="share-text-actions">
+    <button type="button" id="share-copy-text" class="share-secondary" disabled>Copy product details</button>
+    <button type="button" id="share-whatsapp" class="share-secondary" disabled>Open WhatsApp with details</button>
+   </div>
+   <p class="share-explainer">For WhatsApp with photos, use <strong>Share picture</strong> and choose WhatsApp in your phone’s share menu. If your phone doesn’t support image sharing, download the picture and attach it in WhatsApp. Text sharing includes product photo links where available.</p>
+  </div>
+ </div>
 </dialog>
 <div id="manager-toast" class="manager-toast" role="status" aria-live="polite"><span aria-hidden="true">✓</span> <strong id="manager-toast-message">Product added</strong></div>
 <script type="module">
