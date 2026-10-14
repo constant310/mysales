@@ -568,6 +568,233 @@ function renderProduct(p){
  card.append(open);list.append(card);
 }
 
+/* Quick vendor catalogue: one actual image containing selected photos and prices.
+   This is a private manager feature; no product or management data is sent to another service. */
+const productShareDialog=$('product-share-dialog');
+const SHARE_LIMIT=6;
+let shareChosen=new Set(),sharePictureFile=null,sharePictureUrl=null,shareBuildSerial=0,shareBuilding=false;
+const shareableProducts=()=>products.filter(p=>p.units?.[0]);
+const selectedShareProducts=()=>shareableProducts().filter(p=>shareChosen.has(p.id));
+const safeProductImage=p=>{
+ try{const url=new URL(String(p.image_path||''));return url.protocol==='https:'?url.href:'';}
+ catch{return '';}
+};
+function shareProductText(){
+ const picked=selectedShareProducts();
+ if(!picked.length)return '';
+ const lines=['Hello! Here are the products you requested from '+currentStore.name+':',''];
+ picked.forEach((p,i)=>{
+  lines.push((i+1)+'. '+p.name+' — '+currency(p.units[0].price)+(p.units[0].name&&p.units[0].name!=='piece'?' / '+p.units[0].name:''));
+  const photo=safeProductImage(p);
+  if(photo)lines.push('Photo: '+photo);
+  lines.push('');
+ });
+ if(currentStore.status==='published')lines.push('View more products: '+publicUrl());
+ lines.push('Please let us know which ones you would like.');
+ return lines.join('\n').trim();
+}
+function discardSharePicture(){
+ shareBuildSerial++;
+ sharePictureFile=null;
+ if(sharePictureUrl){URL.revokeObjectURL(sharePictureUrl);sharePictureUrl=null;}
+ $('share-picture-image').removeAttribute('src');
+ $('share-picture-image').hidden=true;
+ $('share-picture-placeholder').hidden=false;
+ $('share-native').disabled=true;$('share-download').disabled=true;
+}
+function shareStatus(message,isError=false){
+ $('share-status').textContent=message;
+ $('share-status').style.color=isError?'#a43f31':'#53765d';
+}
+function updateShareSelection(){
+ const selected=selectedShareProducts().length;
+ $('share-selection-count').textContent=selected+' of '+SHARE_LIMIT+' selected';
+ $('share-prepare').disabled=!selected||shareBuilding;
+ $('share-copy-text').disabled=!selected;
+ $('share-whatsapp').disabled=!selected;
+ discardSharePicture();
+ $('share-picture-placeholder').textContent=selected
+  ? 'Tap Prepare picture to make your catalogue with '+selected+' product'+(selected===1?'':'s')+'.'
+  : 'Select at least one product to make a picture catalogue.';
+ shareStatus(selected?'Ready to prepare '+selected+' product'+(selected===1?'':'s')+'.':'Select products to share.');
+}
+function renderSharePicker(){
+ const host=$('share-product-list');host.replaceChildren();
+ const search=$('share-search').value.toLowerCase().trim();
+ const matching=shareableProducts().filter(p=>[p.name,p.category,p.description].some(v=>String(v||'').toLowerCase().includes(search)));
+ if(!matching.length){const empty=node('p',products.length?'No matching products.':'Add a product first to share its photo and price.');empty.className='hint';empty.style.padding='14px';host.append(empty);return;}
+ for(const p of matching){
+  const item=node('label','');item.className='share-product-option';
+  const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.value=p.id;
+  checkbox.checked=shareChosen.has(p.id);checkbox.setAttribute('aria-label','Include '+p.name+' in customer catalogue');
+  checkbox.onchange=()=>{
+   if(checkbox.checked&&shareChosen.size>=SHARE_LIMIT){
+    checkbox.checked=false;shareStatus('Choose up to '+SHARE_LIMIT+' products per picture. Send another catalogue for more.',true);return;
+   }
+   if(checkbox.checked)shareChosen.add(p.id);else shareChosen.delete(p.id);
+   updateShareSelection();
+  };
+  item.append(checkbox);
+  const url=safeProductImage(p);
+  if(url){const image=document.createElement('img');image.src=url;image.alt='';image.loading='lazy';
+   image.onerror=()=>{const blank=node('span','No photo');blank.className='share-option-fallback';image.replaceWith(blank);};
+   item.append(image);
+  }else{const blank=node('span','No photo');blank.className='share-option-fallback';item.append(blank);}
+  const detail=node('span','');detail.className='share-option-text';
+  detail.append(node('strong',p.name),node('small',currency(p.units[0].price)));item.append(detail);host.append(item);
+ }
+}
+function openShareProducts(preselectId=null){
+ shareChosen=new Set();
+ $('share-search').value='';
+ if(preselectId&&shareableProducts().some(p=>p.id===preselectId))shareChosen.add(preselectId);
+ discardSharePicture();renderSharePicker();updateShareSelection();
+ if(!productShareDialog.open)productShareDialog.showModal();
+}
+$('share-products').onclick=()=>openShareProducts();
+$('share-one-product').onclick=()=>{
+ if(!dialogProduct)return;
+ const id=dialogProduct.id;
+ productDialog.close();
+ openShareProducts(id);
+};
+$('share-search').oninput=renderSharePicker;
+$('share-select-all').onclick=()=>{
+ const search=$('share-search').value.toLowerCase().trim();
+ const matching=shareableProducts().filter(p=>[p.name,p.category,p.description].some(v=>String(v||'').toLowerCase().includes(search)));
+ for(const p of matching){if(shareChosen.size>=SHARE_LIMIT)break;shareChosen.add(p.id);}
+ renderSharePicker();updateShareSelection();
+};
+$('share-clear').onclick=()=>{shareChosen.clear();renderSharePicker();updateShareSelection();};
+$('share-close').onclick=()=>productShareDialog.close();
+productShareDialog.addEventListener('close',()=>{shareChosen.clear();discardSharePicture();$('share-search').value='';});
+function loadShareImage(url){
+ return new Promise(resolve=>{
+  if(!url){resolve(null);return;}
+  const img=new Image();let done=false;
+  const settle=value=>{if(done)return;done=true;clearTimeout(timeout);img.onload=null;img.onerror=null;resolve(value);};
+  const timeout=setTimeout(()=>settle(null),7000);
+  img.crossOrigin='anonymous';img.referrerPolicy='no-referrer';img.onload=()=>settle(img);img.onerror=()=>settle(null);
+  img.src=url;
+ });
+}
+function drawRounded(ctx,x,y,w,h,r){
+ const radius=Math.min(r,w/2,h/2);
+ ctx.beginPath();ctx.moveTo(x+radius,y);ctx.arcTo(x+w,y,x+w,y+h,radius);
+ ctx.arcTo(x+w,y+h,x,y+h,radius);ctx.arcTo(x,y+h,x,y,radius);
+ ctx.arcTo(x,y,x+w,y,radius);ctx.closePath();
+}
+function drawWrapped(ctx,text,x,y,width,lineHeight,maxLines){
+ const words=String(text||'').trim().split(/\s+/);const lines=[];
+ let line='';
+ for(const word of words){
+  const next=line?line+' '+word:word;
+  if(ctx.measureText(next).width>width&&line){lines.push(line);line=word;}
+  else line=next;
+ }
+ if(line)lines.push(line);
+ for(let i=0;i<Math.min(lines.length,maxLines);i++){
+  let value=lines[i];
+  if(i===maxLines-1&&lines.length>maxLines){
+   while(value&&ctx.measureText(value+'…').width>width)value=value.slice(0,-1);
+   value+='…';
+  }
+  ctx.fillText(value,x,y+i*lineHeight,width);
+ }
+}
+async function makeSharePicture(picked){
+ const width=1080,rows=Math.ceil(picked.length/2),height=255+rows*520+(rows-1)*22+120;
+ const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+ const ctx=canvas.getContext('2d',{alpha:false});
+ if(!ctx)throw Error('This browser cannot prepare catalogue images.');
+ ctx.fillStyle='#F1F6F1';ctx.fillRect(0,0,width,height);
+ ctx.fillStyle='#15582F';ctx.fillRect(0,0,width,231);
+ ctx.fillStyle='#B8ECC8';ctx.font='700 26px Arial, sans-serif';ctx.fillText('PRODUCTS AVAILABLE',46,60);
+ ctx.fillStyle='#fff';ctx.font='bold 53px Arial, sans-serif';
+ drawWrapped(ctx,currentStore.name,44,129,990,55,2);
+ ctx.fillStyle='#E2F5E8';ctx.font='26px Arial, sans-serif';ctx.fillText('Pictures · Product names · Prices in ₦',47,209);
+ const images=await Promise.all(picked.map(p=>loadShareImage(safeProductImage(p))));
+ let photos=0;
+ for(let i=0;i<picked.length;i++){
+  const p=picked[i],col=i%2,row=Math.floor(i/2),x=33+col*516,y=254+row*542,w=495,h=520;
+  ctx.fillStyle='#FFFFFF';drawRounded(ctx,x,y,w,h,18);ctx.fill();
+  ctx.fillStyle='#F0F5F0';drawRounded(ctx,x+15,y+15,w-30,344,12);ctx.fill();
+  const img=images[i];
+  if(img&&img.naturalWidth&&img.naturalHeight){
+   const maxW=w-58,maxH=316,scale=Math.min(maxW/img.naturalWidth,maxH/img.naturalHeight);
+   const dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;
+   ctx.drawImage(img,x+(w-dw)/2,y+22+(325-dh)/2,dw,dh);photos++;
+  }else{
+   ctx.fillStyle='#7B9784';ctx.font='bold 26px Arial, sans-serif';ctx.textAlign='center';
+   ctx.fillText('Photo available on request',x+w/2,y+176,w-40);ctx.textAlign='left';
+  }
+  ctx.fillStyle='#243C2D';ctx.font='bold 27px Arial, sans-serif';
+  drawWrapped(ctx,p.name,x+26,y+390,w-52,34,2);
+  ctx.fillStyle='#168541';ctx.font='bold 39px Arial, sans-serif';
+  ctx.fillText(currency(p.units[0].price),x+26,y+486,w-52);
+ }
+ const footerY=height-105;
+ ctx.fillStyle='#22553B';ctx.font='bold 27px Arial, sans-serif';ctx.fillText('Ask us about any item',40,footerY);
+ ctx.fillStyle='#769080';ctx.font='23px Arial, sans-serif';
+ ctx.fillText(currentStore.status==='published'?publicUrl():'Made with mySales Online Stores',40,footerY+42,1000);
+ const blob=await new Promise((resolve,reject)=>{
+  try{canvas.toBlob(b=>b?resolve(b):reject(Error('Picture creation failed.')),'image/jpeg',.86);}
+  catch(e){reject(e);}
+ });
+ return {blob,photos};
+}
+$('share-prepare').onclick=async()=>{
+ const picked=selectedShareProducts();
+ if(!picked.length||shareBuilding)return;
+ discardSharePicture();const serial=shareBuildSerial;
+ shareBuilding=true;$('share-prepare').disabled=true;$('share-select-all').disabled=true;$('share-clear').disabled=true;
+ $('share-prepare').textContent='Preparing…';shareStatus('Adding product photos and prices to your picture…');
+ try{
+  const result=await makeSharePicture(picked);
+  if(serial!==shareBuildSerial)return;
+  const safeName=String(currentStore.name||'store').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,38)||'store';
+  sharePictureFile=new File([result.blob],safeName+'-products.jpg',{type:'image/jpeg'});
+  sharePictureUrl=URL.createObjectURL(result.blob);
+  $('share-picture-image').src=sharePictureUrl;$('share-picture-image').hidden=false;
+  $('share-picture-placeholder').hidden=true;
+  $('share-native').disabled=false;$('share-download').disabled=false;
+  shareStatus(result.photos===picked.length
+   ? 'Ready! All '+result.photos+' product pictures are included. Share or download below.'
+   : 'Ready: '+result.photos+' of '+picked.length+' photos included. Missing photos are shown as placeholders; copy the product details to send photo links.');
+ }catch(err){shareStatus('Could not create the picture: '+err.message+'. You can still copy details or open WhatsApp.',true);}
+ finally{shareBuilding=false;$('share-prepare').textContent='Prepare picture';$('share-prepare').disabled=!selectedShareProducts().length;
+  $('share-select-all').disabled=false;$('share-clear').disabled=false;}
+};
+$('share-native').onclick=()=>{
+ if(!sharePictureFile)return;
+ // Prepared before the tap: native Share must be called directly from a user gesture.
+ const files=[sharePictureFile];
+ if(typeof navigator.share!=='function'||(typeof navigator.canShare==='function'&&!navigator.canShare({files}))){
+  shareStatus('Image sharing is not supported here. Download the picture and attach it in WhatsApp.',true);return;
+ }
+ try{
+  Promise.resolve(navigator.share({files,title:currentStore.name+' products',text:'Product pictures and prices from '+currentStore.name}))
+   .then(()=>shareStatus('Picture shared.'))
+   .catch(err=>{if(err?.name!=='AbortError')shareStatus('Sharing was unavailable. Download the picture and send it in WhatsApp.',true);});
+ }catch(err){shareStatus('Sharing failed. Download the picture and attach it in WhatsApp.',true);}
+};
+$('share-download').onclick=()=>{
+ if(!sharePictureUrl||!sharePictureFile)return;
+ const link=document.createElement('a');link.href=sharePictureUrl;link.download=sharePictureFile.name;
+ document.body.append(link);link.click();link.remove();
+ shareStatus('Your product picture is ready. Attach it in a WhatsApp chat if it did not download automatically.');
+};
+$('share-copy-text').onclick=async()=>{
+ const message=shareProductText();if(!message)return;
+ try{await navigator.clipboard.writeText(message);shareStatus('Copied product names, prices and photo links. Paste into WhatsApp.');}
+ catch{window.prompt('Copy these product details:',message);}
+};
+$('share-whatsapp').onclick=()=>{
+ const message=shareProductText();if(!message)return;
+ window.open('https://wa.me/?text='+encodeURIComponent(message),'_blank','noopener,noreferrer');
+ shareStatus('WhatsApp opened with product details. For actual photo attachments, use Share picture above.');
+};
+
 const productDialog=$('product-dialog'),dialogForm=$('dialog-form'),dialogSave=$('dialog-save');
 let dialogProduct=null,dialogBaseline=null,dialogPhotoFile=null,dialogPhotoUrl=null,dialogEditing=false,dialogBusy=false;
 let saleRequestKey=null;
