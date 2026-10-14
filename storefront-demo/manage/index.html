@@ -686,15 +686,29 @@ $('share-select-all').onclick=()=>{
 $('share-clear').onclick=()=>{shareChosen.clear();renderSharePicker();updateShareSelection();};
 $('share-close').onclick=()=>productShareDialog.close();
 productShareDialog.addEventListener('close',()=>{shareChosen.clear();discardSharePicture();$('share-search').value='';});
-function loadShareImage(url){
- return new Promise(resolve=>{
-  if(!url){resolve(null);return;}
-  const img=new Image();let done=false;
-  const settle=value=>{if(done)return;done=true;clearTimeout(timeout);img.onload=null;img.onerror=null;resolve(value);};
-  const timeout=setTimeout(()=>settle(null),14000);
-  img.crossOrigin='anonymous';img.referrerPolicy='no-referrer';img.onload=()=>settle(img);img.onerror=()=>settle(null);
-  img.src=url;
- });
+async function loadShareImage(p){
+ if(!p?.image_path)return null;
+ let temporaryUrl=null;
+ try{
+  // Product photos arrive through the authenticated same-origin proxy.
+  const result=await fetch('/api/merchant/share-image?productId='+encodeURIComponent(p.id),{
+   headers:{Authorization:'Bearer '+token},cache:'no-store'
+  });
+  if(!result.ok)throw Error('Product picture could not load');
+  const blob=await result.blob();
+  if(!['image/jpeg','image/png','image/webp'].includes(blob.type)||blob.size>5500000||blob.size<20)
+   throw Error('Unsupported image');
+  temporaryUrl=URL.createObjectURL(blob);
+  const image=new Image();
+  await new Promise((resolve,reject)=>{
+   const timer=setTimeout(()=>reject(Error('Image loading timed out')),6500);
+   image.onload=()=>{clearTimeout(timer);resolve();};
+   image.onerror=()=>{clearTimeout(timer);reject(Error('Invalid image'));};
+   image.src=temporaryUrl;
+  });
+  if(!image.naturalWidth||!image.naturalHeight)throw Error('Invalid image');
+  return {image,dispose:()=>URL.revokeObjectURL(temporaryUrl)};
+ }catch{if(temporaryUrl)URL.revokeObjectURL(temporaryUrl);return null;}
 }
 function drawRounded(ctx,x,y,w,h,r){
  const radius=Math.min(r,w/2,h/2);
@@ -731,13 +745,13 @@ async function makeSharePicture(picked){
  ctx.fillStyle='#fff';ctx.font='bold 53px Arial, sans-serif';
  drawWrapped(ctx,currentStore.name,44,129,990,55,2);
  ctx.fillStyle='#E2F5E8';ctx.font='26px Arial, sans-serif';ctx.fillText('Pictures · Product names · Prices in ₦',47,209);
- const images=await Promise.all(picked.map(p=>loadShareImage(imageForCatalogue(p))));
+ const images=await Promise.all(picked.map(p=>loadShareImage(p)));
  let photos=0;
  for(let i=0;i<picked.length;i++){
   const p=picked[i],col=i%2,row=Math.floor(i/2),x=33+col*516,y=254+row*542,w=495,h=520;
   ctx.fillStyle='#FFFFFF';drawRounded(ctx,x,y,w,h,18);ctx.fill();
   ctx.fillStyle='#F0F5F0';drawRounded(ctx,x+15,y+15,w-30,344,12);ctx.fill();
-  const img=images[i];
+  const img=images[i]?.image;
   if(img&&img.naturalWidth&&img.naturalHeight){
    const maxW=w-58,maxH=316,scale=Math.min(maxW/img.naturalWidth,maxH/img.naturalHeight);
    const dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;
@@ -751,6 +765,7 @@ async function makeSharePicture(picked){
   ctx.fillStyle='#168541';ctx.font='bold 39px Arial, sans-serif';
   ctx.fillText(currency(p.units[0].price),x+26,y+486,w-52);
  }
+ for(const loaded of images)loaded?.dispose();
  const footerY=height-105;
  ctx.fillStyle='#22553B';ctx.font='bold 27px Arial, sans-serif';ctx.fillText('Ask us about any item',40,footerY);
  ctx.fillStyle='#769080';ctx.font='23px Arial, sans-serif';
@@ -791,7 +806,7 @@ $('share-native').onclick=()=>{
   shareStatus('Image sharing is not supported here. Download the picture and attach it in WhatsApp.',true);return;
  }
  try{
-  Promise.resolve(navigator.share({files,title:currentStore.name+' products',text:'Product pictures and prices from '+currentStore.name}))
+  Promise.resolve(navigator.share({files,title:currentStore.name+' products',text:shareProductText()}))
    .then(()=>shareStatus('Picture shared.'))
    .catch(err=>{if(err?.name!=='AbortError')shareStatus('Sharing was unavailable. Download the picture and send it in WhatsApp.',true);});
  }catch(err){shareStatus('Sharing failed. Download the picture and attach it in WhatsApp.',true);}
