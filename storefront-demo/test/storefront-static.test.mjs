@@ -567,3 +567,53 @@ test('new store creation also gives vendor link immediately without persisting t
  assert.match(ui,/link cannot be retrieved later/i);
  assert.doesNotMatch(ui,/localStorage\.setItem\([^)]*managementLink/);
 });
+
+
+test('vendor selects up to six products to share from the private manager',async()=>{
+ const manager=await read('manage/index.html');
+ assert.match(manager,/id="share-products"/);
+ assert.match(manager,/id="product-share-dialog"/);
+ assert.match(manager,/id="share-one-product"/);
+ assert.match(manager,/id="share-product-list"/);
+ assert.match(manager,/id="share-search"/);
+ assert.match(manager,/id="share-select-all"/);
+ assert.match(manager,/id="share-selection-count"/);
+ assert.match(manager,/const SHARE_LIMIT=6/);
+ assert.match(manager,/function openShareProducts\(preselectId=null\)/);
+ assert.match(manager,/shareChosen\.size>=SHARE_LIMIT/);
+ assert.match(manager,/function renderSharePicker/);
+ assert.match(manager,/openShareProducts\(id\)/);
+ assert.match(manager,/const shareableProducts=\(\)=>products\.filter/);
+});
+test('vendor WhatsApp messages include names, naira prices and real public photo links',async()=>{
+ const manager=await read('manage/index.html');
+ assert.match(manager,/function shareProductText\(\)/);
+ assert.match(manager,/const photo=safeProductImage\(p\)/);
+ assert.match(manager,/if\(photo\)lines\.push\('Photo: '\+photo\)/);
+ assert.match(manager,/currency\(p\.units\[0\]\.price\)/);
+ assert.match(manager,/photo_url|image_path/);
+ assert.match(manager,/if\(currentStore\.status==='published'\)lines\.push/);
+ assert.match(manager,/function publicUrl/);
+ assert.match(manager,/id="share-copy-text"/);
+ assert.match(manager,/id="share-whatsapp"/);
+ assert.match(manager,/https:\/\/wa\.me\/\?text=/);
+ assert.doesNotMatch(manager,/shareProductText[\s\S]{0,1200}manage\/claim#token/);
+});
+test('image catalogue uses actual product photos, correct prices and a real shareable file',async()=>{
+ const manager=await read('manage/index.html');
+ assert.match(manager,/async function makeSharePicture\(picked\)/);
+ assert.match(manager,/canvas\.toBlob/);
+ assert.match(manager,/loadShareImage\(safeProductImage\(p\)\)/);
+ assert.match(manager,/img\.crossOrigin='anonymous'/);
+ assert.match(manager,/new File\(\[result\.blob\]/);
+ assert.match(manager,/navigator\.share\(\{files,title:currentStore\.name/);
+ assert.match(manager,/navigator\.canShare/);
+ assert.match(manager,/URL\.createObjectURL\(result\.blob\)/);
+ assert.match(manager,/URL\.revokeObjectURL/);
+ assert.match(manager,/id="share-prepare"/);
+ assert.match(manager,/id="share-native"/);
+ assert.match(manager,/id="share-download"/);
+ assert.match(manager,/id="share-picture-image"/);
+ assert.match(manager,/Only selected products will be included/);
+ assert.match(manager,/Attach it in a WhatsApp chat/);
+});
