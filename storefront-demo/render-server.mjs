@@ -12,7 +12,7 @@ const allowed=new Set([
  '/api/store','/api/discover','/api/signup',
  '/api/merchant/me','/api/merchant/claim','/api/merchant/products',
  '/api/merchant/restock','/api/merchant/publish','/api/merchant/confirm-sale',
- '/api/merchant/export','/api/merchant/update-product',
+ '/api/merchant/export','/api/merchant/share-image','/api/merchant/update-product',
  '/api/merchant/archive-product','/api/merchant/store-settings','/api/merchant/upload-image',
  '/api/operator/me','/api/operator/stores','/api/operator/analytics','/api/activity',
 ]);
