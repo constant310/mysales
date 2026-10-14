@@ -267,6 +267,39 @@ Deno.serve(async (request: Request) => {
       return out(200,{authenticated:true,storeId:id,store:{slug:actor.slug,public_handle:actor.public_handle,name:actor.name,description:actor.description,whatsapp:actor.whatsapp,status:actor.status,whatsapp_template:actor.whatsapp_template}});
     if (pathname === '/api/merchant/claim' && request.method==='POST')
       return out(200,{ok:true,storeId:id,reusable:true});
+    if (pathname === '/api/merchant/share-image' && request.method==='GET') {
+      const productId=query.get('productId')||'';
+      if(!uuid.test(productId))return out(400,{error:'Invalid product'});
+      // Product URL comes from our store database, not from the request query.
+      const found=await sql`select image_path from early_storefront.products
+        where id=${productId} and store_id=${id} and archived_at is null limit 1`;
+      if(!found.length||!found[0].image_path)return out(404,{error:'Product photo unavailable'});
+      let photo:URL;
+      try{photo=new URL(String(found[0].image_path));}catch{return out(422,{error:'Invalid image URL'});}
+      const permitted=new Set(['wsxszbdvvtowmrnxdsrp.supabase.co','images.pexels.com','images.unsplash.com']);
+      if(photo.protocol!=='https:'||photo.port||photo.username||photo.password||!permitted.has(photo.hostname))
+        return out(422,{error:'Unsupported product image source'});
+      try{
+        const image=await fetch(photo.href,{headers:{accept:'image/jpeg,image/png,image/webp'},
+          redirect:'error',signal:AbortSignal.timeout(9000)});
+        if(!image.ok||!image.body)return out(502,{error:'Product photo could not be loaded'});
+        const contentType=(image.headers.get('content-type')||'').split(';')[0].toLowerCase();
+        if(!['image/jpeg','image/png','image/webp'].includes(contentType))
+          return out(415,{error:'Unsupported product photo format'});
+        const limit=5500000;
+        if(Number(image.headers.get('content-length')||0)>limit)return out(413,{error:'Image too large'});
+        const reader=image.body.getReader();const chunks:Uint8Array[]=[];let size=0;
+        try{while(true){const {done,value}=await reader.read();if(done)break;
+          size+=value.byteLength;if(size>limit){await reader.cancel();return out(413,{error:'Image too large'});}
+          chunks.push(value);}}finally{reader.releaseLock();}
+        if(size<20)return out(502,{error:'Empty product photo'});
+        const bytes=new Uint8Array(size);let pos=0;
+        for(const part of chunks){bytes.set(part,pos);pos+=part.byteLength;}
+        return new Response(bytes,{status:200,headers:{
+          'content-type':contentType,'cache-control':'private, no-store',
+          'x-content-type-options':'nosniff','referrer-policy':'no-referrer'}});
+      }catch{return out(502,{error:'Could not retrieve product photo'});}
+    }
     if (pathname === '/api/merchant/products' && request.method==='GET')
       return out(200,{products:await productQuery(id,false)});
     if (pathname === '/api/merchant/products' && request.method==='POST') {
