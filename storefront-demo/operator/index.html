@@ -69,6 +69,33 @@ label.wide{grid-column:1/-1}
 .footer-note{margin:18px 0;color:#829184;font-size:.76rem;line-height:1.65}
 @media(max-width:790px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.row-grid{grid-template-columns:1fr}}
 @media(max-width:480px){.app{padding-inline:13px}.metrics{gap:8px}.metric{padding:15px 12px}.panel{padding:17px}.store{flex-direction:column}.store-actions{flex-direction:row;flex-wrap:wrap;width:100%}.store-actions>*{flex:1}form.create{grid-template-columns:1fr}label.wide{grid-column:auto}.heading{margin-top:19px}.topbar{padding-inline:13px}}
+
+/* Vendor analytics and secure handoff immediately after resetting access. */
+.store-actions .store-analytics-toggle{background:#f6faf7;border-color:#dbeadf;color:#245d3b}
+.vendor-insights{margin-top:15px;padding:14px;background:#f5faf6;border:1px solid #e0eee3;border-radius:12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.vendor-insight{min-width:0;padding:11px 8px;background:white;border:1px solid #e9efe9;border-radius:10px;text-align:center}
+.vendor-insight strong{display:block;font-size:1.26rem;color:#137c3e;font-weight:950;letter-spacing:-.04em}
+.vendor-insight small{display:block;font-size:.7rem;color:#698171;margin-top:4px;line-height:1.4}
+.vendor-insights-note{grid-column:1/-1;font-size:.72rem;color:#768e7a;line-height:1.5;margin:5px 0 0}
+.metric-visit-note{font-size:.73rem;color:#738e7a;margin:10px 0 0}
+.handoff-dialog{border:0;background:white;color:#233e2c;border-radius:20px;padding:0;width:min(520px,calc(100vw - 24px));max-height:92dvh;box-shadow:0 20px 80px #051a0c70;overflow:auto}
+.handoff-dialog::backdrop{background:#03170cab;backdrop-filter:blur(3px)}
+.handoff-head{padding:23px 24px 18px;border-bottom:1px solid #e7eee8;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.handoff-kicker{font-size:.69rem;letter-spacing:.10em;color:#16803c;font-weight:900;text-transform:uppercase}
+.handoff-head h2{font-size:1.35rem;line-height:1.22;letter-spacing:-.045em;margin:7px 0 0}
+.handoff-close{border:0;background:#f0f6f1;border-radius:50%;width:38px;height:38px;font-size:1.3rem;color:#48674f}
+.handoff-body{padding:20px 24px 25px}
+.handoff-success{padding:12px 13px;border-radius:11px;background:#edfaef;border:1px solid #cfe8d3;color:#24633b;font-size:.82rem;line-height:1.6;margin:0 0 19px}
+.handoff-body label{display:block;font-size:.79rem;font-weight:850;color:#3c6246}
+.handoff-input{width:100%;margin:7px 0 13px;padding:13px;border-radius:11px;border:1px solid #d4e4d8;background:#f8fbf8;font-size:.8rem;color:#304736}
+.handoff-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.handoff-actions button,.handoff-actions a{min-height:48px;border-radius:11px;font-size:.82rem;font-weight:900;display:flex;align-items:center;justify-content:center;padding:10px 12px;text-decoration:none;text-align:center;line-height:1.4}
+#handoff-copy{background:#168640;color:#fff;border:0}
+#handoff-whatsapp{background:#f0faf2;border:1px solid #bde4c5;color:#146c37}
+.handoff-warning{font-size:.74rem;line-height:1.6;color:#687b6d;margin:16px 0 0}
+#handoff-feedback{font-size:.78rem;font-weight:850;color:#18783c;margin:14px 0 0}
+.handoff-shop{display:block;overflow-wrap:anywhere;margin-top:15px;font-size:.78rem;color:#376f49}
+@media(max-width:480px){.handoff-head{padding:20px 18px 15px}.handoff-body{padding:17px 18px 21px}.handoff-actions{grid-template-columns:1fr}.vendor-insights{gap:6px;padding:10px}.vendor-insight{padding:9px 6px}.vendor-insight strong{font-size:1.1rem}.vendor-insight small{font-size:.67rem}}
 </style></head>
 <body>
 <header><div class="topbar"><div class="identity"><span class="mark">mS</span><span>mySales<small>PRIVATE ADMIN · STOREFRONTS</small></span></div><button id="logout" type="button">Log out</button></div></header>
@@ -84,6 +111,8 @@ label.wide{grid-column:1/-1}
 <article class="metric"><span class="eyebrow">Stores with products</span><strong id="metric-activated">—</strong><small>Businesses that uploaded an item</small></article>
 <article class="metric"><span class="eyebrow">Cart engagement</span><strong id="metric-cart">—</strong><small>Sessions that added to cart</small></article>
 <article class="metric"><span class="eyebrow">WhatsApp intent</span><strong id="metric-whatsapp">—</strong><small>Sessions that clicked WhatsApp enquiry</small></article>
+<article class="metric"><span class="eyebrow">Cart-to-visit rate</span><strong id="metric-cart-rate">—</strong><small>Share of visits that added to cart</small></article>
+<article class="metric"><span class="eyebrow">WhatsApp intent rate</span><strong id="metric-whatsapp-rate">—</strong><small>Share of visits that clicked WhatsApp</small></article>
 <article class="metric"><span class="eyebrow">Recorded merchant sales</span><strong id="metric-sales">—</strong><small>Merchant-confirmed sales, not online checkouts</small></article>
 </div>
 <div class="row-grid">
@@ -98,7 +127,19 @@ label.wide{grid-column:1/-1}
 <label class="wide">About this business<textarea name="description" maxlength="2000"></textarea></label>
 <button type="submit" class="primary">Create store & private link</button>
 </form>
-<div id="newlink" hidden><strong>New management link</strong><p>Only send this to the store owner. Copy it now; it is not retrievable again.</p><a id="private" target="_blank" rel="noreferrer"></a><p><button id="copy" type="button" class="secondary">Copy private link</button></p></div></details>
+</details>
+<dialog id="handoff-dialog" class="handoff-dialog" aria-labelledby="handoff-title" aria-modal="true">
+ <div class="handoff-head"><div><span class="handoff-kicker">PRIVATE VENDOR ACCESS</span><h2 id="handoff-title">New vendor link is ready</h2></div><button id="handoff-close" class="handoff-close" type="button" aria-label="Close vendor link">×</button></div>
+ <div class="handoff-body">
+ <p class="handoff-success" id="handoff-summary">The new private management link is ready. Previous access has been revoked.</p>
+ <label for="handoff-link">Private management link — send only to the vendor</label>
+ <input id="handoff-link" class="handoff-input" type="text" readonly spellcheck="false" autocomplete="off" aria-describedby="handoff-warning">
+ <div class="handoff-actions"><button id="handoff-copy" type="button">Copy vendor link</button><a id="handoff-whatsapp" target="_blank" rel="noopener noreferrer">Send via WhatsApp</a></div>
+ <p id="handoff-feedback" role="status" aria-live="polite"></p>
+ <a id="handoff-shop" class="handoff-shop" target="_blank" rel="noopener noreferrer"></a>
+ <p id="handoff-warning" class="handoff-warning"><strong>Keep it private:</strong> Anyone with this link can edit the vendor’s store. This link cannot be retrieved later. Save or share it before closing this panel. The public customer link stays unchanged.</p>
+ </div>
+</dialog>
 <p class="footer-note">Visitor figures are anonymous session estimates, not identifiable people or completed purchases. Historical visits before analytics activation cannot be reconstructed. Admin data is private and is never sent to public storefront pages.</p>
 </div>
 </main>
@@ -134,10 +175,57 @@ function renderChart(events,days){
  $('chart-first').textContent=daily[0]?.key||'';
  $('chart-last').textContent=daily.at(-1)?.key||'';
 }
-function showLink(link){
- $('newlink').hidden=false;$('private').href=link;$('private').textContent=link;
- $('copy').onclick=async()=>{try{await navigator.clipboard.writeText(link);status.textContent='Link copied. Send privately.';}catch{status.textContent='Copy the private link shown above.';}};
- document.querySelector('details.setup').open=true;
+const handoff=$('handoff-dialog'),handoffInput=$('handoff-link');
+let currentVendorLink='';
+function closeHandoff(){
+ if(handoff.open)handoff.close();
+}
+handoff.addEventListener('close',()=>{
+ // Never persist management capability to analytics, storage or admin records.
+ currentVendorLink='';
+ handoffInput.value='';
+ $('handoff-whatsapp').removeAttribute('href');
+ $('handoff-shop').removeAttribute('href');
+ $('handoff-shop').textContent='';
+ $('handoff-feedback').textContent='';
+});
+$('handoff-close').onclick=closeHandoff;
+handoffInput.onclick=()=>handoffInput.select();
+$('handoff-copy').onclick=async()=>{
+ if(!currentVendorLink)return;
+ try{
+  await navigator.clipboard.writeText(currentVendorLink);
+  $('handoff-feedback').textContent='Copied. Send this privately to the vendor.';
+ }catch{
+  handoffInput.select();
+  const copied=typeof document.execCommand==='function'&&document.execCommand('copy');
+  $('handoff-feedback').textContent=copied?'Copied. Send this privately to the vendor.':'Select and copy the link above.';
+ }
+};
+function showLink(link,vendor,{rotated=false}={}){
+ if(typeof link!=='string'||!/^https:\/\/(?:store\.mysalesofficial\.com|mysales-early-storefront-branch\.onrender\.com)\/manage\/claim#token=[A-Za-z0-9_-]{43}$/.test(link))
+  throw Error('Invalid private link returned. Please contact support.');
+ currentVendorLink=link;
+ const name=String(vendor?.name||'this vendor');
+ $('handoff-title').textContent='Private link for '+name;
+ $('handoff-summary').textContent=rotated
+  ? 'Access reset successfully. The vendor’s previous management link and active sessions are now revoked.'
+  : 'Store created successfully. Your vendor’s private management link is ready.';
+ handoffInput.value=link;
+ $('handoff-feedback').textContent='';
+ const customerUrl=location.origin+'/'+encodeURIComponent(vendor?.public_handle||vendor?.slug||'');
+ const shop=$('handoff-shop');
+ if(vendor?.public_handle||vendor?.slug){shop.href=customerUrl;shop.textContent='Customer store: '+customerUrl;shop.hidden=false;}
+ else {shop.hidden=true;shop.removeAttribute('href');shop.textContent='';}
+ const digits=String(vendor?.whatsapp||'').replace(/\D/g,'');
+ const message='Hello '+name+', here is your private mySales store management link:\n'+link+'\n\nKeep it safe and do not share it publicly. You can use it to add or edit products and manage your store.';
+ const whatsapp=$('handoff-whatsapp');
+ if(/^[1-9]\d{7,14}$/.test(digits)){
+  whatsapp.href='https://wa.me/'+digits+'?text='+encodeURIComponent(message);
+  whatsapp.hidden=false;
+ }else{whatsapp.hidden=true;whatsapp.removeAttribute('href');}
+ if(!handoff.open)handoff.showModal();
+ $('handoff-copy').focus({preventScroll:true});
 }
 async function action(body){return api('stores',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});}
 function renderStores(){
@@ -161,17 +249,40 @@ function renderStores(){
   info.append(title,meta,measures);
   const actions=text('div','');actions.className='store-actions';
   const a=text('a','View store');a.href='/'+encodeURIComponent(s.public_handle||s.slug);a.target='_blank';a.rel='noopener';actions.append(a);
-  const rotate=text('button','Reset merchant link');rotate.type='button';rotate.className='danger';
+  const rotate=text('button','Reset & get vendor link');rotate.type='button';rotate.className='danger';
   rotate.onclick=async()=>{
-   if(!confirm('Reset the merchant access link? All previous links and sessions for this store will stop working.'))return;
-   rotate.disabled=true;try{
-    const r=await action({action:'rotate',storeId:s.id});showLink(r.managementLink);
-    status.textContent='New private merchant link issued. Copy it before leaving the page.';
-   }catch(e){status.textContent=e.message;}finally{rotate.disabled=false;}
+   if(!confirm('Reset private access for '+s.name+'? Their old management links and sessions will stop working. Their products and customer link will stay intact.'))return;
+   rotate.disabled=true;rotate.textContent='Resetting…';
+   try{
+    const r=await action({action:'rotate',storeId:s.id});
+    showLink(r.managementLink,s,{rotated:true});
+    status.textContent='New private access link issued for '+s.name+'. Copy or send it before closing.';
+   }catch(e){status.textContent=e.message;}
+   finally{rotate.disabled=false;rotate.textContent='Reset & get vendor link';}
   };
   const publish=text('button',s.status==='published'?'Unpublish':'Publish');publish.type='button';
   publish.onclick=async()=>{publish.disabled=true;try{await action({action:'publish-store',storeId:s.id,published:s.status!=='published'});await refresh();}catch(e){status.textContent=e.message;}finally{publish.disabled=false;}};
-  actions.append(publish,rotate);box.append(info,actions);list.append(box);
+  const insights=text('div','');insights.className='vendor-insights';insights.hidden=true;
+  const period=currentDays+' days';
+  const metrics=[
+   ['Visits',s.visits],['Added to cart',s.cart_sessions],['WhatsApp clicks',s.whatsapp_sessions]
+  ];
+  for(const [label,value] of metrics){
+   const cell=text('div','');cell.className='vendor-insight';
+   cell.append(text('strong',int(value)),text('small',label));insights.append(cell);
+  }
+  const rate=Number(s.visits)>0?Math.round(100*Number(s.whatsapp_sessions||0)/Number(s.visits)):0;
+  insights.append(text('p','WhatsApp intent rate: '+rate+'% of tracked visits · Last '+period+'. This shows clicks, not confirmed purchases.')).lastChild.className='vendor-insights-note';
+  const view=text('button','View analytics');view.type='button';view.className='store-analytics-toggle';
+  view.setAttribute('aria-expanded','false');
+  view.onclick=()=>{
+   const opening=insights.hidden;
+   insights.hidden=!opening;view.textContent=opening?'Hide analytics':'View analytics';
+   view.setAttribute('aria-expanded',String(opening));
+  };
+  actions.prepend(view);
+  actions.append(publish,rotate);
+  info.append(insights);box.append(info,actions);list.append(box);
  }
 }
 async function refresh(){
@@ -188,6 +299,8 @@ async function refresh(){
   setMetric('metric-cart',v.cartSessions);
   setMetric('metric-whatsapp',v.whatsappSessions);
   setMetric('metric-sales',s.recorded_sales);
+  $('metric-cart-rate').textContent=Number(v.visits)>0?Math.round(100*Number(v.cartSessions||0)/Number(v.visits))+'%':'0%';
+  $('metric-whatsapp-rate').textContent=Number(v.visits)>0?Math.round(100*Number(v.whatsappSessions||0)/Number(v.visits))+'%':'0%';
   $('metric-new').textContent=int(s.new_stores)+' new in the last '+currentDays+' days';
   const percent=s.total_stores?Math.round(100*Number(s.stores_with_products||0)/Number(s.total_stores)):0;
   $('activation').textContent=percent+'%';
@@ -206,7 +319,7 @@ $('refresh').onclick=()=>refresh().catch(()=>{});
 $('create').onsubmit=async e=>{
  e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');b.disabled=true;
  const details=Object.fromEntries(new FormData(f));
- try{const r=await action({action:'create',...details});showLink(r.managementLink);f.reset();status.textContent='Store created. Private link ready to send.';await refresh();}
+ try{const r=await action({action:'create',...details});showLink(r.managementLink,{...r.store,whatsapp:details.whatsapp});f.reset();status.textContent='Store created. Private link ready to send.';await refresh();}
  catch(err){status.textContent=err.message;}finally{b.disabled=false;}
 };
 $('logout').onclick=()=>{sessionStorage.removeItem('mysales_private_operator_token');location.replace('/operator/claim');};
