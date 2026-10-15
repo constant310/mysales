@@ -1,0 +1,77 @@
+name: Generate coherent v9 shop dialogue
+on:
+  push:
+    branches: [video/mysales-clear-story-v9-20261009]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  audio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Generate a clear eleven-line mySales storyline
+        run: |
+          pip install --quiet edge-tts pydub
+          sudo apt-get update -qq >/dev/null 2>&1
+          sudo apt-get install -y ffmpeg >/dev/null 2>&1
+          mkdir -p output
+          cat >/tmp/voice.py <<'PY'
+          import asyncio,os,subprocess
+          import edge_tts
+          from pydub import AudioSegment
+          lines=[
+          (0.20,3.40,'Three cartons are gone. Who owes us thirty thousand naira?','en-NG-EzinneNeural','en-US-JennyNeural'),
+          (3.80,2.15,"Let's rewind to this morning.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+          (6.15,3.70,"Please, I'll transfer the thirty thousand tonight.",'en-US-JennyNeural','en-NG-EzinneNeural'),
+          (10.15,3.75,"The cashier hands over the goods... but records nothing.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+          (14.10,4.35,"By closing, the stock is gone. The customer's name? Nowhere.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+          (18.70,2.80,"How do we even find her?",'en-NG-EzinneNeural','en-US-JennyNeural'),
+          (21.65,3.35,"That's how untracked sales become expensive mistakes.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+          (25.25,4.25,"With mySales, record a credit sale against the customer.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+          (29.65,4.00,"Stock updates. And the thirty thousand stays visible as unpaid.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+          (33.80,3.55,"When she pays, mark it settled. No more guessing.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+          (37.45,1.90,"mySales. Know your business.",'en-US-ChristopherNeural','en-US-GuyNeural')]
+          def srt(t):
+           ms=int(t*1000);h=ms//3600000;ms%=3600000;m=ms//60000;ms%=60000;s=ms//1000;ms%=1000
+           return f'{h:02}:{m:02}:{s:02},{ms:03}'
+          async def render(i,line):
+           start,dur,txt,primary,secondary=line
+           p=f'output/line_{i:02}.mp3'
+           for voice in [primary,secondary]:
+            try:
+             await edge_tts.Communicate(txt,voice,rate='+8%' if i not in (0,2,5) else '+10%').save(p)
+             if os.path.getsize(p)>500:break
+            except Exception as ex:print('TTS retry',i,str(ex)[:120],flush=True)
+           else:raise RuntimeError('Failed line '+str(i))
+           wav=AudioSegment.from_file(p).set_frame_rate(44100).set_channels(2)
+           maxms=int(dur*1000)
+           if len(wav)>maxms:
+            fac=len(wav)/maxms+0.07;f=f'output/fit_{i:02}.wav'
+            subprocess.run(['ffmpeg','-loglevel','error','-y','-i',p,'-filter:a',f'atempo={min(2.0,fac)}',f],check=True)
+            wav=AudioSegment.from_wav(f).set_frame_rate(44100).set_channels(2)
+           return wav[:maxms].fade_in(30).fade_out(80)
+          async def main():
+           out=AudioSegment.silent(duration=39700,frame_rate=44100).set_channels(2)
+           with open('output/mySales_V9_subtitles.srt','w') as srtfile:
+            for i,line in enumerate(lines):
+             clip=await render(i,line)
+             st,dur,txt,_,_=line
+             out=out.overlay(clip,position=round(st*1000))
+             srtfile.write(f'{i+1}\n{srt(st)} --> {srt(st+dur)}\n{txt}\n\n')
+             print('Done',i,txt,flush=True)
+           out.export('output/mySales_V9_dialogue.wav',format='wav')
+           out.export('output/mySales_V9_dialogue.mp3',format='mp3',bitrate='192k')
+          asyncio.run(main())
+          PY
+          python /tmp/voice.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mysales-v9-voice
+          path: output/
+          retention-days: 5
