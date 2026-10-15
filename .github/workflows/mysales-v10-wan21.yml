@@ -1,0 +1,52 @@
+name: V10 alternate Wan2.1 video model
+on:
+  push:
+    branches: [video/v10-genuine-new-shots-20261009]
+  pull_request:
+    branches: [main]
+permissions: {contents: read}
+jobs:
+  alternative-open-model:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Render fresh story acting with open Wan 2.1
+        run: |
+          pip install --quiet gradio_client
+          mkdir -p new-wan21-scenes
+          cat >/tmp/run.py <<'PY'
+          from gradio_client import Client
+          import os,shutil
+          c=Client('multimodalart/wan2-1-fast',verbose=False)
+          shots=[
+            ('03_cashier_acknowledges','Realistic video in a Nigerian minimart: Nigerian young male cashier in dark green uniform behind a checkout counter nods while a woman customer holding a black bag asks to pay later, all actions physical and natural. Dramatic commercial cinema, no captions.'),
+            ('04_cashier_unrecorded','Realistic medium shot in a Nigerian grocery shop: young Black Nigerian male cashier at checkout, green polo shirt, tries to write a transaction in an open paper notebook, phone buzzes and distracts him, he forgets the credit sale, shows hesitation, no text.'),
+            ('06_owner_stock_gap','Realistic Nigerian woman store owner in mustard yellow blouse with dark braids stands in a provision shop aisle and counts cartons on a shelf, sees an empty space for three missing cartons, worried and confused, cinematic handheld camera, no text.'),
+            ('07_owner_ledger','Realistic Black Nigerian female shop owner in yellow shirt and braids at retail counter leafs through a paper register of sales, urgently looks for a missing customer name, stops and looks worried, close-up cinema, no subtitles.'),
+            ('08_owner_uses_phone','Realistic Black Nigerian female shop owner in yellow shirt and braids uses a smartphone at a Nigerian retail counter, taps to record a transaction, her concern turns into a relieved smile, cinematic natural acting, no text.'),
+            ('09_happy_shop','A realistic Nigerian female store owner with black braids and yellow blouse and young male cashier in green polo, smiling together at checkout, showing a smartphone with well-organized records, authentic warm upbeat business advert, no labels.')
+          ]
+          for i,(name,prompt) in enumerate(shots):
+            try:
+              # text to video with Wan 2.1 1.3B.
+              result=c.predict(prompt,'watermark, subtitles, deformed hands, blurry faces, animation',640,384,32,1.0,4,16,api_name='/generate_video')
+              p=result[0] if isinstance(result,(tuple,list)) else result
+              if isinstance(p,dict): p=p.get('video') or p.get('path')
+              if not p or not os.path.isfile(p):raise RuntimeError(repr(result)[:300])
+              dest='new-wan21-scenes/'+name+'.mp4';shutil.copy2(p,dest)
+              print('GENERATED',name,os.path.getsize(dest),flush=True)
+            except Exception as e:
+              print('FAILED',name,repr(e)[:400],flush=True)
+              with open('new-wan21-scenes/errors.txt','a') as f:f.write(name+': '+repr(e)+'\n')
+          PY
+          python /tmp/run.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mysales-v10-wan21-acting
+          path: new-wan21-scenes/
+          retention-days: 5

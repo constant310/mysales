@@ -1,0 +1,81 @@
+name: V10 brand-new mySales dialogue
+on:
+  push:
+    branches: [video/v10-genuine-new-shots-20261009]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  new-voice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Generate completely new voice performance for fresh story
+        run: |
+          python -m pip install --quiet edge-tts pydub
+          sudo apt-get update -qq >/dev/null 2>&1
+          sudo apt-get install -y ffmpeg >/dev/null 2>&1
+          mkdir -p v10-audio
+          cat > /tmp/v10_audio.py <<'PY'
+          import asyncio,os,subprocess
+          from pydub import AudioSegment
+          import edge_tts
+          # new script: hook, flashback, clear evidence, real illustrative product workflow, CTA
+          LINES=[
+           (0.20,3.05,"Three cartons missing. Thirty thousand naira unpaid. Who took them?",'en-NG-EzinneNeural','en-US-JennyNeural'),
+           (3.55,2.10,"Here's what happened earlier.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+           (5.85,3.10,"Please, I'll transfer the money tonight.",'en-US-JennyNeural','en-NG-EzinneNeural'),
+           (9.30,3.25,"The cashier agreed and handed over the cartons.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+           (12.80,3.65,"But another distraction came... and the sale went unrecorded.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+           (16.75,3.80,"At closing, the owner couldn't find the customer's name.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+           (20.85,2.70,"That one forgotten entry put thirty thousand naira at risk.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+           (24.10,3.55,"Now, watch how mySales makes the record clear.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+           (27.95,3.05,"Enter the customer, three cartons, and pay later.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+           (31.30,3.30,"Stock decreases. The thirty thousand remains outstanding.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+           (35.00,3.25,"When the customer pays, mark the balance settled.",'en-US-ChristopherNeural','en-US-GuyNeural'),
+           (38.55,2.40,"mySales. Know where your money goes.",'en-US-ChristopherNeural','en-US-GuyNeural')
+          ]
+          def stamp(t):
+           x=round(t*1000);h=x//3600000;x%=3600000;m=x//60000;x%=60000;s=x//1000;x%=1000
+           return f'{h:02}:{m:02}:{s:02},{x:03}'
+          async def get(i,item):
+           _,duration,line,*voices=item
+           out=f'v10-audio/line{i:02}.mp3'
+           for voice in voices:
+            try:
+             await edge_tts.Communicate(line,voice,rate='+14%').save(out)
+             if os.path.getsize(out)>500:break
+            except Exception as e:print('retry',voice,repr(e)[:100],flush=True)
+           else:raise RuntimeError('failed voice line '+str(i))
+           seg=AudioSegment.from_file(out).set_channels(2).set_frame_rate(44100)
+           deadline=int(duration*1000)
+           if len(seg)>deadline:
+            factor=len(seg)/deadline+0.04
+            p=f'v10-audio/fit{i:02}.wav'
+            subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-y','-i',out,'-af',f'atempo={min(2.0,factor):.4f}',p],check=True)
+            seg=AudioSegment.from_wav(p).set_channels(2).set_frame_rate(44100)
+           return seg[:deadline].fade_in(30).fade_out(90)
+          async def main():
+           master=AudioSegment.silent(duration=41650,frame_rate=44100).set_channels(2)
+           with open('v10-audio/captions.srt','w') as subs:
+            for i,item in enumerate(LINES):
+             start,seconds,line,*_=item
+             wave=await get(i,item)
+             master=master.overlay(wave,position=int(start*1000))
+             subs.write(f'{i+1}\n{stamp(start)} --> {stamp(start+seconds)}\n{line}\n\n')
+             print('SUCCESS',i,line,flush=True)
+           master.export('v10-audio/dialogue.wav',format='wav')
+           master.export('v10-audio/dialogue.mp3',format='mp3',bitrate='192k')
+          asyncio.run(main())
+          PY
+          python /tmp/v10_audio.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mysales-v10-fresh-audio
+          path: v10-audio/
+          retention-days: 5

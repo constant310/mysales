@@ -1,0 +1,67 @@
+name: V10 complete mySales visual regeneration
+on:
+  push:
+    branches: [video/v10-genuine-new-shots-20261009]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  new-acting:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Generate entirely new character performance footage with open-source LTX
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python -m pip install --quiet gradio_client
+          sudo apt-get update -qq >/dev/null 2>&1
+          sudo apt-get install -y ffmpeg >/dev/null 2>&1
+          mkdir -p references v10-scenes
+          gh run download 37993401143 --repo constant310/mysales -n mysales-actual-ai-motion-test -D references/owner_source
+          gh run download 37993755120 --repo constant310/mysales -n mysales-ai-acting-scenes -D references/people_source
+          ffmpeg -hide_banner -loglevel error -y -ss 0.9 -i references/owner_source/mysales_first_acting_clip.mp4 -frames:v 1 references/owner.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 0.7 -i references/people_source/02_cashier.mp4 -frames:v 1 references/cashier.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 0.7 -i references/people_source/03_customer.mp4 -frames:v 1 references/customer.jpg
+          cat > /tmp/v10_new_scenes.py <<'PY'
+          from gradio_client import Client, handle_file
+          import os,shutil,time
+          c=Client("Lightricks/ltx-video-distilled",verbose=False)
+          SCENES=[
+          ("01_owner_discovery","owner","The exact same Nigerian woman shopkeeper with black braids and mustard yellow shirt in her grocery shop, discovers a shortfall: she opens the cash drawer, counts banknotes, pushes the notes aside with disbelief and looks up toward a staff member. Strong natural facial reaction, documentary cinema close up, clear purposeful natural human motion, one continuous shot, no words, no text, no logos."),
+          ("02_customer_asks_credit","customer","The same young Nigerian woman customer in this bright stocked provision shop, standing at the checkout with her groceries, gestures politely toward her phone, speaks to the cashier about paying by transfer later, smiles reassuringly, naturally moves her shoulders and hands and holds a bag. Movie-like Nigerian commercial acting, one shot, no text, no captions."),
+          ("03_cashier_accepts","cashier","The same young Nigerian male cashier in green work apron, at the same small minimart checkout, listens to the customer, nods and raises his hands to acknowledge her promise to pay later. His eyes follow the customer, he turns to the grocery cartons on the counter. Beautiful warm real-world shop cinematography, human fluid movement, no subtitles."),
+          ("04_cashier_hands_cartons","cashier","The same Nigerian male checkout clerk in green shirt and apron, at checkout counter in the same shop, picks up three small grocery cartons and extends them across the counter to a customer, completing the handoff. Precise natural human arm and hand movement, fixed steady camera, real-life cinema with realistic expressions, no written text."),
+          ("05_cashier_distracted","cashier","The same young male Nigerian cashier in dark green apron in same shop, about to write a sale into an open paper notebook on the counter, his phone buzzes, he picks up the phone, looks at it, forgets the open notebook and shuts it. Medium-close shot, expressive natural body language, one continuous cinematic scene, no text."),
+          ("06_customer_departure","customer","The same young Black Nigerian woman customer, long neat black braids and dark casual top, in the same grocery store, takes her black bag containing groceries from checkout and walks away through the aisle toward the door while looking back briefly. Realistic full body movement, polished commercial scene, one unbroken camera shot, no text."),
+          ("07_owner_searches_shelf","owner","The same Nigerian female business owner with black braids and mustard shirt in the same neighborhood provision store walks to a nearby shelf and physically checks a conspicuous gap where three cartons should be, glances at her list and frowns. Clearly recognizable face, natural intentional motions, Nigerian small business scene, no captions."),
+          ("08_owner_checks_ledger","owner","The same Nigerian female shop owner with the same mustard yellow top and braided hair sits at her counter, urgently flips through a paper sales ledger, traces entries with one finger and then looks upset when she cannot find the missing customer's name. Fluid lifelike gestures, cinematic close-up, same lighting and shop, no text."),
+          ("09_owner_uses_phone","owner","The same Nigerian woman shopkeeper with black braids, mustard shirt, in her same shop now uses a smartphone to confidently enter a customer sale, tapping the screen with finger then nodding with relief. Realistic facial expression, precise natural small hand movements, shallow depth of field, one cinematic shot, no text overlay."),
+          ("10_owner_confident","owner","The same Black Nigerian female shop owner with black braids and mustard yellow blouse in same brightly lit grocery shop smiles with relief while looking at a phone showing organized records, turns and gives her cashier a confident approving nod. Natural cinematic acting, subtle head movement, one continuous shot, no words or graphics.")
+          ]
+          for i,(name,reference,prompt) in enumerate(SCENES):
+           try:
+            print('START',i,name,flush=True)
+            r=c.predict(prompt, "subtitles, words, fake text, watermark, deformed hands, duplicate fingers, objects vanishing, jitter, cutaway, cartoon, overexposure",handle_file('references/'+reference+'.jpg'),None,640,384,"image-to-video",2.5,9,1100+i,False,1.0,False,api_name="/image_to_video")
+            path=r[0] if isinstance(r,(tuple,list)) else r
+            if isinstance(path,dict):path=path.get("video") or path.get("path")
+            if not path or not os.path.isfile(path):raise RuntimeError("No video: "+repr(r)[:260])
+            shutil.copy2(path, "v10-scenes/"+name+".mp4")
+            print('DONE',name,os.path.getsize("v10-scenes/"+name+".mp4"),flush=True)
+           except Exception as e:
+            print('FAILED',name,repr(e)[:400],flush=True)
+            with open("v10-scenes/generation_errors.txt","a") as f:f.write(name+":"+repr(e)+"\n")
+          PY
+          python /tmp/v10_new_scenes.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mysales-v10-new-ai-scenes
+          path: v10-scenes/
+          retention-days: 5
