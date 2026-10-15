@@ -1,0 +1,65 @@
+name: Fetch commercially usable faceless retail b-roll
+on:
+  push:
+    branches: [video/stock-broll-my-sales-20261009]
+  pull_request:
+    branches: [main]
+permissions: {contents: read}
+jobs:
+  broll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Retrieve Pexels licensed closeup retail scenes
+        run: |
+          pip install --quiet requests
+          mkdir -p free-broll
+          cat >/tmp/fetch.py <<'PY'
+          import requests,re,html,os,subprocess
+          videos={
+            'checkout_hands':3970164,
+            'ledger_hands':6117602,
+            'phone_hands':6278956,
+            'receipt_hands':5683795,
+          }
+          s=requests.Session();s.headers['User-Agent']='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/119.0 Safari/537.36'
+          for name,num in videos.items():
+            try:
+              page=s.get(f'https://www.pexels.com/video/{num}/',timeout=20)
+              text=html.unescape(page.text).replace('\\u002F','/').replace('\\/','/')
+              urls=re.findall(r'https?://(?:videos\.pexels\.com/video-files|player\.vimeo\.com)[^"\\ <>]+?\.mp4(?:\?[^"\\ <>]*)?',text)
+              for template in [f'https://videos.pexels.com/video-files/{num}/{num}-hd_1920_1080_25fps.mp4',f'https://videos.pexels.com/video-files/{num}/{num}-hd_1080_1920_25fps.mp4',f'https://videos.pexels.com/video-files/{num}/{num}-sd_960_540_25fps.mp4']:
+                if template not in urls:urls.append(template)
+              print(name,'status',page.status_code,'urls',len(urls),flush=True)
+              saved=False
+              for url in urls[:12]:
+                try:
+                  r=s.get(url,timeout=20,stream=True,headers={'Range':'bytes=0-'})
+                  if r.status_code not in (200,206):continue
+                  typ=r.headers.get('content-type','')
+                  if 'video' not in typ and not url.endswith('mp4'):continue
+                  out=f'free-broll/{name}.mp4'
+                  with open(out,'wb') as f:
+                    n=0
+                    for piece in r.iter_content(256*1024):
+                      n+=len(piece);f.write(piece)
+                      if n>40_000_000:break
+                  if os.stat(out).st_size>25000:
+                    print('SAVED',out,os.path.getsize(out),flush=True)
+                    saved=True;break
+                except Exception as e:print('Download error',name,repr(e)[:100],flush=True)
+              if not saved: print('NO_VIDEO',name,flush=True)
+            except Exception as ex:print('PAGE_ERROR',name,repr(ex)[:200],flush=True)
+          with open('free-broll/source.txt','w') as f:
+             f.write('Source: Pexels.com\nLicense: https://www.pexels.com/license\nClips used only as faceless b-roll, not as endorsements.\n')
+             f.write(str(videos))
+          PY
+          python /tmp/fetch.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mysales-faceless-retail-broll
+          path: free-broll/
+          retention-days: 7
