@@ -1,0 +1,76 @@
+name: Generate human-acted mySales Instagram scenes
+on:
+  push:
+    branches: [video/instagram-human-ad-20261009]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  actors:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Generate realistic actors using open-weight video models
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          python -m pip install --quiet gradio_client
+          sudo apt-get update -qq >/dev/null 2>&1
+          sudo apt-get install -y ffmpeg >/dev/null 2>&1
+          mkdir -p references scenes
+          gh run download 37993401143 --repo constant310/mysales -n mysales-actual-ai-motion-test -D references/owner_source
+          gh run download 37993755120 --repo constant310/mysales -n mysales-ai-acting-scenes -D references/people_source
+          ffmpeg -hide_banner -loglevel error -y -ss 0.6 -i references/owner_source/mysales_first_acting_clip.mp4 -frames:v 1 references/owner.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 0.6 -i references/people_source/02_cashier.mp4 -frames:v 1 references/cashier.jpg
+          ffmpeg -hide_banner -loglevel error -y -ss 0.6 -i references/people_source/03_customer.mp4 -frames:v 1 references/customer.jpg
+          cat > /tmp/generate.py <<'PY'
+          import os,shutil
+          from gradio_client import Client,handle_file
+          # One consistent actor reference for every appearance of a character.
+          shots=[
+           ("01_owner_hook","owner","Cinematic vertical 9:16 realistic Nigerian drama in an authentic Nigerian corner supermarket. Exactly the same adult Black Nigerian woman in a mustard-yellow work blouse and black braided hair as in the source photo. Close-up from chest up; she counts several notes over the cash drawer, looks up to camera with widened eyes and a tense confused expression, and says a short question with natural lips and eyebrows. Continuity: same face, same blouse, same fluorescent-lit supermarket shelves, real human motion; hold shot, no subtitles or visible captions."),
+           ("02_customer_credit","customer","Cinematic vertical 9:16 commercial film of this same young Black Nigerian woman customer with long black braids, dark clothing and small black shopping bag at a neighborhood supermarket counter. She gestures with her phone to explain she will transfer money tonight, moves her mouth naturally as if making a promise, smiles and nods reassuringly. Authentic natural acting, one close medium shot, identical face and wardrobe to reference, no captions, no visible text."),
+           ("03_cashier_accepts","cashier","Vertical 9:16 lifelike cinematic shot of same young Black Nigerian male cashier wearing dark teal polo in the same Nigerian grocery store. He listens to a customer off-camera, glances at phone, nods yes and reaches to hand small product cartons across the counter. Realistic motions of shoulders, eyes and both hands, maintain facial identity; do not change store environment, no titles."),
+           ("04_cashier_distracted","cashier","Vertical 9:16 realistic movie shot, same young Black Nigerian male cashier, teal polo, at his cashier desk in Nigerian minimart; he opens a paper sales notebook, his mobile phone rings, and he is distracted by the phone, closes the notebook without writing an unpaid sale. Lifelike hand movement, clear cause and effect, concerned glance, no text or logos."),
+           ("05_customer_exits","customer","Realistic cinematic Nigerian minimart scene, exact same young woman customer with long black braids and black outfit, holding a black bag with purchased cartons. She smiles and walks naturally out from counter toward exit while looking at smartphone; medium shot, natural hair and full-body human movement, vertical portrait framing, no captions."),
+           ("06_owner_searches","owner","Cinematic vertical frame in the same Nigerian mini mart, exactly the same shop owner, black braids and mustard blouse, walks to a shelf, points at the empty space where three cartons were, glances toward cashier with disbelief, visibly upset. Physically realistic hand gestures, genuine facial movement, do not alter face, no text."),
+           ("07_owner_ledger","owner","Realistic vertical cinematic close-up shot of exactly the same Black Nigerian woman shopkeeper with braided black hair and mustard blouse sitting at same cash desk. She turns notebook pages rapidly looking for the name of the customer who owes her money, pauses, sighs and rubs forehead, eye focus on empty ledger, natural expressive physical acting, no words on screen."),
+           ("08_owner_relief","owner","Warm optimistic cinematic vertical shot of same Black Nigerian woman shopkeeper in mustard blouse and braided black hair inside her same corner store. She confidently taps on a smartphone as if recording a customer's credit balance and then her worried face relaxes into a hopeful subtle smile. Very natural realistic hand gestures and eye movement, same person and shop, no text."),
+          ]
+          neg="distorted hands, extra fingers, duplicate faces, morphing faces, cartoon, watermark, captions, text overlay, jump cut"
+          c=Client("Lightricks/ltx-video-distilled",verbose=False)
+          for i,(name,role,prompt) in enumerate(shots):
+            try:
+              print('START',name,flush=True)
+              r=c.predict(prompt,neg,handle_file('references/'+role+'.jpg'),None,384,640,"image-to-video",2.5,9,5520+i,False,1.0,False,api_name="/image_to_video")
+              p=r[0] if isinstance(r,(list,tuple)) else r
+              if isinstance(p,dict):p=p.get("video") or p.get("path")
+              if not p or not os.path.isfile(p):raise RuntimeError('No file '+repr(r)[:160])
+              out='scenes/'+name+'.mp4'
+              shutil.copy2(p,out)
+              print('SUCCESS',name,os.stat(out).st_size,flush=True)
+            except Exception as ex:
+              print('FAILED',name,repr(ex)[:420],flush=True)
+              with open('scenes/errors.txt','a') as f:f.write(name+':'+repr(ex)+'\n')
+          # Inspect alternate Wan demo endpoint signatures to enable additional truly new scenes.
+          for name in ['zerogpu-aoti/Wan2.2-14B-Fast','multimodalart/wan2-1-fast']:
+            try:
+              w=Client(name,verbose=False)
+              spec=w.view_api(return_format='dict')
+              print('WAN_API',name,str(spec)[:14000],flush=True)
+            except Exception as e: print('WAN_CONNECT_ERROR',name,str(e)[:700],flush=True)
+          PY
+          python /tmp/generate.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mysales-human-reel-scenes
+          path: scenes/
+          retention-days: 7
