@@ -1,0 +1,67 @@
+name: mySales individual acting clip review
+on:
+  push:
+    branches: [video/individual-clips-review-oct10]
+  pull_request:
+    branches: [main]
+permissions: {contents: read, actions: read}
+jobs:
+  generate-clips:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Generate portrait acting shots with LTX and validate output
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          python -m pip install -q gradio_client pillow
+          sudo apt-get update -qq >/dev/null 2>&1
+          sudo apt-get install -y ffmpeg >/dev/null 2>&1
+          mkdir -p reference clips
+          gh run download 37993401143 --repo constant310/mysales -n mysales-actual-ai-motion-test -D reference/owner_source
+          gh run download 37993755120 --repo constant310/mysales -n mysales-ai-acting-scenes -D reference/people_source
+          ffmpeg -v error -y -ss 0.6 -i reference/owner_source/mysales_first_acting_clip.mp4 -frames:v 1 reference/owner.jpg
+          ffmpeg -v error -y -ss 0.5 -i reference/people_source/03_customer.mp4 -frames:v 1 reference/customer.jpg
+          ffmpeg -v error -y -ss 0.5 -i reference/people_source/02_cashier.mp4 -frames:v 1 reference/cashier.jpg
+          cat >/tmp/clipgen.py <<'PY'
+          import os, subprocess, shutil
+          from gradio_client import Client,handle_file
+          c=Client('Lightricks/ltx-video-distilled',verbose=False)
+          clips=[
+            ('01_owner_counts_cash','owner',
+             'One continuous vertical portrait close-up inside a small Nigerian provision shop. The same adult Nigerian female owner in a mustard yellow blouse is at her till, naturally counts banknotes in her hands, stops counting, raises her head and looks deeply worried toward the cashier. Preserve exact same face, hairstyle, shop and blouse from the reference, keep entire head in frame, eye-level tripod camera, physically believable deliberate fingers, lifelike nuanced facial acting, no cuts, no zoom, no writing or subtitle, no logo.'),
+            ('02_customer_shows_phone','customer',
+             'One continuous vertical portrait close-up in the same Nigerian minimart. The same young woman customer with long black braids and black outfit holds her mobile phone beside a black shopping bag, gestures politely toward the cashier with the phone as though promising to transfer later, then gives a slight reassuring nod. Frame upper body and hands, let visible phone and bag be prominent, natural body and hand motion, consistent skin and clothing, no written text, no abrupt camera move, no cut.'),
+            ('03_cashier_ledger','cashier',
+             'One continuous vertical realistic medium close-up inside a Nigerian corner shop at the checkout. The same young Nigerian cashier in a green uniform stands beside the point of sale terminal, starts to reach for the notebook to record the credit sale, then is distracted by a phone on the counter and looks away, leaving the notebook blank. Emphasize hands, paper register, counter and hesitation, natural believable arm and head movements, smooth tripod footage, no cuts, no text overlay.'),
+            ('04_owner_checks_record','owner',
+             'One continuous vertical portrait shot of the identical Nigerian female shop owner wearing the same mustard-yellow blouse at the same store counter. She sets down the money and leafs through a paper sales ledger searching for an entry, pauses, then covers her forehead with one hand in disappointment; small natural movement, keep her entire face in shot, realistic cinematic shop acting, consistent face and background, no cuts, no subtitles.')
+          ]
+          negative='blurred face, face offscreen, severed head, frame clipping, warped hands, extra fingers, wrong ethnicity, flicker, morph, time lapse, artificial CGI, cartoon, floating money, watermark, printed text, captions'
+          for i,(name,ref,prompt) in enumerate(clips):
+            try:
+              print('START',name,flush=True)
+              r=c.predict(prompt,negative,handle_file('reference/'+ref+'.jpg'),None,640,384,'image-to-video',2.5,9,730+i,False,1.0,False,api_name='/image_to_video')
+              p=r[0] if isinstance(r,(tuple,list)) else r
+              if isinstance(p,dict):p=p.get('video') or p.get('path')
+              if not p or not os.path.isfile(p):raise RuntimeError('No output file')
+              dst='clips/'+name+'.mp4'
+              shutil.copyfile(p,dst)
+              probe=subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-show_entries','stream=width,height,duration','-of','default=noprint_wrappers=1',dst],text=True)
+              print('CLIP',name,'size',os.path.getsize(dst),probe,flush=True)
+            except Exception as exc:
+              print('FAILED',name,repr(exc)[:460],flush=True)
+              with open('clips/error_log.txt','a') as f:f.write(name+': '+repr(exc)+'\n')
+          PY
+          python /tmp/clipgen.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mySales-individual-acting-clips
+          path: clips/
+          retention-days: 7
