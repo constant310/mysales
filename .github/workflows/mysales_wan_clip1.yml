@@ -1,0 +1,62 @@
+name: Wan 2.2 genuine generation mySales Clip 1
+on:
+  push:
+    branches: [video/wan-new-owner-clip1-20261010]
+  pull_request:
+    branches: [main]
+permissions: {contents: read}
+jobs:
+  wan-film:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - name: Render from scratch with Wan2.2 5B
+        run: |
+          pip install -q gradio_client
+          mkdir -p output
+          cat >/tmp/render.py <<'PY'
+          import os,shutil,time
+          from gradio_client import Client
+          model=Client("OpenKing/wan2-video-generation",verbose=False)
+          prompt=(
+            "Vertical 9:16 realistic live-action Nigerian business drama, one continuous medium shot at eye level. "
+            "Small neighbourhood provision store at closing time, warm fluorescent shop lights and believable grocery shelves. "
+            "Adult Black Nigerian woman shop owner, neat black cornrow braids, dark navy work blouse, simple apron. "
+            "She stands behind the checkout counter; open cash drawer full of Nigerian naira notes and small handwritten sales ledger fully visible. "
+            "She opens the drawer, counts the notes carefully with natural fingers, looks at the notebook, then pauses, "
+            "looks back at the notes and slowly raises her face with a concerned suspicious expression. "
+            "Realistic facial micro-expressions, truthful hands and cash, subtle gentle camera push-in, no cuts, "
+            "no jump zoom, film quality, same character throughout, no voice, no captions, no on screen text or logos."
+          )
+          print('Submitted Wan2.2 real model render',flush=True)
+          try:
+           r=None
+           for attempt in range(3):
+            try:
+             r=model.predict(prompt,None,384,672,49,22,4.5,42,api_name='/generate_video')
+             break
+            except Exception as callerr:
+             print('ATTEMPT',attempt+1,repr(callerr)[:300],flush=True)
+             if attempt>=2: raise
+             time.sleep(18)
+           print('RETURN',str(r)[:800],flush=True)
+           p=r[0] if isinstance(r,(list,tuple)) else r
+           if isinstance(p,dict):p=p.get('video') or p.get('path')
+           if p and os.path.isfile(p) and os.path.getsize(p)>10000:
+            shutil.copy2(p,'output/mySales_clip1_Wan2_2.mp4')
+            print('WAN_SUCCESS size',os.path.getsize(p),flush=True)
+           else:raise RuntimeError('No movie returned')
+          except Exception as exc:
+           with open('output/error.txt','w') as f:f.write(repr(exc))
+           print('WAN_ERROR',repr(exc)[:1000],flush=True)
+          PY
+          python /tmp/render.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mysales-wan22-new-clip1
+          path: output/
+          retention-days: 7
