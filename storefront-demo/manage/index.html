@@ -290,6 +290,9 @@ main{max-width:870px;padding-top:19px}
 .share-file-actions,.share-text-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:8px}
 .share-composer .share-explainer{font-size:.72rem;line-height:1.6;margin:17px 0 0;color:#7c8d80}
 @media(max-width:500px){.product-share-dialog{max-height:96dvh;border-radius:15px}.product-share-header{padding:16px 15px 14px}.share-body{padding:14px 15px 19px}.product-share-header h2{font-size:1.08rem}.product-actions{width:100%}.product-actions .btn{flex:1;min-width:100px}.share-select-head{gap:9px}.share-file-actions,.share-text-actions{gap:7px}.share-primary,.share-secondary{font-size:.76rem}}
+.quick-share{display:flex;align-items:center;justify-content:center;width:calc(100% - 24px);margin:0 12px 12px;min-height:42px;border:1px solid #c8e6d1;border-radius:10px;background:#f1faf3;color:#146c37;text-decoration:none;font-weight:850;font-size:.82rem}
+.retain-tip{background:#f1faf3;border:1px solid #cbe9d2;border-radius:14px;padding:15px 17px;margin:0 0 19px;color:#1a6439;line-height:1.45}.retain-tip strong{display:block;margin-bottom:4px;font-size:.93rem}.retain-tip p{margin:0;font-size:.8rem}
+#stock-count[hidden],#edit-stock-count[hidden]{display:none}
 </style></head><body>
 <header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Storefront Manager</span>
 <button id="exit" class="head-btn" hidden>Close private access</button></header>
@@ -311,9 +314,10 @@ main{max-width:870px;padding-top:19px}
 <section class="hero"><div class="eyebrow" id="state">Your online store</div>
 <h1 id="store-title">Welcome to your store</h1><p id="greeting">Let's get your first product online.</p>
 <div class="actions">
-<button id="share" class="btn btn-light" type="button">Copy shop link</button>
+<button id="share" class="btn btn-light" type="button">Share my shop</button>
 <a id="public-link" class="btn btn-light" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;align-items:center">View my shop</a>
 </div><p class="share-link" id="public-url" hidden></p></section>
+<section id="retain-tip" class="retain-tip" hidden><strong>✓ Your products are ready. Share one with a customer.</strong><p>Tap “Share on WhatsApp” below a product to send its picture, price and link. Customers can still message you as usual.</p></section>
 <div class="columns">
 <section class="panel" id="add-section"><div class="panel-top"><div><span class="pill">New product</span><h2 style="margin-top:12px">Add a product</h2></div><button class="btn btn-outline btn-small" type="button" id="cancel-add" hidden>My products</button></div>
  <p class="muted">Choose a photo, name your product and enter the price.</p>
@@ -324,9 +328,8 @@ main{max-width:870px;padding-top:19px}
 <details class="optional" id="extras"><summary>Optional details & stock</summary>
 <label for="product-description">Description</label><textarea id="product-description" name="description" maxlength="2000" placeholder="Size, colour, brand or other useful details"></textarea>
 <label for="product-category">Category</label><input id="product-category" name="category" maxlength="80" placeholder="e.g. Groceries">
-<label for="product-stock">Quantity available (optional)</label>
-<input id="product-stock" name="stock" type="number" min="0" max="10000000" step="1" placeholder="Leave blank for WhatsApp enquiries">
-<p class="hint">You can skip quantity. Customers can ask about availability on WhatsApp.</p></details>
+<label for="stock-mode">Do you want to track quantity?</label><select id="stock-mode" name="trackStock"><option value="false">No — customers ask about availability</option><option value="true">Yes — track exact stock</option></select>
+<div id="stock-count" hidden><label for="product-stock">Quantity available</label><input id="product-stock" name="stock" type="number" min="0" max="10000000" step="1" inputmode="numeric" value="0"><p class="hint">Enter 0 if sold out. Customers will see this item as sold out.</p></div></details>
 <button id="add-button" class="btn" type="submit" style="width:100%;margin-top:17px">Add product to my shop</button>
 <p id="add-note" class="hint">Your product picture, name and price appear together on your storefront.</p>
 </form></section>
@@ -419,11 +422,11 @@ main{max-width:870px;padding-top:19px}
     <form id="dialog-form" class="modal-form" hidden>
       <label for="dialog-name">Product name</label><input id="dialog-name" name="name" maxlength="150" required>
       <div class="modal-field-grid"><div><label for="dialog-edit-price">Selling price (₦)</label><input id="dialog-edit-price" name="price" type="number" min="0" max="10000000000" step="1" inputmode="numeric" required></div>
-      <div><label for="dialog-edit-stock">Quantity in stock</label><input id="dialog-edit-stock" name="stock" type="number" min="0" max="10000000" step="1" inputmode="numeric" required></div></div>
+      <div><label for="dialog-track-stock">Track exact stock?</label><select id="dialog-track-stock" name="trackStock"><option value="false">No — enquiry only</option><option value="true">Yes — track quantity</option></select><div id="edit-stock-count" hidden><label for="dialog-edit-stock">Quantity in stock</label><input id="dialog-edit-stock" name="stock" type="number" min="0" max="10000000" step="1" inputmode="numeric"></div></div></div>
       <label for="dialog-edit-category">Category</label><input id="dialog-edit-category" name="category" maxlength="80" placeholder="e.g. Electronics">
       <label for="dialog-edit-description">Description</label><textarea id="dialog-edit-description" name="description" maxlength="2000" rows="4" placeholder="Describe this product"></textarea>
       <label for="dialog-edit-published">Product visibility</label><select id="dialog-edit-published" name="published"><option value="true">Visible to customers</option><option value="false">Hidden from customers</option></select>
-      <p class="hint">Changing the quantity updates your inventory record. Uploading a new photo replaces the image shown to customers.</p>
+      <p class="hint">If you track stock, zero means sold out. If you do not, customers can ask you about availability.</p>
       <p id="dialog-error" class="modal-error" role="alert" hidden></p>
       <button id="dialog-remove" type="button" class="modal-remove">Remove this product</button>
     </form>
