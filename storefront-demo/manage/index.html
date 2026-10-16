@@ -513,6 +513,7 @@ function showManagerView(){
  $('product-section').hidden=adding;
  $('cancel-add').hidden=!hasProducts;
  $('add-more').hidden=!hasProducts;
+ $('retain-tip').hidden=!hasProducts||currentStore?.status!=='published';
 }
 
 const node=(tag,value)=>{const n=document.createElement(tag);n.textContent=String(value);return n;};
@@ -527,6 +528,15 @@ async function api(path,options={}){
  return j;
 }
 const post=(path,data)=>api(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+const merchantSession=(()=>{
+ try{const old=sessionStorage.getItem('mysales_merchant_analytics_tab');if(/^[0-9a-f-]{36}$/i.test(old||''))return old;}catch{}
+ const created=crypto.randomUUID();try{sessionStorage.setItem('mysales_merchant_analytics_tab',created);}catch{}
+ return created;
+})();
+function reportMerchantActivity(eventType){
+ if(navigator.doNotTrack==='1'||navigator.globalPrivacyControl===true)return;
+ void post('activity',{eventType,sessionId:merchantSession}).catch(()=>{});
+}
 async function copy(value){
  try{await navigator.clipboard.writeText(value);say('Link copied! Share it with your customers.');}
  catch{window.prompt('Copy your link:',value);}
@@ -563,12 +573,23 @@ function renderProduct(p){
  const content=node('div','');content.className='product-body';
  content.append(node('h3',p.name));
  const price=node('div',unit?currency(unit.price):'Contact for price');price.className='price';content.append(price);
- const status=node('p',(p.published?'Visible':'Hidden')+' · '+(Number(p.stock)>0?Number(p.stock)+' in stock':'Enquiry-only')+(p.image_path?'':' · No photo'));
+ const stockLabel=p.track_stock?(Number(p.stock)>0?Number(p.stock)+' in stock':'Sold out'):'Availability by enquiry';
+ const status=node('p',(p.published?'Visible':'Hidden')+' · '+stockLabel+(p.image_path?'':' · No photo'));
  status.className='meta';content.append(status);
  open.append(content);
  const view=node('span','View');view.className='product-view';view.setAttribute('aria-hidden','true');open.append(view);
  open.onclick=()=>openProductDialog(p.id);
- card.append(open);list.append(card);
+ card.append(open);
+ if(p.units?.[0]&&currentStore?.status==='published'){
+  const link=document.createElement('a');link.className='quick-share';link.target='_blank';link.rel='noopener noreferrer';
+  link.textContent='↗ Share on WhatsApp';link.setAttribute('aria-label','Share '+p.name+' on WhatsApp');
+  const u=p.units[0],priceText=currency(u.price)+(u.name&&u.name!=='piece'?' / '+u.name:'');
+  const photo=safeProductImage(p),message=p.name+' — '+priceText+(photo?'\nPhoto: '+photo:'')+'\nSee more: '+publicUrl();
+  link.href='https://wa.me/?text='+encodeURIComponent(message);
+  link.addEventListener('click',()=>reportMerchantActivity('product_share'));
+  card.append(link);
+ }
+ list.append(card);
 }
 
 /* Quick vendor catalogue: one actual image containing selected photos and prices.
@@ -827,6 +848,7 @@ $('share-copy-text').onclick=async()=>{
 };
 $('share-whatsapp').onclick=event=>{
  if(!selectedShareProducts().length){event.preventDefault();return;}
+ reportMerchantActivity('product_share');
  shareStatus('Opening WhatsApp with the selected names, prices and photo links. To send picture attachments, use Share picture.');
 };
 
@@ -871,7 +893,7 @@ function populateProductDialog(product){
  $('dialog-title').textContent=product.name;$('dialog-eyebrow').textContent='Product details';
  $('dialog-price').textContent=product.units?.[0]?currency(product.units[0].price):'Contact for price';
  $('dialog-category').textContent=product.category||'Uncategorized';
- $('dialog-stock').textContent=Number(product.stock)>0?Number(product.stock)+' available':'0 · Enquiry-only';
+ $('dialog-stock').textContent=product.track_stock?(Number(product.stock)>0?Number(product.stock)+' available':'Sold out'):'Availability by enquiry';
  $('dialog-visibility').textContent=product.published?'Visible to customers':'Hidden from customers';
  $('dialog-unit').textContent=(product.units||[]).map(u=>u.name).join(', ')||'Piece';
  $('dialog-description').textContent=product.description||'No description added.';
@@ -1143,7 +1165,14 @@ settingsForm.onsubmit=async e=>{
  }catch(err){say(err.message,true);}
  finally{button.textContent='Save changes';updateBusinessSave();}
 };
-$('share').onclick=()=>copy(publicUrl());
+$('share').onclick=()=>{
+ const url=publicUrl();
+ if(typeof navigator.share==='function'){
+  navigator.share({title:currentStore.name,text:'Browse products and prices from '+currentStore.name,url})
+   .then(()=>reportMerchantActivity('shop_share'))
+   .catch(err=>{if(err?.name!=='AbortError')copy(url);});
+ }else{copy(url);reportMerchantActivity('shop_share');}
+};
 $('copy-manager').onclick=()=>copy(location.origin+'/manage/claim#token='+encodeURIComponent(token));
 $('export').onclick=async()=>{const b=$('export');b.disabled=true;try{const data=await api('export');const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='mysales-store-backup.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);say('Backup downloaded.');}catch(err){say(err.message,true);}finally{b.disabled=false;}};
 $('exit').onclick=()=>{
@@ -1180,7 +1209,7 @@ async function openManager(){
   updateHero();
   $('access-recovery').hidden=true;$('app').hidden=false;$('exit').hidden=false;
   say(new URLSearchParams(location.search).has('welcome')?'Welcome! Add your first product to launch your store.':'Your private store manager is ready.');
-  try{await refresh();}catch(error){say('Your store is open, but products could not load. Refresh to try again: '+error.message,true);}
+  try{await refresh();reportMerchantActivity('dashboard_open');}catch(error){say('Your store is open, but products could not load. Refresh to try again: '+error.message,true);}
  }catch(error){
   if(error.status===401||error.status===403){
    forgetManagerToken();token='';
