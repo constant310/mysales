@@ -10,7 +10,7 @@ const edgeBase='https://wsxszbdvvtowmrnxdsrp.supabase.co/functions/v1/early-stor
 const allowedOrigins=new Set(['https://store.mysalesofficial.com','https://mysales-early-storefront-branch.onrender.com']);
 const allowed=new Set([
  '/api/store','/api/discover','/api/signup',
- '/api/merchant/me','/api/merchant/claim','/api/merchant/products',
+ '/api/merchant/me','/api/merchant/claim','/api/merchant/products','/api/merchant/activity',
  '/api/merchant/restock','/api/merchant/publish','/api/merchant/confirm-sale',
  '/api/merchant/export','/api/merchant/update-product',
  '/api/merchant/archive-product','/api/merchant/store-settings','/api/merchant/upload-image',
