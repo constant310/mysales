@@ -152,6 +152,8 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 .icon-control{transition:border-color .15s,background .15s}
 @media(max-width:600px){.demo-promo{margin:0 15px 15px;flex-direction:column;align-items:stretch;padding:17px}.demo-promo-cta{width:100%}.demo-promo strong{font-size:.96rem}.demo-promo p{font-size:.76rem}}
 
+#sheet-ask{display:block;width:100%;margin:12px 0 0;padding:12px;border:1px solid #bde3c8;border-radius:11px;background:#e9f8ee;color:#145d31;font-weight:850;font-size:.89rem}
+#sheet-ask:disabled{opacity:.5;cursor:not-allowed}
 </style></head><body><div class="site">
 <header class="brandbar"><a class="brand" href="/" aria-label="mySales home"><span class="brand-mark" aria-hidden="true">mS</span><span>mySales</span></a><span class="brand-note">Online storefront</span></header>
 <aside id="demo-promo" class="demo-promo" aria-label="Create your own store" hidden>
@@ -189,7 +191,8 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 <div class="sheet-head"><img id="sheet-thumb" class="sheet-thumb" alt="Selected product photo"><div class="sheet-title"><small id="sheet-category">Product</small><h2 id="sheet-name">Product</h2><strong id="sheet-price">₦0</strong></div><button id="sheet-close" class="close-button" type="button" aria-label="Close product options">×</button></div>
 <p id="sheet-description" class="sheet-description" hidden></p>
 <div class="qty-row"><label>Quantity</label><div class="counter"><button id="minus" type="button" aria-label="Decrease quantity">−</button><span id="qty" aria-live="polite">1</span><button id="plus" type="button" aria-label="Increase quantity">+</button></div></div>
-<div class="sheet-actions"><button id="sheet-add" type="button">Add to cart</button><button id="sheet-enquire" type="button">Enquire now</button></div>
+<div class="sheet-actions"><button id="sheet-add" type="button">Add to cart</button><button id="sheet-enquire" type="button">View basket</button></div>
+<button type="button" id="sheet-ask">Ask seller about this product on WhatsApp</button>
 <p class="sheet-help">This is an enquiry, not an online payment. The seller confirms availability.</p>
 </section>
 <dialog id="filter-dialog" class="filter-dialog" aria-labelledby="filter-title">
@@ -303,8 +306,8 @@ function renderProducts(){
   details.append(title);
   const category=node('small',p.category||'Product');category.className='grid-category';details.append(category);
   const u=unitOf(p),price=node('strong',u?currency(u.price):'Ask price');price.className='grid-price';details.append(price);
-  const add=node('button');add.type='button';add.className='grid-add';add.disabled=!u;add.setAttribute('aria-label','Add '+p.name+' to cart');
-  add.textContent='Add to cart';add.onclick=()=>openSheet(p,add);
+  const add=node('button');add.type='button';add.className='grid-add';add.disabled=!u||(p.track_stock===true&&remaining(p)<1);add.setAttribute('aria-label','Add '+p.name+' to cart');
+  add.textContent=p.track_stock===true&&stockOf(p)<1?'Sold out':'Add to cart';add.onclick=()=>openSheet(p,add);
   details.append(add);card.append(details);fragment.append(card);
  }
  host.append(fragment);
@@ -341,7 +344,7 @@ $('filter-form').onsubmit=event=>{
 function unitsInBasket(p){return [...cart.values()].filter(item=>item.productId===p.id).reduce((n,item)=>n+item.quantity*item.factor,0);}
 function remaining(p){
  const unit=unitOf(p),stock=stockOf(p);
- return stock>0?Math.max(0,Math.floor((stock-unitsInBasket(p))/Math.max(1,Number(unit?.factor)||1))):99;
+ return p.track_stock===true?Math.max(0,Math.floor((stock-unitsInBasket(p))/Math.max(1,Number(unit?.factor)||1))):99;
 }
 function updateSheet(){
  const p=selectedProduct;
@@ -350,6 +353,8 @@ function updateSheet(){
  $('plus').disabled=!p||selectedQuantity>=Math.min(99,remaining(p));
  const enable=!!p&&!!unitOf(p)&&selectedQuantity<=remaining(p);
  $('sheet-add').disabled=!enable;$('sheet-enquire').disabled=!enable;
+ $('sheet-ask').disabled=isDemo||!/^[1-9]\d{7,14}$/.test(String(store?.whatsapp||'').replace(/\D/g,''));
+ $('sheet-add').textContent=p?.track_stock&&remaining(p)<1?'Sold out':'Add to cart';
 }
 function openSheet(p,source){
  if(!p||!unitOf(p)){notify('This item is unavailable for enquiries.');return;}
@@ -401,7 +406,7 @@ function addSelected(openBasket=false){
  const p=selectedProduct,u=unitOf(p);
  if(!p||!u)return;
  const stock=stockOf(p),wanted=unitsInBasket(p)+selectedQuantity*Number(u.factor);
- if(stock>0&&wanted>stock){notify('Only '+stock+' available. Reduce the quantity.');updateSheet();return;}
+ if(p.track_stock===true&&wanted>stock){notify('Only '+stock+' available. Reduce the quantity.');updateSheet();return;}
  const key=keyOf(p,u),item=cart.get(key)||{productId:p.id,name:p.name,unit:u.name,factor:Number(u.factor),price:Number(u.price),quantity:0};
  item.quantity+=selectedQuantity;cart.set(key,item);
  renderCart();trackActivity('cart_add');closeSheet(false);
@@ -409,6 +414,15 @@ function addSelected(openBasket=false){
 }
 $('sheet-add').onclick=()=>addSelected(false);
 $('sheet-enquire').onclick=()=>addSelected(true);
+$('sheet-ask').onclick=()=>{
+ if(!selectedProduct||isDemo)return;
+ const number=String(store?.whatsapp||'').replace(/\D/g,'');
+ if(!/^[1-9]\d{7,14}$/.test(number)){notify('This seller is not available on WhatsApp.');return;}
+ const p=selectedProduct,u=unitOf(p);
+ const message='Hello '+store.name+', I saw '+p.name+(u?' ('+currency(u.price)+')':'')+' in your online shop. Is it available?';
+ trackActivity('whatsapp_click');
+ location.href='https://wa.me/'+number+'?text='+encodeURIComponent(message);
+};
 function openCart(){
  closeSheet(false);$('overlay').classList.add('open');$('drawer').classList.add('open');
  $('drawer').setAttribute('aria-hidden','false');$('close-cart').focus({preventScroll:true});
