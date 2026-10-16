@@ -60,7 +60,7 @@ async function merchant(request: Request) {
   return found[0] || null;
 }
 const productQuery = (storeId: string, publishedOnly: boolean) =>
-  sql!`select p.id,p.name,p.description,p.category,p.image_path,p.base_unit,p.published,
+  sql!`select p.id,p.name,p.description,p.category,p.image_path,p.base_unit,p.published,p.track_stock,
    coalesce(st.quantity_base,0) as stock,coalesce(u.units,'[]'::json) as units
    from early_storefront.products p
    left join early_storefront.stock st on st.product_id=p.id and st.store_id=p.store_id
@@ -162,7 +162,23 @@ Deno.serve(async (request: Request) => {
           (select count(*)::int from early_storefront.products where archived_at is null) as total_products,
           (select count(*)::int from early_storefront.products where archived_at is null and published) as published_products,
           (select count(*)::int from early_storefront.sales) as recorded_sales,
-          (select count(*)::int from early_storefront.sales where created_at >= now()-(${days}::int || ' days')::interval) as sales_period`;
+          (select count(*)::int from early_storefront.sales where created_at >= now()-(${days}::int || ' days')::interval) as sales_period,
+          (select count(distinct a.store_id)::int from early_storefront.merchant_activity_events a
+            join early_storefront.stores s on s.id=a.store_id
+            where a.event_type='dashboard_open' and a.event_day >= ((now() at time zone 'UTC')::date - ${since}::int)
+            and s.description not ilike '%TEST STORE%' and s.name not ilike 'DEMO %' and s.name not ilike 'mySales Demo %') as active_merchants,
+          (select count(*)::int from (
+            select a.store_id from early_storefront.merchant_activity_events a
+            join early_storefront.stores s on s.id=a.store_id
+            where a.event_type='dashboard_open' and a.event_day >= ((now() at time zone 'UTC')::date - ${since}::int)
+            and s.description not ilike '%TEST STORE%' and s.name not ilike 'DEMO %' and s.name not ilike 'mySales Demo %'
+            group by a.store_id having count(distinct a.event_day)>1
+          ) returning_merchants) as returning_merchants,
+          (select count(*)::int from early_storefront.merchant_activity_events a
+            join early_storefront.stores s on s.id=a.store_id
+            where a.event_type in ('product_share','shop_share')
+            and a.event_day >= ((now() at time zone 'UTC')::date - ${since}::int)
+            and s.description not ilike '%TEST STORE%' and s.name not ilike 'DEMO %' and s.name not ilike 'mySales Demo %') as merchant_share_sessions`;
         const signups=await sql`select (created_at at time zone 'UTC')::date as day,count(*)::int as new_stores
           from early_storefront.stores where created_at >= now()-(${days}::int || ' days')::interval
           group by 1 order by 1`;
@@ -174,7 +190,10 @@ Deno.serve(async (request: Request) => {
           coalesce(p.published_count,0)::int as published_count,
           coalesce(ev.visits,0)::int as visits,
           coalesce(ev.cart_sessions,0)::int as cart_sessions,
-          coalesce(ev.whatsapp_sessions,0)::int as whatsapp_sessions
+          coalesce(ev.whatsapp_sessions,0)::int as whatsapp_sessions,
+          coalesce(ma.active_days,0)::int as active_days,
+          coalesce(ma.shares,0)::int as share_sessions,
+          ma.last_active_at
           from early_storefront.stores s
           left join (select store_id,count(*)::int as product_count,
                      count(*) filter(where published)::int as published_count
@@ -185,6 +204,12 @@ Deno.serve(async (request: Request) => {
                       count(*) filter(where event_type='whatsapp_click')::int as whatsapp_sessions
                      from early_storefront.activity_events where event_day >= ((now() at time zone 'UTC')::date - ${since}::int)
                      group by store_id) ev on ev.store_id=s.id
+          left join (select store_id,count(distinct event_day)::int as active_days,
+                     count(*) filter(where event_type in ('shop_share','product_share'))::int as shares,
+                     max(created_at) as last_active_at
+                    from early_storefront.merchant_activity_events
+                    where event_day >= ((now() at time zone 'UTC')::date - ${since}::int)
+                    group by store_id) ma on ma.store_id=s.id
           order by s.created_at desc limit 250`;
         const totals=dailyEvents.reduce((a,r)=>{
           if(r.event_type==='store_view')a.visits+=r.sessions;
@@ -265,6 +290,16 @@ Deno.serve(async (request: Request) => {
     const id=actor.store_id as string;
     if (pathname === '/api/merchant/me' && request.method==='GET')
       return out(200,{authenticated:true,storeId:id,store:{slug:actor.slug,public_handle:actor.public_handle,name:actor.name,description:actor.description,whatsapp:actor.whatsapp,status:actor.status,whatsapp_template:actor.whatsapp_template}});
+    if(pathname==='/api/merchant/activity' && request.method==='POST'){
+      const b=await bodyJson(request);
+      const eventType=String(b.eventType||''),sessionId=String(b.sessionId||'');
+      if(!['dashboard_open','shop_share','product_share'].includes(eventType)||!uuid.test(sessionId))
+        return out(400,{error:'Invalid activity event'});
+      await sql`insert into early_storefront.merchant_activity_events(store_id,event_type,session_id)
+        values(${id},${eventType},${sessionId})
+        on conflict(store_id,event_day,event_type,session_id) do nothing`;
+      return out(202,{ok:true});
+    }
     if (pathname === '/api/merchant/claim' && request.method==='POST')
       return out(200,{ok:true,storeId:id,reusable:true});
     if (pathname === '/api/merchant/share-image' && request.method==='GET') {
@@ -305,13 +340,14 @@ Deno.serve(async (request: Request) => {
     if (pathname === '/api/merchant/products' && request.method==='POST') {
       const b=await bodyJson(request);
       const name=b.name, description=b.description??'', category=b.category??'', baseUnit=b.baseUnit??'piece',
-            unitName=b.unitName??'piece',factor=b.factor??1,price=b.price;
+            unitName=b.unitName??'piece',factor=b.factor??1,price=b.price,trackStock=b.trackStock===true;
       if (!textVal(name,150,true)||!textVal(description,2000)||!textVal(category,80)||
-        !textVal(baseUnit,40,true)||!textVal(unitName,40,true)||!goodInt(factor,1,1000000)||!goodInt(price,0,10000000000))
+        !textVal(baseUnit,40,true)||!textVal(unitName,40,true)||!goodInt(factor,1,1000000)||!goodInt(price,0,10000000000)||
+        (b.trackStock!==undefined&&typeof b.trackStock!=='boolean'))
         return out(400,{error:'Invalid product'});
       const saved = await sql.begin(async tx => {
-        const p=await tx`insert into early_storefront.products(store_id,name,description,category,base_unit,published)
-          values(${id},${String(name).trim()},${description},${category},${baseUnit},false) returning id`;
+        const p=await tx`insert into early_storefront.products(store_id,name,description,category,base_unit,published,track_stock)
+          values(${id},${String(name).trim()},${description},${category},${baseUnit},false,${trackStock}) returning id`;
         await tx`insert into early_storefront.units(store_id,product_id,name,factor,price_ngn)
           values(${id},${p[0].id},${unitName},${Number(factor)},${Number(price)})`;
         await tx`insert into early_storefront.stock(store_id,product_id,quantity_base) values(${id},${p[0].id},0)`;
@@ -355,16 +391,19 @@ Deno.serve(async (request: Request) => {
       // Authenticated, store-scoped atomic edit with audited stock adjustments.
       const hasStock=b.stock!==undefined;
       const hasPublished=b.published!==undefined;
+      const hasTracking=b.trackStock!==undefined;
       if (!uuid.test(String(b.productId||'')) || !textVal(b.name,150,true) ||
         !textVal(b.description??'',2000) || !textVal(b.category??'',80) ||
         !goodInt(b.price,0,10000000000) || !uuid.test(String(b.unitId||'')) ||
         (hasStock&&!goodInt(b.stock,0,10000000)) ||
-        (hasPublished&&typeof b.published!=='boolean'))
+        (hasPublished&&typeof b.published!=='boolean') ||
+        (hasTracking&&typeof b.trackStock!=='boolean'))
         return out(400,{error:'Invalid product changes'});
       const changed=await sql.begin(async tx => {
         const prod=await tx`update early_storefront.products set name=${String(b.name).trim()},
           description=${b.description??''},category=${b.category??''},
-          published=case when ${hasPublished} then ${hasPublished?b.published:false} else published end
+          published=case when ${hasPublished} then ${hasPublished?b.published:false} else published end,
+          track_stock=case when ${hasTracking} then ${hasTracking?b.trackStock:false} else track_stock end
           where id=${b.productId} and store_id=${id} and archived_at is null returning id`;
         if (!prod.length) return false;
         const unit=await tx`update early_storefront.units set price_ngn=${Number(b.price)}
