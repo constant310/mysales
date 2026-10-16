@@ -115,7 +115,7 @@ label.wide{grid-column:1/-1}
 <article class="metric"><span class="eyebrow">WhatsApp intent rate</span><strong id="metric-whatsapp-rate">—</strong><small>Share of visits that clicked WhatsApp</small></article>
 <article class="metric"><span class="eyebrow">Active merchants</span><strong id="metric-merchant-active">—</strong><small>Non-demo shops with manager activity in selected period</small></article>
 <article class="metric"><span class="eyebrow">Returning merchants</span><strong id="metric-merchant-returning">—</strong><small>Non-demo merchants active on 2+ separate days</small></article>
-<article class="metric"><span class="eyebrow">Merchant sharing sessions</span><strong id="metric-merchant-shares">—</strong><small>Shop or product sharing activity, counted once per session daily</small></article>
+<article class="metric"><span class="eyebrow">Merchant sharing actions</span><strong id="metric-merchant-shares">—</strong><small>Shop or product share attempts, counted once per session daily</small></article>
 <article class="metric"><span class="eyebrow">Non-demo recorded sales</span><strong id="metric-sales">—</strong><small>Merchant-confirmed sales, not online checkouts</small></article>
 </div>
 <div class="row-grid">
@@ -251,7 +251,7 @@ function renderStores(){
   const stamp=Number.isFinite(date.valueOf())?date.toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}):'';
   const meta=text('p','Joined '+stamp+' · '+(s.whatsapp||'No number'));meta.className='store-meta';
   const measures=text('div','');measures.className='store-measures';
-  for(const [n,v] of [['Products',s.product_count],['Visits',s.visits],['Carts',s.cart_sessions],['WhatsApp',s.whatsapp_sessions],['Manager days',s.active_days],['Shares',s.share_sessions]]){
+  for(const [n,v] of [['Products',s.product_count],['Visits',s.visits],['Carts',s.cart_sessions],['WhatsApp',s.whatsapp_sessions],['Manager days',s.active_days],['Share actions',s.share_sessions]]){
    const item=text('span','');item.append(text('b',int(v)),text('span',' '+n));measures.append(item);
   }
   info.append(title,meta,measures);
