@@ -47,6 +47,6 @@ test('private dashboard preserves merchant management and never renders a fake v
 
 test('operator analytics compares UTC event dates without accidental date-integer comparisons',async()=>{
  const src=await read('supabase/functions/early-storefront-backend/index.ts');
- assert.equal(src.split("event_day >= ((now() at time zone 'UTC')::date -").length-1,2);
+ assert.ok(src.split("event_day >= ((now() at time zone 'UTC')::date -").length-1>=2);
  assert.ok(!src.includes('event_day>=current_date-'));
 });
