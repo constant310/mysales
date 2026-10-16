@@ -292,7 +292,7 @@ test('storefront is a single grid-only shopping experience with no Explore or bo
 test('product cards use full-width Add to cart buttons with proper SVG icons',async()=>{
  const catalogue=await read('s/index.html');
  assert.match(catalogue,/\.grid-add\{display:flex;gap:8px;align-items:center;justify-content:center;width:100%/);
- assert.match(catalogue,/add\.textContent='Add to cart'/);
+ assert.match(catalogue,/add\.textContent=p\.track_stock===true&&stockOf\(p\)<1\?'Sold out':'Add to cart'/);
  assert.match(catalogue,/add\.onclick=\(\)=>openSheet\(p,add\)/);
  assert.match(catalogue,/grid-media/);
  assert.match(catalogue,/grid-title/);
@@ -310,7 +310,7 @@ test('customer shopping keeps stock-aware quantity selection, one basket, and Wh
  assert.match(catalogue,/function renderCart/);
  assert.match(catalogue,/function unitsInBasket/);
  assert.match(catalogue,/function remaining/);
- assert.match(catalogue,/stock>0&&wanted>stock/);
+ assert.match(catalogue,/p\.track_stock===true&&wanted>stock/);
  assert.match(catalogue,/id="purchase-sheet"/);
  assert.match(catalogue,/id="sheet-add"/);
  assert.match(catalogue,/id="sheet-enquire"/);
@@ -421,7 +421,7 @@ test('marketing homepage puts merchant creation before examples and uses a conve
 
 test('customer storefront uses only functional quiet icons; conversion buttons are text-first',async()=>{
  const catalogue=await read('s/index.html');
- assert.match(catalogue,/add\.textContent='Add to cart'/);
+ assert.match(catalogue,/add\.textContent=p\.track_stock===true&&stockOf\(p\)<1\?'Sold out':'Add to cart'/);
  assert.match(catalogue,/class="shop-cta" href="#products">Browse products<\/a>/);
  assert.match(catalogue,/id="home-cart"/);
  assert.match(catalogue,/id="filter-home"/);
@@ -461,7 +461,7 @@ test('sample storefront is explicitly a free-store signup funnel, not a real ord
 
 test('shopping buttons are legible without decorative cart and WhatsApp icons',async()=>{
  const catalogue=await read('s/index.html');
- assert.match(catalogue,/add\.textContent='Add to cart'/);
+ assert.match(catalogue,/add\.textContent=p\.track_stock===true&&stockOf\(p\)<1\?'Sold out':'Add to cart'/);
  assert.doesNotMatch(catalogue,/const CART_SVG=/);
  assert.match(catalogue,/id="sheet-add" type="button">Add to cart<\/button>/);
  assert.match(catalogue,/id="sheet-enquire" type="button">Enquire now<\/button>/);
@@ -603,8 +603,8 @@ test('image catalogue uses actual product photos, correct prices and a real shar
  const manager=await read('manage/index.html');
  assert.match(manager,/async function makeSharePicture\(picked\)/);
  assert.match(manager,/canvas\.toBlob/);
- assert.match(manager,/loadShareImage\(safeProductImage\(p\)\)/);
- assert.match(manager,/img\.crossOrigin='anonymous'/);
+ assert.match(manager,/loadShareImage\(p\)/);
+ assert.match(manager,/fetch\('\/api\/merchant\/share-image\?productId=/);
  assert.match(manager,/new File\(\[result\.blob\]/);
  assert.match(manager,/navigator\.share\(\{files,title:currentStore\.name/);
  assert.match(manager,/navigator\.canShare/);
