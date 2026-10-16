@@ -163,6 +163,30 @@ Deno.serve(async (request: Request) => {
           (select count(*)::int from early_storefront.products where archived_at is null and published) as published_products,
           (select count(*)::int from early_storefront.sales) as recorded_sales,
           (select count(*)::int from early_storefront.sales where created_at >= now()-(${days}::int || ' days')::interval) as sales_period,
+          (select count(*)::int from early_storefront.stores rs
+             where rs.description not ilike '%TEST STORE%' and rs.name not ilike 'DEMO %' and rs.name not ilike 'mySales Demo %') as real_stores,
+          (select count(*)::int from early_storefront.stores rs where rs.status='published'
+             and rs.description not ilike '%TEST STORE%' and rs.name not ilike 'DEMO %' and rs.name not ilike 'mySales Demo %') as real_published_stores,
+          (select count(*)::int from early_storefront.stores rs
+             where rs.created_at >= now()-(${days}::int || ' days')::interval
+             and rs.description not ilike '%TEST STORE%' and rs.name not ilike 'DEMO %' and rs.name not ilike 'mySales Demo %') as real_new_stores,
+          (select count(distinct p.store_id)::int from early_storefront.products p
+             join early_storefront.stores rs on rs.id=p.store_id
+             where p.archived_at is null and rs.description not ilike '%TEST STORE%'
+             and rs.name not ilike 'DEMO %' and rs.name not ilike 'mySales Demo %') as real_stores_with_products,
+          (select count(*)::int from early_storefront.products p
+             join early_storefront.stores rs on rs.id=p.store_id
+             where p.archived_at is null and p.published=true and rs.description not ilike '%TEST STORE%'
+             and rs.name not ilike 'DEMO %' and rs.name not ilike 'mySales Demo %') as real_published_products,
+          (select count(*)::int from early_storefront.sales x
+             join early_storefront.stores rs on rs.id=x.store_id
+             where rs.description not ilike '%TEST STORE%' and rs.name not ilike 'DEMO %'
+             and rs.name not ilike 'mySales Demo %') as real_sales,
+          (select count(*)::int from early_storefront.sales x
+             join early_storefront.stores rs on rs.id=x.store_id
+             where x.created_at >= now()-(${days}::int || ' days')::interval
+             and rs.description not ilike '%TEST STORE%' and rs.name not ilike 'DEMO %'
+             and rs.name not ilike 'mySales Demo %') as real_sales_period,
           (select count(distinct a.store_id)::int from early_storefront.merchant_activity_events a
             join early_storefront.stores s on s.id=a.store_id
             where a.event_type='dashboard_open' and a.event_day >= ((now() at time zone 'UTC')::date - ${since}::int)
