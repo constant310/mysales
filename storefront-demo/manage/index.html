@@ -317,7 +317,7 @@ main{max-width:870px;padding-top:19px}
 <button id="share" class="btn btn-light" type="button">Share my shop</button>
 <a id="public-link" class="btn btn-light" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;align-items:center">View my shop</a>
 </div><p class="share-link" id="public-url" hidden></p></section>
-<section id="retain-tip" class="retain-tip" hidden><strong>✓ Your products are ready. Share one with a customer.</strong><p>Tap “Share on WhatsApp” below a product to send its picture, price and link. Customers can still message you as usual.</p></section>
+<section id="retain-tip" class="retain-tip" hidden><strong>✓ Your products are ready. Share one with a customer.</strong><p>Tap “Share on WhatsApp” below a product to send its name, price, picture link and shop link.</p><button type="button" id="dismiss-retain-tip" class="btn btn-outline btn-small" style="margin-top:10px">Got it</button></section>
 <div class="columns">
 <section class="panel" id="add-section"><div class="panel-top"><div><span class="pill">New product</span><h2 style="margin-top:12px">Add a product</h2></div><button class="btn btn-outline btn-small" type="button" id="cancel-add" hidden>My products</button></div>
  <p class="muted">Choose a photo, name your product and enter the price.</p>
@@ -506,6 +506,12 @@ function showManagerToast(message){
  managerToastTimer=setTimeout(()=>$('manager-toast').classList.remove('visible'),2600);
 }
 const defaultWhatsApp='Hello {store_name}, I would like to enquire about:\n\n{items}\n\nEstimated subtotal: {subtotal}\nPlease confirm availability and final price.\n{customer_note}';
+const tipKey=()=>('mysales_retain_tip_'+String(currentStore?.public_handle||''));
+function dismissRetainTip(){
+ try{localStorage.setItem(tipKey(),'1');}catch{}
+ $('retain-tip').hidden=true;
+}
+$('dismiss-retain-tip').onclick=dismissRetainTip;
 function showManagerView(){
  const hasProducts=products.length>0;
  const adding=isAdding||!hasProducts;
@@ -513,7 +519,9 @@ function showManagerView(){
  $('product-section').hidden=adding;
  $('cancel-add').hidden=!hasProducts;
  $('add-more').hidden=!hasProducts;
- $('retain-tip').hidden=!hasProducts||currentStore?.status!=='published';
+ let alreadyShown=false;
+ try{alreadyShown=localStorage.getItem(tipKey())==='1';}catch{}
+ $('retain-tip').hidden=!hasProducts||currentStore?.status!=='published'||alreadyShown;
 }
 
 const node=(tag,value)=>{const n=document.createElement(tag);n.textContent=String(value);return n;};
@@ -586,7 +594,7 @@ function renderProduct(p){
   const u=p.units[0],priceText=currency(u.price)+(u.name&&u.name!=='piece'?' / '+u.name:'');
   const photo=safeProductImage(p),message=p.name+' — '+priceText+(photo?'\nPhoto: '+photo:'')+'\nSee more: '+publicUrl();
   link.href='https://wa.me/?text='+encodeURIComponent(message);
-  link.addEventListener('click',()=>reportMerchantActivity('product_share'));
+  link.addEventListener('click',()=>{reportMerchantActivity('product_share');dismissRetainTip();});
   card.append(link);
  }
  list.append(card);
@@ -1185,9 +1193,9 @@ $('share').onclick=()=>{
  const url=publicUrl();
  if(typeof navigator.share==='function'){
   navigator.share({title:currentStore.name,text:'Browse products and prices from '+currentStore.name,url})
-   .then(()=>reportMerchantActivity('shop_share'))
+   .then(()=>{reportMerchantActivity('shop_share');dismissRetainTip();})
    .catch(err=>{if(err?.name!=='AbortError')copy(url);});
- }else{copy(url);reportMerchantActivity('shop_share');}
+ }else{copy(url);reportMerchantActivity('shop_share');dismissRetainTip();}
 };
 $('copy-manager').onclick=()=>copy(location.origin+'/manage/claim#token='+encodeURIComponent(token));
 $('export').onclick=async()=>{const b=$('export');b.disabled=true;try{const data=await api('export');const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='mysales-store-backup.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);say('Backup downloaded.');}catch(err){say(err.message,true);}finally{b.disabled=false;}};
