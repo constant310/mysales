@@ -464,7 +464,8 @@ test('shopping buttons are legible without decorative cart and WhatsApp icons',a
  assert.match(catalogue,/add\.textContent=p\.track_stock===true&&stockOf\(p\)<1\?'Sold out':'Add to cart'/);
  assert.doesNotMatch(catalogue,/const CART_SVG=/);
  assert.match(catalogue,/id="sheet-add" type="button">Add to cart<\/button>/);
- assert.match(catalogue,/id="sheet-enquire" type="button">Enquire now<\/button>/);
+ assert.match(catalogue,/id="sheet-enquire" type="button">View basket<\/button>/);
+ assert.match(catalogue,/id="sheet-ask">Ask seller about this product on WhatsApp<\/button>/);
  assert.match(catalogue,/id="send-label">Send WhatsApp enquiry<\/span>/);
  assert.match(catalogue,/id="filter-home"/);
  assert.match(catalogue,/id="home-cart"/);
