@@ -856,7 +856,7 @@ const productDialog=$('product-dialog'),dialogForm=$('dialog-form'),dialogSave=$
 let dialogProduct=null,dialogBaseline=null,dialogPhotoFile=null,dialogPhotoUrl=null,dialogEditing=false,dialogBusy=false;
 let saleRequestKey=null;
 const detailFieldIds={name:'dialog-name',price:'dialog-edit-price',category:'dialog-edit-category',
- description:'dialog-edit-description',stock:'dialog-edit-stock',published:'dialog-edit-published'};
+ description:'dialog-edit-description',stock:'dialog-edit-stock',trackStock:'dialog-track-stock',published:'dialog-edit-published'};
 function detailValues(){
  const result={};
  for(const [key,id] of Object.entries(detailFieldIds))result[key]=$(id).value;
@@ -864,7 +864,7 @@ function detailValues(){
 }
 function snapshotProduct(p){
  return {name:String(p.name||''),price:String(Number(p.units?.[0]?.price??0)),category:String(p.category||''),
-  description:String(p.description||''),stock:String(Number(p.stock||0)),published:String(Boolean(p.published))};
+  description:String(p.description||''),stock:String(Number(p.stock||0)),trackStock:String(p.track_stock===true),published:String(Boolean(p.published))};
 }
 function hasDetailChanges(){
  if(!dialogBaseline)return false;
@@ -874,7 +874,7 @@ function hasDetailChanges(){
 function updateDetailSave(){
  const values=detailValues();
  const allowed=dialogForm.checkValidity()&&Boolean(values.name.trim())&&
-  /^\d+$/.test(values.price)&&/^\d+$/.test(values.stock);
+  /^\d+$/.test(values.price)&&(values.trackStock==='false'||/^\d+$/.test(values.stock));
  dialogSave.disabled=!dialogEditing||dialogBusy||!hasDetailChanges()||!allowed;
 }
 function clearDialogPhotoUrl(){
@@ -901,6 +901,7 @@ function populateProductDialog(product){
  dialogBaseline=snapshotProduct(product);
  for(const [key,id] of Object.entries(detailFieldIds))$(id).value=dialogBaseline[key];
  $('dialog-read').hidden=false;dialogForm.hidden=true;$('dialog-footer').hidden=true;$('dialog-advanced').hidden=true;
+ toggleDetailStock();
  $('dialog-photo-picker').hidden=true;$('dialog-edit').hidden=false;
  $('dialog-error').hidden=true;$('dialog-error').textContent='';
  $('dialog-save').textContent='Save changes';dialogSave.disabled=true;
@@ -919,10 +920,17 @@ function enterProductEdit(){
  dialogEditing=true;
  $('dialog-eyebrow').textContent='Editing product';
  $('dialog-edit').hidden=true;$('dialog-read').hidden=true;dialogForm.hidden=false;
- $('dialog-photo-picker').hidden=false;$('dialog-footer').hidden=false;$('dialog-advanced').hidden=false;
+ $('dialog-photo-picker').hidden=false;$('dialog-footer').hidden=false;$('dialog-advanced').hidden=!dialogProduct.track_stock;
  $('dialog-name').focus({preventScroll:true});
  updateDetailSave();
 }
+function toggleDetailStock(){
+ const enabled=$('dialog-track-stock').value==='true';
+ $('edit-stock-count').hidden=!enabled;
+ $('dialog-edit-stock').disabled=!enabled;
+ $('dialog-edit-stock').required=enabled;
+}
+$('dialog-track-stock').addEventListener('change',()=>{toggleDetailStock();$('dialog-advanced').hidden=$('dialog-track-stock').value!=='true'||!dialogEditing;updateDetailSave();});
 $('dialog-edit').onclick=enterProductEdit;
 for(const id of Object.values(detailFieldIds)){
  $(id).addEventListener('input',updateDetailSave);
@@ -960,7 +968,7 @@ dialogForm.onsubmit=async event=>{
  event.preventDefault();
  if(!dialogEditing||dialogBusy||!hasDetailChanges()||!dialogForm.checkValidity())return;
  const values=detailValues();
- if(!values.name.trim()||!/^\d+$/.test(values.price)||!/^\d+$/.test(values.stock)){updateDetailSave();return;}
+ if(!values.name.trim()||!/^\d+$/.test(values.price)||(values.trackStock==='true'&&!/^\d+$/.test(values.stock))){updateDetailSave();return;}
  const p=dialogProduct,unit=p?.units?.[0];
  if(!p||!unit)return;
  dialogBusy=true;dialogSave.disabled=true;dialogSave.textContent='Saving…';
@@ -976,7 +984,8 @@ dialogForm.onsubmit=async event=>{
   }
   await post('update-product',{productId:p.id,unitId:unit.id,
    name:values.name.trim(),price:Number(values.price),category:values.category,
-   description:values.description,stock:Number(values.stock),published:values.published==='true'});
+   description:values.description,trackStock:values.trackStock==='true',
+   ...(values.trackStock==='true'?{stock:Number(values.stock)}:{}),published:values.published==='true'});
   await refresh();
   const updated=products.find(row=>row.id===p.id);
   if(updated)populateProductDialog(updated);else productDialog.close();
@@ -1038,6 +1047,13 @@ async function preparePhoto(file){
  if(!jpg||jpg.size>=2000000)throw Error('Photo is still too large. Try a smaller image.');
  return new File([jpg],'product.jpg',{type:'image/jpeg'});
 }
+$('stock-mode').onchange=()=>{
+ const enabled=$('stock-mode').value==='true';
+ $('stock-count').hidden=!enabled;
+ $('product-stock').disabled=!enabled;
+ $('product-stock').required=enabled;
+};
+$('stock-mode').onchange();
 $('product-photo').onchange=e=>{
  const file=e.target.files?.[0];const old=$('preview').dataset.url;if(old)URL.revokeObjectURL(old);
  if(file){const url=URL.createObjectURL(file);$('preview').dataset.url=url;$('preview').src=url;$('preview').style.display='block';$('photo-icon').style.display='none';$('photo-label').textContent=file.name||'Photo selected';}
@@ -1054,7 +1070,7 @@ $('add').onsubmit=async e=>{
   const photo=await preparePhoto(data.photo);
   const result=await post('products',{
    name:data.name,price:Number(data.price),description:data.description||'',
-   category:data.category||'',baseUnit:'piece',unitName:'piece',factor:1
+   category:data.category||'',trackStock:data.trackStock==='true',baseUnit:'piece',unitName:'piece',factor:1
   });
   const errors=[];
   let photoUploaded=false;
@@ -1064,7 +1080,7 @@ $('add').onsubmit=async e=>{
    if(!uploadResult.imageUrl)throw Error('The server did not return a saved photo.');
    photoUploaded=true;
   }catch(err){errors.push('Photo not saved: '+err.message);}
-  if(data.stock&&Number(data.stock)>0){
+  if(data.trackStock==='true'&&data.stock&&Number(data.stock)>0){
    try{await post('restock',{productId:result.id,amount:Number(data.stock)});}
    catch(err){errors.push('Stock could not update: '+err.message);}
   }
@@ -1082,7 +1098,7 @@ $('add').onsubmit=async e=>{
     }catch(err){errors.push('Store could not go live: '+err.message);}
    }
   }
-  form.reset();$('extras').open=false;$('preview').style.display='none';
+  form.reset();$('extras').open=false;$('stock-count').hidden=true;$('preview').style.display='none';
   $('photo-icon').style.display='block';$('photo-label').textContent='Choose a product photo';
   say(errors.length?'Product saved as a draft or with an issue. '+errors.join(' ')+' Use its photo button below to retry.':
    '🎉 Product and picture added! Share your storefront with customers.',errors.length>0);
