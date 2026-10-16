@@ -83,7 +83,7 @@ label{margin-top:15px}input,textarea{min-height:49px;padding:12px;border-radius:
 <div id="success" hidden>
 <div class="ready">✓</div><div class="step" style="margin-top:16px">Step 2 of 2</div>
 <h2 id="success-title">Your shop is created!</h2><p class="sub">One more step: add your first product and your storefront can go live.</p>
-<p class="warning"><strong>Keep this private link.</strong> It is the key to editing your store. Save it safely and never post it publicly.</p>
+<p class="warning"><strong>Your store stays saved on this phone.</strong> Keep a private backup of this link as well, in case you change phones. Never post it publicly.</p>
 <div class="secret" id="secret"></div>
 <div class="sucrow"><button id="copy" type="button" class="ghost">Save private link</button></div>
 <button id="continue" type="button" class="primary">Continue to add products →</button>
@@ -130,7 +130,7 @@ $('create').addEventListener('submit',async e=>{
   if(!j.managementLink)throw Error('Could not generate your store link');
   managementLink=j.managementLink;
   const issuedToken=new URLSearchParams(new URL(managementLink).hash.slice(1)).get('token');
-  if(issuedToken&&/^[A-Za-z0-9_-]{43}$/.test(issuedToken))sessionStorage.setItem('mysales_private_management_token',issuedToken);
+  if(issuedToken&&/^[A-Za-z0-9_-]{43}$/.test(issuedToken))rememberToken(issuedToken);
   $('secret').textContent=managementLink;$('success-title').textContent=j.store.name+' is ready!';
   $('public').textContent=location.origin+j.publicUrl;
   $('start').hidden=true;$('success').hidden=false;scrollTo({top:0,behavior:'smooth'});
