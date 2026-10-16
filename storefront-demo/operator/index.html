@@ -104,9 +104,9 @@ label.wide{grid-column:1/-1}
 <div id="main" hidden>
 <section class="heading"><div><span class="kicker">STORE PERFORMANCE</span><h1>Platform overview</h1><p>Real merchant activity, products and anonymous customer sessions.</p></div><div class="controls"><select id="range" aria-label="Analytics time range"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option></select><button type="button" id="refresh" class="secondary">Refresh stats</button></div></section>
 <div class="metrics">
-<article class="metric emphasis"><span class="eyebrow">Businesses registered</span><strong id="metric-stores">—</strong><small id="metric-new">New registrations loading</small></article>
-<article class="metric"><span class="eyebrow">Published stores</span><strong id="metric-published">—</strong><small>Customer-visible shops</small></article>
-<article class="metric"><span class="eyebrow">Published products</span><strong id="metric-products">—</strong><small>Across every business</small></article>
+<article class="metric emphasis"><span class="eyebrow">Real businesses registered</span><strong id="metric-stores">—</strong><small id="metric-new">New registrations loading</small></article>
+<article class="metric"><span class="eyebrow">Real published stores</span><strong id="metric-published">—</strong><small>Customer-visible shops</small></article>
+<article class="metric"><span class="eyebrow">Real published products</span><strong id="metric-products">—</strong><small>Across every business</small></article>
 <article class="metric"><span class="eyebrow">Store visits</span><strong id="metric-visits">—</strong><small>Anonymous browser sessions in selected period</small></article>
 <article class="metric"><span class="eyebrow">Stores with products</span><strong id="metric-activated">—</strong><small>Businesses that uploaded an item</small></article>
 <article class="metric"><span class="eyebrow">Cart engagement</span><strong id="metric-cart">—</strong><small>Sessions that added to cart</small></article>
@@ -116,13 +116,13 @@ label.wide{grid-column:1/-1}
 <article class="metric"><span class="eyebrow">Active merchants</span><strong id="metric-merchant-active">—</strong><small>Non-demo shops with manager activity in selected period</small></article>
 <article class="metric"><span class="eyebrow">Returning merchants</span><strong id="metric-merchant-returning">—</strong><small>Non-demo merchants active on 2+ separate days</small></article>
 <article class="metric"><span class="eyebrow">Merchant sharing sessions</span><strong id="metric-merchant-shares">—</strong><small>Shop or product sharing activity, counted once per session daily</small></article>
-<article class="metric"><span class="eyebrow">Recorded merchant sales</span><strong id="metric-sales">—</strong><small>Merchant-confirmed sales, not online checkouts</small></article>
+<article class="metric"><span class="eyebrow">Non-demo recorded sales</span><strong id="metric-sales">—</strong><small>Merchant-confirmed sales, not online checkouts</small></article>
 </div>
 <div class="row-grid">
 <section class="panel"><h2>Daily store visits</h2><p class="subtle">Number of browser-tab sessions, counted once per store each UTC day. Tracking starts on the date this version goes live.</p><div id="visits-chart" class="chart" role="img" aria-label="Daily store visits chart"></div><div class="legend"><span id="chart-first"></span><span id="chart-last"></span></div></section>
 <section class="panel"><h2>Merchant activation</h2><p class="subtle">Businesses that have uploaded at least one non-archived product.</p><div class="health-number" id="activation">—</div><p class="health-caption" id="activation-note">Loading store activity…</p><div class="progress"><div id="activation-bar"></div></div><p class="subtle" id="updated">Data is refreshed on request.</p></section>
 </div>
-<section class="panel" style="margin-top:18px"><div class="table-head"><div><h2>All businesses</h2><p class="subtle">Latest registered stores, publication status, products and customer engagement.</p></div><input id="store-search" type="search" aria-label="Search registered businesses" placeholder="Search businesses…"></div><div id="stores" class="store-list">Loading businesses…</div></section>
+<section class="panel" style="margin-top:18px"><div class="table-head"><div><h2>All businesses</h2><p class="subtle">Latest registered stores (including demo/test shops), products and customer engagement.</p></div><input id="store-search" type="search" aria-label="Search registered businesses" placeholder="Search businesses…"></div><div id="stores" class="store-list">Loading businesses…</div></section>
 <details class="setup"><summary>Create a merchant storefront</summary><p>This operator-only form creates a shop and issues a permanent, revocable private management link.</p>
 <form id="create" class="create">
 <label>Business name<input name="name" required maxlength="150" placeholder="e.g. Ada Beauty Store"></label>
@@ -143,7 +143,7 @@ label.wide{grid-column:1/-1}
  <p id="handoff-warning" class="handoff-warning"><strong>Keep it private:</strong> Anyone with this link can edit the vendor’s store. This link cannot be retrieved later. Save or share it before closing this panel. The public customer link stays unchanged.</p>
  </div>
 </dialog>
-<p class="footer-note">Visitor figures are anonymous session estimates, not identifiable people or completed purchases. Historical visits before analytics activation cannot be reconstructed. Admin data is private and is never sent to public storefront pages.</p>
+<p class="footer-note">Real merchant totals exclude seeded demo shops; this exclusion is based on the demo name/description markers. Visitor figures are anonymous session estimates, not identifiable people or completed purchases. Historical visits before analytics activation cannot be reconstructed. Admin data is private and is never sent to public storefront pages.</p>
 </div>
 </main>
 <script type="module">
@@ -299,25 +299,25 @@ async function refresh(){
   const data=await api('analytics?days='+currentDays);
   allStores=data.stores||[];
   const s=data.summary||{},v=data.totals||{};
-  setMetric('metric-stores',s.total_stores);
-  setMetric('metric-published',s.published_stores);
-  setMetric('metric-products',s.published_products);
+  setMetric('metric-stores',s.real_stores);
+  setMetric('metric-published',s.real_published_stores);
+  setMetric('metric-products',s.real_published_products);
   setMetric('metric-visits',v.visits);
-  setMetric('metric-activated',s.stores_with_products);
+  setMetric('metric-activated',s.real_stores_with_products);
   setMetric('metric-cart',v.cartSessions);
   setMetric('metric-whatsapp',v.whatsappSessions);
-  setMetric('metric-sales',s.recorded_sales);
+  setMetric('metric-sales',s.real_sales);
   setMetric('metric-merchant-active',s.active_merchants);
   setMetric('metric-merchant-returning',s.returning_merchants);
   setMetric('metric-merchant-shares',s.merchant_share_sessions);
   $('metric-cart-rate').textContent=Number(v.visits)>0?Math.round(100*Number(v.cartSessions||0)/Number(v.visits))+'%':'0%';
   $('metric-whatsapp-rate').textContent=Number(v.visits)>0?Math.round(100*Number(v.whatsappSessions||0)/Number(v.visits))+'%':'0%';
-  $('metric-new').textContent=int(s.new_stores)+' new in the last '+currentDays+' days';
-  const percent=s.total_stores?Math.round(100*Number(s.stores_with_products||0)/Number(s.total_stores)):0;
+  $('metric-new').textContent=int(s.real_new_stores)+' new in the last '+currentDays+' days';
+  const percent=s.real_stores?Math.round(100*Number(s.real_stores_with_products||0)/Number(s.real_stores)):0;
   $('activation').textContent=percent+'%';
   $('activation-bar').style.width=percent+'%';
-  $('activation-note').textContent=int(s.stores_with_products)+' of '+int(s.total_stores)+' registered stores have products listed.';
-  $('updated').textContent='Updated '+new Date(data.generatedAt||Date.now()).toLocaleString('en-NG')+' · '+int(s.sales_period)+' recorded sales in the selected period.';
+  $('activation-note').textContent=int(s.real_stores_with_products)+' of '+int(s.real_stores)+' real registered stores have products listed.';
+  $('updated').textContent='Updated '+new Date(data.generatedAt||Date.now()).toLocaleString('en-NG')+' · '+int(s.real_sales_period)+' non-demo sales in the selected period.';
   renderChart(data.dailyEvents||[],currentDays);
   renderStores();
   status.textContent='Private operator access verified. Live database data loaded.';
