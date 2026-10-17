@@ -318,6 +318,34 @@ main{max-width:870px;padding-top:19px}
 #business-other-country{margin-top:9px}
 #business-other-country[hidden]{display:none!important}
 @media(max-width:380px){.manager-phone-row{grid-template-columns:1fr}}
+
+/* WhatsApp Status publisher inside the owner's manager, never shown to visitors. */
+#status-section{max-width:760px;margin:18px auto 0}
+#status-section[hidden]{display:none!important}
+.status-intro h2{margin:10px 0 7px;letter-spacing:-.035em}
+.status-intro p{max-width:560px;color:#6B8070;font-size:.85rem;line-height:1.55;margin:0 0 18px}
+.status-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 12px}
+.status-toolbar span{flex:1;font-size:.78rem;font-weight:850;color:#3B6948}
+.status-toolbar button{background:transparent;border:0;padding:8px 0;color:#167D3F;font-size:.77rem;font-weight:850}
+.status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:15px}
+.status-choice{display:flex;align-items:center;gap:11px;border:1px solid #DDE9E0;border-radius:12px;padding:10px;min-width:0;cursor:pointer}
+.status-choice:has(input:checked){border-color:#63C27D;background:#F3FCF5}
+.status-choice input{width:18px!important;height:18px!important;min-height:18px;flex:none;accent-color:#16843D}
+.status-choice img{width:58px;height:58px;border-radius:9px;object-fit:contain;background:#F4F8F5;flex:none}
+.status-choice span{min-width:0;flex:1}
+.status-choice strong{display:block;line-height:1.4;color:#304338;font-size:.83rem;overflow-wrap:anywhere}
+.status-choice small{display:block;margin-top:4px;color:#16823F;font-size:.8rem;font-weight:850}
+.status-actions{display:flex;flex-wrap:wrap;gap:10px}
+.status-actions .btn{flex:1;min-width:190px}
+.status-previews{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:13px;margin:17px 0 11px}
+.status-previews:empty{display:none}
+.status-preview{min-width:0;margin:0;border:1px solid #E0EAE2;background:#FAFDFA;border-radius:13px;padding:10px}
+.status-preview img{width:100%;aspect-ratio:9/16;object-fit:contain;background:#F1F7F3;border-radius:8px}
+.status-preview figcaption{font-size:.77rem;color:#526954;line-height:1.5;margin:7px 0;overflow-wrap:anywhere}
+.status-preview a{display:block;text-decoration:none;text-align:center;padding:9px;border-radius:8px;background:#E6F6EB;color:#18743B;font-size:.78rem;font-weight:850}
+#status-feedback{font-size:.8rem;color:#52765D;line-height:1.6;margin:9px 0}
+.status-guide{margin:13px 0 0;font-size:.75rem;line-height:1.65;color:#718373}
+@media(max-width:500px){.status-grid{grid-template-columns:1fr}.status-actions .btn{min-width:100%}}
 </style></head><body>
 <header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><button id="exit" class="head-btn" style="margin-left:auto" hidden>Sign out</button></header>
 <main><p id="notice" role="status" aria-live="polite">Opening your store…</p>
@@ -327,6 +355,7 @@ main{max-width:870px;padding-top:19px}
 <h1 id="store-title">Welcome to your store</h1><p id="greeting">Let's get your first product online.</p>
 <div class="actions">
 <button id="share" class="btn btn-light" type="button">Share my shop</button>
+<button id="status-open" class="btn btn-light" type="button" hidden>Post to Status</button>
 <a id="public-link" class="btn btn-light" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;align-items:center">View my shop</a>
 </div><p class="share-link" id="public-url" hidden></p></section>
 <section id="retain-tip" class="retain-tip" hidden><strong>✓ Your products are ready. Share one with a customer.</strong><p>Tap “Share on WhatsApp” below a product to send its name, description, price, photo link and shop link.</p><button type="button" id="dismiss-retain-tip" class="btn btn-outline btn-small" style="margin-top:10px">Got it</button></section>
@@ -349,6 +378,16 @@ main{max-width:870px;padding-top:19px}
 <div><h2>Your products <span id="total" style="font-size:.84rem;color:#789589"></span></h2><p class="share-hint">Pick items to send prices and pictures to customers.</p></div><div class="product-actions"><button class="btn btn-outline btn-small" id="share-products" type="button">Share products</button><button class="btn btn-outline btn-small" id="add-more" type="button">Add product</button></div></div>
 <div id="products" class="product-list"></div></section>
 </div>
+<section class="panel" id="status-section" aria-labelledby="status-heading" hidden>
+ <div class="status-intro"><span class="pill">FREE MARKETING TOOL</span><h2 id="status-heading">Post products to WhatsApp Status</h2>
+ <p>Choose products and create a separate portrait Status picture for each. Each image includes the product photo, name, price and the mySales logo — <strong>no stock or order quantity.</strong></p></div>
+ <div class="status-toolbar"><span id="status-selection-count">0 selected</span><button id="status-select-all" type="button">Select first 10</button><button id="status-clear" type="button">Clear</button></div>
+ <div id="status-products" class="status-grid" role="group" aria-label="Choose products for WhatsApp Status"></div>
+ <div class="status-actions"><button type="button" class="btn" id="status-prepare" disabled>Prepare Status pictures</button><button type="button" class="btn btn-outline" id="status-share" disabled>Share to WhatsApp Status</button></div>
+ <p id="status-feedback" role="status" aria-live="polite">Select products to create your Status pictures.</p>
+ <div id="status-previews" class="status-previews" aria-label="Prepared Status pictures"></div>
+ <p class="status-guide">After tapping <strong>Share to WhatsApp Status</strong>, select <strong>WhatsApp → My Status</strong> in your phone's sharing menu. If your phone does not support multiple images, save each image above and post from WhatsApp. Posting requires your confirmation; mySales cannot post automatically.</p>
+</section>
 <section class="settings-hub" aria-labelledby="settings-heading">
   <div class="settings-intro"><span class="settings-overline">STORE MANAGEMENT</span><h2 id="settings-heading">Store settings</h2><p>Keep your shop details and customer messages in one place.</p></div>
 
@@ -480,6 +519,7 @@ main{max-width:870px;padding-top:19px}
 <script type="module">
 import {accessToken,requireAccount,logout} from '/auth/client.mjs';
 import {fillCountryCodes,showOtherCountryCode,internationalWhatsApp,splitInternationalWhatsApp} from '/auth/phone.mjs';
+import {photoProxyPath,prepareStatusPictures,canShareEnquiryFiles,MAX_ENQUIRY_IMAGES} from '/shop/whatsapp-enquiry.mjs';
 const $=id=>document.getElementById(id),notice=$('notice'),list=$('products');
 let currentStore=null,products=[],isAdding=new URLSearchParams(location.search).has('welcome'),managerToastTimer=0;
 function showManagerToast(message){
@@ -500,6 +540,8 @@ function showManagerView(){
  const adding=isAdding||!hasProducts;
  $('add-section').hidden=!adding;
  $('product-section').hidden=adding;
+ $('status-section').hidden=adding;
+ $('status-open').hidden=!hasProducts;
  $('cancel-add').hidden=!hasProducts;
  $('add-more').hidden=!hasProducts;
  let alreadyShown=false;
@@ -551,6 +593,7 @@ async function refresh(){
   list.append(empty);
  }
  for(const p of products)renderProduct(p);
+ renderStatusPicker();
 }
 function renderProduct(p){
  const unit=p.units?.[0];
