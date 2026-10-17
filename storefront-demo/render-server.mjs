@@ -5,18 +5,19 @@ import {readFile} from 'node:fs/promises';
 import {resolve,extname,sep} from 'node:path';
 
 const root=resolve('storefront-demo');
-const edgeBase='https://wsxszbdvvtowmrnxdsrp.supabase.co/functions/v1/early-storefront-backend';
+const staging=process.env.MYSALES_V5_AUTH_STAGING==='true';
+const edgeBase='https://wsxszbdvvtowmrnxdsrp.supabase.co/functions/v1/'+(staging?'early-storefront-backend-v5-test':'early-storefront-backend');
 // Exact public origins accepted for browser POST requests; never trust wildcard origins.
-const allowedOrigins=new Set(['https://store.mysalesofficial.com','https://mysales-early-storefront-branch.onrender.com']);
+const allowedOrigins=new Set(['https://store.mysalesofficial.com','https://mysales-early-storefront-branch.onrender.com', 'https://mysales-v5-email-staging.onrender.com']);
 const allowed=new Set([
  '/api/store','/api/discover','/api/signup',
- '/api/merchant/me','/api/merchant/claim','/api/merchant/products','/api/merchant/activity',
+ '/api/merchant/me','/api/merchant/transfer','/api/merchant/products','/api/merchant/activity',
  '/api/merchant/restock','/api/merchant/publish','/api/merchant/confirm-sale',
  '/api/merchant/export','/api/merchant/update-product',
  '/api/merchant/archive-product','/api/merchant/store-settings','/api/merchant/upload-image','/api/merchant/share-image',
  '/api/operator/me','/api/operator/stores','/api/operator/analytics','/api/activity',
 ]);
-const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml','.ico':'image/x-icon'};
+const mime={'.html':'text/html; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml','.ico':'image/x-icon'};
 const json=(res,status,body)=>{res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(body));};
 async function edgeFetch(path,method='GET',headers={},body) {
  const target=path.startsWith('/api/signup')?edgeBase.replace('/early-storefront-backend','/early-storefront-signup'):edgeBase;
@@ -146,6 +147,9 @@ http.createServer(async(req,res)=>{
   if(path==='/')staticPath='/index.html';
   if(path==='/discover'||path==='/discover/')staticPath='/discover/index.html';
   if(path==='/create'||path==='/create/')staticPath='/create/index.html';
+  if(path==='/login'||path==='/login/')staticPath='/login/index.html';
+  // Not launched: reserve Buy and Explore URLs without showing either in navigation.
+  if(['/buy','/buy/','/explore','/explore/'].includes(path))return json(res,404,{error:'Not available yet'});
   if(path==='/manage'||path==='/manage/')staticPath='/manage/index.html';
   if(path==='/manage/claim')staticPath='/manage/claim.html';
   if(path==='/operator'||path==='/operator/')staticPath='/operator/index.html';
@@ -166,7 +170,7 @@ http.createServer(async(req,res)=>{
    throw error;
   }
   res.setHeader('Content-Type',mime[extname(file)]);
-  if(path.startsWith('/manage')||path.startsWith('/operator'))res.setHeader('Cache-Control','no-store');
+  if(path.startsWith('/manage')||path.startsWith('/login')||path.startsWith('/create')||path.startsWith('/operator'))res.setHeader('Cache-Control','no-store');
   return res.end(bytes);
  }catch(error){
   console.error('Request failed',error?.message);

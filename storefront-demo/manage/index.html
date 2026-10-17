@@ -293,31 +293,79 @@ main{max-width:870px;padding-top:19px}
 .quick-share{display:flex;align-items:center;justify-content:center;width:calc(100% - 24px);margin:0 12px 12px;min-height:42px;border:1px solid #c8e6d1;border-radius:10px;background:#f1faf3;color:#146c37;text-decoration:none;font-weight:850;font-size:.82rem}
 .retain-tip{background:#f1faf3;border:1px solid #cbe9d2;border-radius:14px;padding:15px 17px;margin:0 0 19px;color:#1a6439;line-height:1.45}.retain-tip strong{display:block;margin-bottom:4px;font-size:.93rem}.retain-tip p{margin:0;font-size:.8rem}
 #stock-count[hidden],#edit-stock-count[hidden]{display:none}
+
+/* Consistent two-column product cards; phones use one clear column. */
+#product-section .product-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:14px}
+#product-section .product{display:flex;flex-direction:column;min-width:0;height:100%;border:1px solid #e1eae3;border-radius:16px;overflow:hidden}
+#product-section .product-open{display:grid;grid-template-columns:88px minmax(0,1fr);gap:13px;align-items:start;min-height:140px;flex:1;padding:15px;width:100%}
+#product-section .product-open img,#product-section .product-open .ph{width:88px;height:88px;object-fit:contain;background:#f5f9f5;border:1px solid #eaf0ec;border-radius:11px}
+#product-section .product-body{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+#product-section .product-body h3{font-size:.91rem;line-height:1.35;min-height:2.5em;margin:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+#product-section .product-body .price{font-size:1.04rem;margin:0;color:#147a37}
+#product-section .product-view{display:none}
+#product-section .product-badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+#product-section .product-badge{display:inline-flex;font-size:.69rem;padding:4px 7px;font-weight:750;border-radius:6px;line-height:1.3}
+#product-section .badge-live{color:#16773b;background:#eaf7ee}
+#product-section .badge-muted{color:#68766c;background:#f0f1f0}
+#product-section .badge-stock{color:#4c6858;background:#edf4ef}
+#product-section .badge-out{color:#9d4735;background:#fff0ed}
+#product-section .quick-share{display:flex;align-items:center;justify-content:center;width:100%;min-height:45px;border:0;border-top:1px solid #e2eee6;border-radius:0;margin:0;padding:12px;color:#166b39;background:#f2faf4;font-size:.81rem}
+#product-section .quick-share:hover{background:#e8f6ed}
+@media(max-width:700px){#product-section .product-list{grid-template-columns:1fr}#product-section .product-open{min-height:115px}}
+@media(max-width:380px){#product-section .product-open{grid-template-columns:76px minmax(0,1fr)}#product-section .product-open img,#product-section .product-open .ph{width:76px;height:76px}}
+.manager-phone-row{display:grid;grid-template-columns:minmax(130px,1fr) minmax(0,1.1fr);gap:9px}
+.manager-phone-row select,.manager-phone-row input{min-width:0}
+#business-other-country{margin-top:9px}
+#business-other-country[hidden]{display:none!important}
+@media(max-width:380px){.manager-phone-row{grid-template-columns:1fr}}
+
+/* WhatsApp Status publisher inside the owner's manager, never shown to visitors. */
+#status-section{max-width:760px;margin:18px auto 0}
+#status-section[hidden]{display:none!important}
+.status-intro h2{margin:10px 0 7px;letter-spacing:-.035em}
+.status-intro p{max-width:560px;color:#6B8070;font-size:.85rem;line-height:1.55;margin:0 0 18px}
+.status-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 12px}
+.status-toolbar span{flex:1;font-size:.78rem;font-weight:850;color:#3B6948}
+.status-toolbar button{background:transparent;border:0;padding:8px 0;color:#167D3F;font-size:.77rem;font-weight:850}
+.status-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:15px}
+.status-choice{display:flex;align-items:center;gap:11px;border:1px solid #DDE9E0;border-radius:12px;padding:10px;min-width:0;cursor:pointer}
+.status-choice:has(input:checked){border-color:#63C27D;background:#F3FCF5}
+.status-choice input{width:18px!important;height:18px!important;min-height:18px;flex:none;accent-color:#16843D}
+.status-choice img{width:58px;height:58px;border-radius:9px;object-fit:contain;background:#F4F8F5;flex:none}
+.status-choice span{min-width:0;flex:1}
+.status-choice strong{display:block;line-height:1.4;color:#304338;font-size:.83rem;overflow-wrap:anywhere}
+.status-choice small{display:block;margin-top:4px;color:#16823F;font-size:.8rem;font-weight:850}
+.status-actions{display:flex;flex-wrap:wrap;gap:10px}
+.status-actions .btn{flex:1;min-width:190px}
+.status-previews{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:13px;margin:17px 0 11px}
+.status-previews:empty{display:none}
+.status-preview{min-width:0;margin:0;border:1px solid #E0EAE2;background:#FAFDFA;border-radius:13px;padding:10px}
+.status-preview img{width:100%;aspect-ratio:9/16;object-fit:contain;background:#F1F7F3;border-radius:8px}
+.status-preview figcaption{font-size:.77rem;color:#526954;line-height:1.5;margin:7px 0;overflow-wrap:anywhere}
+.status-preview a{display:block;text-decoration:none;text-align:center;padding:9px;border-radius:8px;background:#E6F6EB;color:#18743B;font-size:.78rem;font-weight:850}
+#status-feedback{font-size:.8rem;color:#52765D;line-height:1.6;margin:9px 0}
+.status-guide{margin:13px 0 0;font-size:.75rem;line-height:1.65;color:#718373}
+.status-link-tools{margin:15px 0 8px;background:#F3FBF5;border:1px solid #D8E9DE;padding:15px;border-radius:12px}
+.status-link-tools h3{margin:0 0 5px;font-size:.91rem;color:#214F30}
+.status-link-tools p{font-size:.78rem;line-height:1.55;color:#647B6A;margin:0 0 10px}
+.status-link-tools a{font-size:.78rem;word-break:break-all;color:#126B34;font-weight:800}
+.status-link-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:11px}
+.status-link-actions .btn{min-height:42px;font-size:.79rem;flex:1;min-width:165px}
+.status-link-tools .status-guide{margin-top:11px;font-size:.74rem}
+@media(max-width:500px){.status-grid{grid-template-columns:1fr}.status-actions .btn{min-width:100%}}
 </style></head><body>
-<header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Storefront Manager</span>
-<button id="exit" class="head-btn" hidden>Close private access</button></header>
+<header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><button id="exit" class="head-btn" style="margin-left:auto" hidden>Sign out</button></header>
 <main><p id="notice" role="status" aria-live="polite">Opening your store…</p>
-<section id="access-recovery" class="access-recovery" aria-labelledby="recovery-heading" hidden>
- <div class="recovery-symbol" aria-hidden="true">🔐</div>
- <h1 id="recovery-heading">Reconnect to your store</h1>
- <p id="recovery-message">Open your saved private manager link to continue editing. Your products and store details are still saved.</p>
- <form id="recover-form">
-  <label for="recover-link">Paste your private management link</label>
-  <input id="recover-link" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste the private link you saved" required>
-  <button class="btn" type="submit" id="recover-button">Open my store →</button>
- </form>
- <button class="btn btn-outline" id="retry-access" type="button" hidden>Try connecting again</button>
- <p class="recovery-note">Your private link is the key to your store. Do not share it publicly. On a shared phone, use “Close private access” when finished.</p>
- <p class="recovery-secondary"><a href="/">Back to mySales</a></p>
-</section>
+
 <div id="app" hidden>
 <section class="hero"><div class="eyebrow" id="state">Your online store</div>
 <h1 id="store-title">Welcome to your store</h1><p id="greeting">Let's get your first product online.</p>
 <div class="actions">
 <button id="share" class="btn btn-light" type="button">Share my shop</button>
+<button id="status-open" class="btn btn-light" type="button" hidden>Post to Status</button>
 <a id="public-link" class="btn btn-light" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;align-items:center">View my shop</a>
 </div><p class="share-link" id="public-url" hidden></p></section>
-<section id="retain-tip" class="retain-tip" hidden><strong>✓ Your products are ready. Share one with a customer.</strong><p>Tap “Share on WhatsApp” below a product to send its name, price, picture link and shop link.</p><button type="button" id="dismiss-retain-tip" class="btn btn-outline btn-small" style="margin-top:10px">Got it</button></section>
+<section id="retain-tip" class="retain-tip" hidden><strong>✓ Your products are ready. Share one with a customer.</strong><p>Tap “Share on WhatsApp” below a product to send its name, description, price, photo link and shop link.</p><button type="button" id="dismiss-retain-tip" class="btn btn-outline btn-small" style="margin-top:10px">Got it</button></section>
 <div class="columns">
 <section class="panel" id="add-section"><div class="panel-top"><div><span class="pill">New product</span><h2 style="margin-top:12px">Add a product</h2></div><button class="btn btn-outline btn-small" type="button" id="cancel-add" hidden>My products</button></div>
  <p class="muted">Choose a photo, name your product and enter the price.</p>
@@ -337,8 +385,28 @@ main{max-width:870px;padding-top:19px}
 <div><h2>Your products <span id="total" style="font-size:.84rem;color:#789589"></span></h2><p class="share-hint">Pick items to send prices and pictures to customers.</p></div><div class="product-actions"><button class="btn btn-outline btn-small" id="share-products" type="button">Share products</button><button class="btn btn-outline btn-small" id="add-more" type="button">Add product</button></div></div>
 <div id="products" class="product-list"></div></section>
 </div>
+<section class="panel" id="status-section" aria-labelledby="status-heading" hidden>
+ <div class="status-intro"><span class="pill">FREE MARKETING TOOL</span><h2 id="status-heading">Post products to WhatsApp Status</h2>
+ <p>Choose products and create a separate portrait Status picture for each. Each image includes the product photo, name, price and the mySales logo — <strong>no stock or order quantity.</strong></p></div>
+ <div class="status-toolbar"><span id="status-selection-count">0 selected</span><button id="status-select-all" type="button">Select first 10</button><button id="status-clear" type="button">Clear</button></div>
+ <div id="status-products" class="status-grid" role="group" aria-label="Choose products for WhatsApp Status"></div>
+ <div class="status-actions"><button type="button" class="btn" id="status-prepare" disabled>Prepare Status pictures</button><button type="button" class="btn btn-outline" id="status-share" disabled>Share to WhatsApp Status</button></div>
+ <p id="status-feedback" role="status" aria-live="polite">Select products to create your Status pictures.</p>
+ <div id="status-previews" class="status-previews" aria-label="Prepared Status pictures"></div>
+ <div class="status-link-tools" aria-labelledby="status-link-title">
+  <h3 id="status-link-title">Add a link to your online shop</h3>
+  <p>Copy your public shop link and paste it into WhatsApp Status. Customers can then visit your catalogue directly.</p>
+  <a id="status-shop-url" target="_blank" rel="noopener noreferrer" href="https://store.mysalesofficial.com/">Your shop link</a>
+  <div class="status-link-actions">
+   <button class="btn" type="button" id="status-copy-link">Copy link for Status</button>
+   <button class="btn btn-outline" type="button" id="status-share-link">Share shop link</button>
+  </div>
+  <p class="status-guide">For a reliably <strong>clickable</strong> link, publish a second <strong>text Status</strong> containing the URL, immediately after your product photo Status. You can also paste the link onto a photo Status using WhatsApp's text tool, but tap-through behavior may vary by app version.</p>
+ </div>
+ <p class="status-guide">Tap <strong>Share to WhatsApp Status</strong>, choose WhatsApp, then select <strong>My Status</strong>. If your device doesn't support multiple images, download them individually. Photos don't contain clickable hotspots, and WhatsApp requires you to confirm posting.</p>
+</section>
 <section class="settings-hub" aria-labelledby="settings-heading">
-  <div class="settings-intro"><span class="settings-overline">STORE MANAGEMENT</span><h2 id="settings-heading">Store settings</h2><p>Keep your shop details, customer messages and private access in one place.</p></div>
+  <div class="settings-intro"><span class="settings-overline">STORE MANAGEMENT</span><h2 id="settings-heading">Store settings</h2><p>Keep your shop details and customer messages in one place.</p></div>
 
   <details id="settings-panel" class="settings-card">
     <summary class="settings-summary">
@@ -350,7 +418,7 @@ main{max-width:870px;padding-top:19px}
       <form id="settings">
         <div class="settings-form-grid">
           <div class="settings-field"><label for="business-name">Business name</label><input id="business-name" name="name" type="text" maxlength="150" autocomplete="organization" placeholder="Your business name" required></div>
-          <div class="settings-field"><label for="business-whatsapp">WhatsApp number</label><input id="business-whatsapp" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" maxlength="16" placeholder="+234 800 000 0000" required></div>
+          <div class="settings-field"><label for="business-whatsapp">WhatsApp contact</label><div class="manager-phone-row"><select id="business-country" aria-label="WhatsApp country calling code" required></select><input id="business-whatsapp" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel-national" maxlength="24" placeholder="803 123 4567" aria-label="WhatsApp phone number" required></div><input id="business-other-country" type="tel" inputmode="tel" maxlength="5" placeholder="Other calling code e.g. +49" aria-label="Other country calling code" hidden><p class="field-hint">Choose your country code and enter the local WhatsApp number.</p></div>
         </div>
         <div class="settings-field"><label for="business-description">About your business</label><textarea id="business-description" name="description" maxlength="2000" rows="3" placeholder="Tell customers what you sell and why they should shop with you."></textarea><p class="field-hint">This description appears on your storefront Home.</p></div>
         <div class="settings-field"><label for="business-status">Store visibility</label><select id="business-status" name="status"><option value="published">Public — customers can view your store</option><option value="draft">Private — only you can manage it</option></select><p class="field-hint">Choose Private to temporarily hide the storefront from customers.</p></div>
@@ -383,13 +451,13 @@ main{max-width:870px;padding-top:19px}
   <details id="access-panel" class="settings-card">
     <summary class="settings-summary">
       
-      <span class="settings-title"><strong>Private access &amp; backup</strong><small>Secure your editing link and save a copy</small></span>
+      <span class="settings-title"><strong>Account &amp; backup</strong><small>Sign in securely and save a store backup</small></span>
       <span class="settings-action-hint" aria-hidden="true">Open</span>
     </summary>
     <div class="settings-content">
-      <div class="settings-security-note"><span aria-hidden="true">🔒</span><p><strong>Keep your management link private.</strong> Anyone who has it can edit your products and store details. Only share it with someone you trust.</p></div>
+      <div class="settings-security-note"><span aria-hidden="true">🔒</span><p><strong>Your store is secured by your signed-in mySales account.</strong> Never share your login password or Google account credentials.</p></div>
       <div class="settings-access-actions">
-        <button class="btn settings-secondary" id="copy-manager" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy private manager link</button>
+        
         <button class="btn settings-secondary" id="export" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4"/><path d="M5 17v3h14v-3"/></svg>Download store backup</button>
       </div>
     </div>
@@ -416,7 +484,7 @@ main{max-width:870px;padding-top:19px}
         <div><small>Selling unit</small><strong id="dialog-unit"></strong></div>
       </div>
       <div class="modal-description"><h3>Description</h3><p id="dialog-description"></p></div>
-      <button id="share-one-product" type="button" class="share-single-product">Share picture &amp; price with a customer</button>
+      <button id="share-one-product" type="button" class="share-single-product">Share this product on WhatsApp</button>
 
     </div>
     <form id="dialog-form" class="modal-form" hidden>
@@ -466,37 +534,9 @@ main{max-width:870px;padding-top:19px}
 </dialog>
 <div id="manager-toast" class="manager-toast" role="status" aria-live="polite"><span aria-hidden="true">✓</span> <strong id="manager-toast-message">Product added</strong></div>
 <script type="module">
-const managerTokenKey='mysales_private_management_token';
-const validManagerToken=value=>/^[A-Za-z0-9_-]{43}$/.test(value||'');
-const readManagerToken=()=>{
- const fragment=new URLSearchParams(location.hash.slice(1)).get('token')||'';
- if(validManagerToken(fragment))return fragment;
- for(const storage of [sessionStorage,localStorage]){
-  try{const candidate=storage.getItem(managerTokenKey);if(validManagerToken(candidate))return candidate;}catch{}
- }
- return '';
-};
-const rememberManagerToken=value=>{
- for(const storage of [sessionStorage,localStorage]){
-  try{storage.setItem(managerTokenKey,value);}catch{}
- }
-};
-const forgetManagerToken=()=>{
- for(const storage of [sessionStorage,localStorage]){
-  try{storage.removeItem(managerTokenKey);}catch{}
- }
-};
-const parsePrivateLink=input=>{
- const raw=String(input||'').trim();
- if(validManagerToken(raw))return raw;
- try{
-  const link=new URL(raw,location.origin);
-  if(link.origin!==location.origin)return '';
-  const value=new URLSearchParams(link.hash.slice(1)).get('token')||'';
-  return validManagerToken(value)?value:'';
- }catch{return '';}
-};
-let token=readManagerToken();
+import {accessToken,requireAccount,logout} from '/auth/client.mjs';
+import {fillCountryCodes,showOtherCountryCode,internationalWhatsApp,splitInternationalWhatsApp} from '/auth/phone.mjs';
+import {photoProxyPath,prepareStatusPictures,canShareEnquiryFiles,MAX_ENQUIRY_IMAGES} from '/shop/whatsapp-enquiry.mjs';
 const $=id=>document.getElementById(id),notice=$('notice'),list=$('products');
 let currentStore=null,products=[],isAdding=new URLSearchParams(location.search).has('welcome'),managerToastTimer=0;
 function showManagerToast(message){
@@ -517,6 +557,8 @@ function showManagerView(){
  const adding=isAdding||!hasProducts;
  $('add-section').hidden=!adding;
  $('product-section').hidden=adding;
+ $('status-section').hidden=adding;
+ $('status-open').hidden=!hasProducts;
  $('cancel-add').hidden=!hasProducts;
  $('add-more').hidden=!hasProducts;
  let alreadyShown=false;
@@ -528,8 +570,9 @@ const node=(tag,value)=>{const n=document.createElement(tag);n.textContent=Strin
 function say(message,problem=false){notice.textContent=message;notice.style.color=problem?'#af3f32':'#15803d';}
 function currency(value){return '₦'+Number(value||0).toLocaleString('en-NG');}
 async function api(path,options={}){
- if(!validManagerToken(token))throw Error('Your private access is not available in this tab.');
- const h=new Headers(options.headers||{});h.set('Authorization','Bearer '+token);
+ const userToken=await accessToken();
+ if(!userToken)throw Error('Session expired. Please sign in again.');
+ const h=new Headers(options.headers||{});h.set('Authorization','Bearer '+userToken);
  const r=await fetch('/api/merchant/'+path,{...options,headers:h,cache:'no-store'});
  const j=await r.json().catch(()=>({}));
  if(!r.ok){const error=new Error(j.error||'Could not save. Try again.');error.status=r.status;throw error;}
@@ -567,6 +610,7 @@ async function refresh(){
   list.append(empty);
  }
  for(const p of products)renderProduct(p);
+ renderStatusPicker();
 }
 function renderProduct(p){
  const unit=p.units?.[0];
@@ -581,9 +625,11 @@ function renderProduct(p){
  const content=node('div','');content.className='product-body';
  content.append(node('h3',p.name));
  const price=node('div',unit?currency(unit.price):'Contact for price');price.className='price';content.append(price);
- const stockLabel=p.track_stock?(Number(p.stock)>0?Number(p.stock)+' in stock':'Sold out'):'Availability by enquiry';
- const status=node('p',(p.published?'Visible':'Hidden')+' · '+stockLabel+(p.image_path?'':' · No photo'));
- status.className='meta';content.append(status);
+ const stockLabel=p.track_stock?(Number(p.stock)>0?Number(p.stock)+' in stock':'Sold out'):'Ask for availability';
+ const badges=node('div','');badges.className='product-badges';
+ const visibility=node('span',p.published?'Visible':'Hidden');visibility.className='product-badge '+(p.published?'badge-live':'badge-muted');
+ const available=node('span',stockLabel);available.className='product-badge '+(p.track_stock&&Number(p.stock)===0?'badge-out':'badge-stock');
+ badges.append(visibility,available);content.append(badges);
  open.append(content);
  const view=node('span','View');view.className='product-view';view.setAttribute('aria-hidden','true');open.append(view);
  open.onclick=()=>openProductDialog(p.id);
@@ -591,14 +637,149 @@ function renderProduct(p){
  if(p.units?.[0]&&currentStore?.status==='published'){
   const link=document.createElement('a');link.className='quick-share';link.target='_blank';link.rel='noopener noreferrer';
   link.textContent='↗ Share on WhatsApp';link.setAttribute('aria-label','Share '+p.name+' on WhatsApp');
-  const u=p.units[0],priceText=currency(u.price)+(u.name&&u.name!=='piece'?' / '+u.name:'');
-  const photo=safeProductImage(p),message=p.name+' — '+priceText+(photo?'\nPhoto: '+photo:'')+'\nSee more: '+publicUrl();
+  const message=singleProductWhatsappText(p);
   link.href='https://wa.me/?text='+encodeURIComponent(message);
   link.addEventListener('click',()=>{reportMerchantActivity('product_share');dismissRetainTip();});
   card.append(link);
  }
  list.append(card);
 }
+
+
+/* Private merchant Status composer. Quantities remain in customer enquiries,
+   but these public promotional assets show each item's listed unit price only. */
+const statusChosen=new Set();
+let statusFiles=[],statusPreviewUrls=[],statusBusy=false;
+const availableStatusProducts=()=>products.filter(p=>
+ p.published===true&&p.units?.[0]&&photoProxyPath(p.image_path)
+ &&(!p.track_stock||Number(p.stock)>0)
+);
+const pickedStatusProducts=()=>availableStatusProducts().filter(p=>statusChosen.has(p.id));
+function statusShopUrl(){
+ const handle=String(currentStore?.public_handle||currentStore?.slug||'').trim();
+ return handle?'https://store.mysalesofficial.com/'+encodeURIComponent(handle):'';
+}
+function statusLinkMessage(){
+ return 'See everything '+currentStore.name+' has available. Browse products and prices: '+statusShopUrl();
+}
+function refreshStatusShopLink(){
+ const url=statusShopUrl();
+ const link=$('status-shop-url');link.textContent=url||'Shop link unavailable';
+ if(url){link.href=url;link.removeAttribute('aria-disabled');}
+ else{link.removeAttribute('href');link.setAttribute('aria-disabled','true');}
+ $('status-copy-link').disabled=!url;
+ $('status-share-link').disabled=!url;
+}
+$('status-copy-link').onclick=async()=>{
+ const url=statusShopUrl();if(!url)return;
+ try{
+  await navigator.clipboard.writeText(statusLinkMessage());
+  setStatusFeedback('Shop link copied. Open WhatsApp → Updates → text Status and paste it for a tappable link.');
+ }catch{window.prompt('Copy this shop link for your WhatsApp Status:',statusLinkMessage());}
+};
+$('status-share-link').onclick=()=>{
+ const url=statusShopUrl();if(!url)return;
+ if(typeof navigator.share==='function'){
+  try{void navigator.share({title:currentStore.name+' online shop',text:statusLinkMessage(),url})
+   .catch(error=>{if(error?.name!=='AbortError')window.prompt('Copy the shop link into a WhatsApp text Status:',url);});}
+  catch{window.prompt('Copy the shop link into a WhatsApp text Status:',url);}
+ }else window.prompt('Copy the shop link into a WhatsApp text Status:',url);
+};
+function setStatusFeedback(message,error=false){
+ $('status-feedback').textContent=message;
+ $('status-feedback').style.color=error?'#A13E35':'#52765D';
+}
+function discardStatusFiles(){
+ for(const url of statusPreviewUrls)URL.revokeObjectURL(url);
+ statusPreviewUrls=[];statusFiles=[];
+ $('status-previews').replaceChildren();
+ $('status-share').disabled=true;
+}
+function refreshStatusButtons(){
+ $('status-selection-count').textContent=pickedStatusProducts().length+' of '+MAX_ENQUIRY_IMAGES+' selected';
+ $('status-prepare').disabled=!pickedStatusProducts().length||statusBusy;
+ $('status-select-all').disabled=statusBusy;
+ $('status-clear').disabled=statusBusy;
+ for(const input of $('status-products').querySelectorAll('input[type="checkbox"]'))input.disabled=statusBusy;
+}
+function renderStatusPicker(){
+ const eligible=availableStatusProducts();
+ const allowed=new Set(eligible.map(p=>p.id));
+ for(const id of statusChosen)if(!allowed.has(id))statusChosen.delete(id);
+ discardStatusFiles();
+ const host=$('status-products');host.replaceChildren();
+ if(!eligible.length){
+  const empty=node('p','No public products with mySales-hosted photos are ready for Status. Publish an available product with a photo to continue.');
+  empty.className='hint';host.append(empty);
+ }else for(const p of eligible){
+  const item=node('label','');item.className='status-choice';
+  const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=statusChosen.has(p.id);
+  checkbox.setAttribute('aria-label','Post '+p.name+' to WhatsApp Status');
+  checkbox.onchange=()=>{
+   if(statusBusy){checkbox.checked=statusChosen.has(p.id);return;}
+   if(checkbox.checked&&statusChosen.size>=MAX_ENQUIRY_IMAGES){
+    checkbox.checked=false;setStatusFeedback('Choose up to '+MAX_ENQUIRY_IMAGES+' Status pictures per batch.',true);return;
+   }
+   if(checkbox.checked)statusChosen.add(p.id);else statusChosen.delete(p.id);
+   discardStatusFiles();refreshStatusButtons();
+   setStatusFeedback('Ready to prepare '+pickedStatusProducts().length+' product Status pictures.');
+  };
+  const picture=document.createElement('img');picture.src=p.image_path;picture.alt='';
+  const meta=node('span','');meta.append(node('strong',p.name),node('small',currency(p.units[0].price)));
+  item.append(checkbox,picture,meta);host.append(item);
+ }
+ refreshStatusButtons();
+ if(eligible.length)setStatusFeedback('Choose products, then prepare your Status pictures.');
+}
+$('status-open').onclick=()=>{
+ isAdding=false;showManagerView();
+ $('status-section').scrollIntoView({behavior:'smooth',block:'start'});
+};
+$('status-select-all').onclick=()=>{
+ for(const p of availableStatusProducts()){
+  if(statusChosen.size>=MAX_ENQUIRY_IMAGES)break;
+  statusChosen.add(p.id);
+ }
+ renderStatusPicker();setStatusFeedback('Products selected. Prepare your Status pictures.');
+};
+$('status-clear').onclick=()=>{statusChosen.clear();renderStatusPicker();};
+$('status-prepare').onclick=async()=>{
+ if(statusBusy)return;
+ const picked=pickedStatusProducts().slice(0,MAX_ENQUIRY_IMAGES);
+ if(!picked.length){setStatusFeedback('Select a product first.',true);return;}
+ discardStatusFiles();statusBusy=true;refreshStatusButtons();
+ setStatusFeedback('Preparing '+picked.length+' portrait Status picture'+(picked.length===1?'':'s')+'…');
+ try{
+  const files=await prepareStatusPictures(currentStore.name,picked,statusShopUrl());
+  statusFiles=files;
+  for(const [index,file] of files.entries()){
+   const url=URL.createObjectURL(file);statusPreviewUrls.push(url);
+   const figure=node('figure','');figure.className='status-preview';
+   const image=document.createElement('img');image.src=url;image.alt='Status picture '+(index+1);image.loading='lazy';
+   const caption=node('figcaption',file.name.replace(/^mysales-status-\d+-/,'').replace(/\.jpg$/,'').replace(/-/g,' '));
+   const download=node('a','Download picture');download.href=url;download.download=file.name;
+   figure.append(image,caption,download);$('status-previews').append(figure);
+  }
+  $('status-share').disabled=!files.length;
+  setStatusFeedback(files.length
+   ? files.length+' separate Status picture'+(files.length===1?'':'s')+' ready. Tap Share, choose WhatsApp, then My Status.'
+   :'Could not load a product photo. Try again or upload a new photo to your store.',!files.length);
+ }catch(error){setStatusFeedback('Could not prepare Status pictures: '+error.message,true);}
+ finally{statusBusy=false;refreshStatusButtons();}
+};
+$('status-share').onclick=()=>{
+ if(!statusFiles.length)return;
+ // Invoke native file share during the click. WhatsApp chooses the destination.
+ if(!canShareEnquiryFiles(statusFiles)){
+  setStatusFeedback('Your phone cannot share these pictures together. Download each picture above, then post them from WhatsApp → Updates → My Status.',true);
+  return;
+ }
+ try{
+  void navigator.share({files:statusFiles,title:currentStore.name+' products for Status'})
+   .then(()=>{reportMerchantActivity('product_share');setStatusFeedback('Images shared to the chosen app. Finish posting in WhatsApp Status.');})
+   .catch(error=>{if(error?.name!=='AbortError')setStatusFeedback('Sharing could not start. Download the pictures above and post through WhatsApp Status.',true);});
+ }catch{setStatusFeedback('This browser cannot share photos. Download and post them in WhatsApp Status.',true);}
+};
 
 /* Quick vendor catalogue: one actual image containing selected photos and prices.
    This is a private manager feature; no product or management data is sent to another service. */
@@ -627,12 +808,21 @@ const imageForCatalogue=p=>{
  }catch{}
  return original;
 };
+function singleProductWhatsappText(p){
+ const unit=p.units?.[0];
+ const price=unit?currency(unit.price)+(unit.name&&unit.name!=='piece'?' / '+unit.name:''):'Ask for price';
+ const details=String(p.description||'').trim().slice(0,600);
+ const photo=safeProductImage(p);
+ return [p.name,details,'Price: '+price,photo?'Photo: '+photo:'',currentStore?.status==='published'?'See more: '+publicUrl():''].filter(Boolean).join('\n');
+}
 function shareProductText(){
  const picked=selectedShareProducts();
  if(!picked.length)return '';
  const lines=['Hello! Here are the products you requested from '+currentStore.name+':',''];
  picked.forEach((p,i)=>{
   lines.push((i+1)+'. '+p.name+' — '+currency(p.units[0].price)+(p.units[0].name&&p.units[0].name!=='piece'?' / '+p.units[0].name:''));
+  const details=String(p.description||'').trim().slice(0,350);
+  if(details)lines.push(details);
   const photo=safeProductImage(p);
   if(photo)lines.push('Photo: '+photo);
   lines.push('');
@@ -704,9 +894,8 @@ function openShareProducts(preselectId=null){
 $('share-products').onclick=()=>openShareProducts();
 $('share-one-product').onclick=()=>{
  if(!dialogProduct)return;
- const id=dialogProduct.id;
- productDialog.close();
- openShareProducts(id);
+ reportMerchantActivity('product_share');
+ window.open('https://wa.me/?text='+encodeURIComponent(singleProductWhatsappText(dialogProduct)),'_blank','noopener,noreferrer');
 };
 $('share-search').oninput=renderSharePicker;
 $('share-select-all').onclick=()=>{
@@ -724,7 +913,7 @@ async function loadShareImage(p){
  try{
   // Product photos arrive through the authenticated same-origin proxy.
   const result=await fetch('/api/merchant/share-image?productId='+encodeURIComponent(p.id),{
-   headers:{Authorization:'Bearer '+token},cache:'no-store'
+   headers:{Authorization:'Bearer '+await accessToken()},cache:'no-store'
   });
   if(!result.ok)throw Error('Product picture could not load');
   const blob=await result.blob();
@@ -1118,16 +1307,29 @@ $('add').onsubmit=async e=>{
 $('add-more').onclick=()=>{isAdding=true;showManagerView();$('add-section').scrollIntoView({behavior:'smooth'});$('product-name').focus({preventScroll:true});};
 $('cancel-add').onclick=()=>{isAdding=false;showManagerView();$('product-section').scrollIntoView({behavior:'smooth'});};
 const settingsForm=$('settings'),whatsappForm=$('whatsapp-form');
+fillCountryCodes($('business-country'));
+$('business-country').addEventListener('change',()=>{
+ showOtherCountryCode($('business-country'),$('business-other-country'));
+ updateBusinessSave();
+});
+showOtherCountryCode($('business-country'),$('business-other-country'));
 const businessFields=['name','whatsapp','description','status'];
 let businessBaseline=null,whatsappBaseline=null;
 function businessValues(){
  const data=Object.fromEntries(new FormData(settingsForm));
+ try{
+  data.whatsapp=internationalWhatsApp($('business-whatsapp').value,$('business-country').value,$('business-other-country').value);
+  $('business-whatsapp').setCustomValidity('');
+ }catch{
+  data.whatsapp='';
+  $('business-whatsapp').setCustomValidity('Enter a valid phone number with country code.');
+ }
  return Object.fromEntries(businessFields.map(key=>[key,String(data[key]??'')]));
 }
 function updateBusinessSave(){
  const values=businessValues();
  const modified=businessBaseline!==null&&businessFields.some(key=>values[key]!==businessBaseline[key]);
- $('business-save').disabled=!modified||!settingsForm.checkValidity();
+ $('business-save').disabled=!modified||!values.whatsapp||!settingsForm.checkValidity();
  $('business-feedback').textContent=modified?'Unsaved changes':'No changes yet';
  $('business-feedback').style.color=modified?'#16763D':'#829183';
 }
@@ -1197,72 +1399,38 @@ $('share').onclick=()=>{
    .catch(err=>{if(err?.name!=='AbortError')copy(url);});
  }else{copy(url);reportMerchantActivity('shop_share');dismissRetainTip();}
 };
-$('copy-manager').onclick=()=>copy(location.origin+'/manage/claim#token='+encodeURIComponent(token));
+
 $('export').onclick=async()=>{const b=$('export');b.disabled=true;try{const data=await api('export');const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='mysales-store-backup.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);say('Backup downloaded.');}catch(err){say(err.message,true);}finally{b.disabled=false;}};
-$('exit').onclick=()=>{
- forgetManagerToken();
- history.replaceState(null,'',location.pathname);
- location.replace('/manage/');
-};
-function showAccessRecovery(message,{retry=false}={}){
- $('app').hidden=true;$('exit').hidden=true;
- $('access-recovery').hidden=false;
- $('recovery-message').textContent=message;
- $('retry-access').hidden=!retry;
- notice.textContent='';
-}
+$('exit').onclick=()=>logout();
 async function openManager(){
- if(!validManagerToken(token)){
-  showAccessRecovery('Your private access is not available in this browser tab. Paste your saved private management link to reopen your store. Your products have not been removed.');
-  return;
- }
  notice.textContent='Opening your store…';
  try{
+  await requireAccount();
   const identity=await api('me');
   currentStore=identity.store;
-  rememberManagerToken(token);
-  if(location.hash)history.replaceState(null,'',location.pathname+location.search);
   const form=$('settings');
   form.elements.namedItem('name').value=currentStore.name;
   form.elements.namedItem('description').value=currentStore.description||'';
-  form.elements.namedItem('whatsapp').value=currentStore.whatsapp;
+  const phone=splitInternationalWhatsApp(currentStore.whatsapp);
+  $('business-country').value=phone.selected;
+  $('business-whatsapp').value=phone.local;
+  $('business-other-country').value=phone.other;
+  showOtherCountryCode($('business-country'),$('business-other-country'));
   form.elements.namedItem('status').value=currentStore.status;
   $('whatsapp-template').value=currentStore.whatsapp_template||defaultWhatsApp;
   businessBaseline=businessValues();whatsappBaseline=$('whatsapp-template').value;
-  updateBusinessSave();updateWhatsAppSave();
-  updateHero();
-  $('access-recovery').hidden=true;$('app').hidden=false;$('exit').hidden=false;
-  say(new URLSearchParams(location.search).has('welcome')?'Welcome! Add your first product to launch your store.':'Your private store manager is ready.');
-  try{await refresh();reportMerchantActivity('dashboard_open');}catch(error){say('Your store is open, but products could not load. Refresh to try again: '+error.message,true);}
+  refreshStatusShopLink();
+  updateBusinessSave();updateWhatsAppSave();updateHero();
+  $('app').hidden=false;$('exit').hidden=false;
+  say(new URLSearchParams(location.search).has('welcome')
+   ?'Welcome! Add your first product to launch your store.':'Manage your store or open your Live Store.');
+  try{await refresh();reportMerchantActivity('dashboard_open');}
+  catch(error){say('Your store is open, but products could not load. '+error.message,true);}
  }catch(error){
-  if(error.status===401||error.status===403){
-   forgetManagerToken();token='';
-   showAccessRecovery('This private link is invalid or no longer active. If you have another saved management link, paste it below.');
-  }else{
-   showAccessRecovery('We could not connect to your store right now. Your access is still saved; please retry. '+error.message,{retry:true});
-  }
+  if(error.status===401)location.replace('/login/');
+  else if(error.status===404)location.replace('/create/');
+  else say('Could not load your store. '+error.message,true);
  }
 }
-$('retry-access').onclick=()=>openManager();
-$('recover-form').onsubmit=async event=>{
- event.preventDefault();
- const candidate=parsePrivateLink($('recover-link').value);
- if(!candidate){
-  $('recovery-message').textContent='That does not look like a valid mySales private link. Paste the complete link you saved when creating the store.';
-  return;
- }
- const button=$('recover-button');button.disabled=true;button.textContent='Verifying access…';
- try{
-  // Check the capability before persisting it on this device.
-  const result=await fetch('/api/merchant/me',{headers:{Authorization:'Bearer '+candidate},cache:'no-store'});
-  if(!result.ok)throw Error(result.status===401||result.status===403?'This private link is not active. Check that you copied the complete link.':'The store could not be reached. Please try again.');
-  token=candidate;rememberManagerToken(token);
-  $('recover-link').value='';
-  history.replaceState(null,'',location.pathname+location.search);
-  await openManager();
- }catch(error){
-  $('recovery-message').textContent=error.message;
- }finally{button.disabled=false;button.textContent='Open my store →';}
-};
 openManager();
 </script></body></html>

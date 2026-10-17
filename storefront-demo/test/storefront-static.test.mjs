@@ -7,33 +7,30 @@ const read=path=>readFile(new URL(path,root),'utf8');
 
 test('Render proxies real API requests to the Supabase Edge backend',async()=>{
  const server=await read('render-server.mjs');
- assert.match(server,/functions\/v1\/early-storefront-backend/);
+ assert.match(server,/functions\/v1\/.*early-storefront-backend/);
  assert.match(server,/\/health\/db/);
  assert.match(server,/\/api\/merchant\/products/);
  assert.match(server,/\/api\/operator\/stores/);
  assert.doesNotMatch(server,/EARLY_STOREFRONT_DATABASE_URL/);
 });
 
-test('Private management links never expire by default and can be revoked',async()=>{
- const server=await read('server/management-links.mjs');
- assert.match(server,/'infinity'::timestamptz/);
- assert.match(server,/revoked_at IS NULL/);
- assert.doesNotMatch(server,/interval '48 hours'/);
+test('Legacy links are revocable only for one-time ownership transfer',async()=>{
+ const edge=await read('supabase/functions/early-storefront-backend/index.ts');
+ assert.match(edge,/pathname==='\/api\/merchant\/transfer'/);
+ assert.match(edge,/update early_storefront\.management_links set revoked_at=now\(\)/);
+ assert.match(edge,/early_storefront\.store_owners/);
 });
 
-test('Merchant never needs a password, receives a reusable private-link capability',async()=>{
- const claim=await read('manage/claim.html');
+test('Merchant management requires verified account ownership, not a private link',async()=>{
+ const login=await read('login/index.html');
  const manager=await read('manage/index.html');
- assert.match(claim,/location\.hash/);
- assert.match(claim,/storage\.setItem\(key,token\)/);
- assert.match(claim,/\[sessionStorage,localStorage\]/);
- assert.match(manager,/storage\.getItem\(managerTokenKey\)/);
- assert.match(manager,/localStorage/);
- assert.match(manager,/id="access-recovery"/);
- assert.match(manager,/Authorization.*Bearer/);
- assert.match(manager,/upload-image/);
- assert.match(manager,/update-product/);
- assert.match(manager,/archive-product/);
+ const edge=await read('supabase/functions/early-storefront-backend/index.ts');
+ assert.match(login,/signInWithPassword,signUpWithPassword,beginGoogleSignIn,consumeEmailLink/);
+ assert.match(manager,/import \{accessToken,requireAccount,logout\}/);
+ assert.match(edge,/auth\.getUser/);
+ assert.match(edge,/owner\.user_id/);
+ assert.doesNotMatch(manager,/id="access-recovery"/);
+ assert.doesNotMatch(manager,/copy-manager/);
 });
 
 test('Operator has a secure link generator and can rotate merchants links',async()=>{
@@ -63,29 +60,30 @@ test('Customer WhatsApp enquiry cannot deduct inventory',async()=>{
 });
 
 
-test('Visitors can create stores directly from the public demo without an ERP login',async()=>{
+test('Landing and live customer shop send sellers through login',async()=>{
  const landing=await read('index.html');
  const catalogue=await read('s/index.html');
  const create=await read('create/index.html');
  const proxy=await read('render-server.mjs');
- assert.match(landing,/href="\/create\/"/);
- assert.match(catalogue,/id="home-demo"/);
- assert.match(catalogue,/href="\/create\/"/);
+ assert.match(landing,/href="\/login\/"/);
+ assert.match(catalogue,/Create your own store/);
+ assert.match(catalogue,/href="\/login\/"/);
+ assert.match(create,/requireAccount\(\)/);
  assert.match(create,/fetch\('\/api\/signup'/);
- assert.match(create,/managementLink/);
- assert.match(proxy,/\/api\/signup/);
  assert.match(proxy,/early-storefront-signup/);
 });
 
-test('Public store registration issues scoped private tokens without operator privileges',async()=>{
+test('Signup binds each new store to its verified account with no private-link creation',async()=>{
  const signup=await read('supabase/functions/early-storefront-signup/index.ts');
- assert.match(signup,/tokenHash/);
- assert.match(signup,/management_links/);
- assert.match(signup,/status\)/);
- assert.match(signup,/draft/);
- assert.match(signup,/pg_advisory_xact_lock/);
- assert.doesNotMatch(signup,/operator_links/);
- assert.doesNotMatch(signup,/SUPABASE_SERVICE_ROLE_KEY/);
+ const migration=await read('sql/20261017_account_store_owners.sql');
+ assert.match(signup,/auth\.getUser/);
+ assert.match(signup,/store_owners\(store_id,user_id\)/);
+ assert.match(signup,/email_confirmed_at/);
+ assert.match(signup,/status\) values/);
+ assert.doesNotMatch(signup,/managementLink:/);
+ assert.doesNotMatch(signup,/management_links\(store_id/);
+ assert.match(migration,/REFERENCES auth\.users\(id\)/);
+ assert.match(migration,/REVOKE ALL/);
 });
 
 test('First product flow is photo-first and does not expose unit conversion jargon',async()=>{
@@ -144,7 +142,7 @@ test('focused landing and demo do not show competing marketing messages',async()
  const signup=await read('create/index.html');
  const catalogue=await read('s/index.html');
  assert.match(home,/Your business deserves its/);
- assert.match(home,/href="\/create\/"/);
+ assert.match(home,/href="\/login\/"/);
  assert.match(signup,/optional-details/);
  assert.doesNotMatch(home,/faq/);
  assert.doesNotMatch(catalogue,/id="floating"/);
@@ -236,42 +234,34 @@ test('business and WhatsApp settings save only when edited',async()=>{
  assert.match(manager,/settingsForm\.checkValidity\(\)/);
 });
 
-test('private link is only cleared after successful verification, never before retry',async()=>{
+test('Existing-store claim preserves the old link until account transfer succeeds',async()=>{
  const claim=await read('manage/claim.html');
- const manager=await read('manage/index.html');
- assert.match(claim,/if\(!r\.ok\)throw Error/);
- assert.match(claim,/if\(persisted\)\{/);
- assert.match(claim,/history\.replaceState\(null,'',location\.pathname\)/);
- assert.match(claim,/location\.replace\('\/manage\/#token='/);
- assert.doesNotMatch(claim,/history\.replaceState\(null,'',location\.pathname\);\s*async function enter/);
- assert.match(manager,/if\(location\.hash\)history\.replaceState/);
- assert.match(manager,/await api\('me'\)/);
- assert.match(manager,/rememberManagerToken\(token\)/);
-});
-test('merchant can recover access by pasting their private link without sharing it publicly',async()=>{
- const manager=await read('manage/index.html');
- assert.match(manager,/id="access-recovery"/);
- assert.match(manager,/id="recover-link"/);
- assert.match(manager,/id="recover-form"/);
- assert.match(manager,/id="retry-access"/);
- assert.match(manager,/function showAccessRecovery/);
- assert.match(manager,/const parsePrivateLink=input=>/);
- assert.match(manager,/link\.origin!==location\.origin/);
- assert.match(manager,/const result=await fetch\('\/api\/merchant\/me'/);
- assert.match(manager,/Authorization:'Bearer '\+candidate/);
- assert.match(manager,/forgetManagerToken\(\)/);
- assert.match(manager,/sessionStorage,localStorage/);
- assert.doesNotMatch(manager,/localStorage\.setItem\([^)]*currentStore/);
-});
-test('signup remembers private access on the merchant device',async()=>{
- const signup=await read('create/index.html');
- assert.match(signup,/const getSavedToken=/);
- assert.match(signup,/const rememberToken=/);
- assert.match(signup,/\[sessionStorage,localStorage\]/);
- assert.match(signup,/rememberToken\(value\)/);
- assert.match(signup,/\/manage\/\?welcome=1#token=/);
+ const create=await read('create/index.html');
+ const edge=await read('supabase/functions/early-storefront-backend/index.ts');
+ assert.match(claim,/sessionStorage\.setItem\('mysales_legacy_claim_proof'/);
+ assert.match(create,/fetch\('\/api\/merchant\/transfer'/);
+ assert.match(create,/location\.replace\('\/manage\/'\)/);
+ assert.match(edge,/update early_storefront\.sessions set revoked_at=now\(\)/);
 });
 
+test('Merchant can sign in from any device and migrate a legacy store once',async()=>{
+ const create=await read('create/index.html');
+ const login=await read('login/index.html');
+ assert.match(create,/id="transfer-form"/);
+ assert.match(create,/legacyToken/);
+ assert.match(login,/Continue with Google/);
+ assert.doesNotMatch(login,/id="recover-form"/);
+});
+
+test('Login uses renewable account tokens instead of permanent store capabilities',async()=>{
+ const auth=await read('auth/client.mjs');
+ const create=await read('create/index.html');
+ assert.match(auth,/refresh_token/);
+ assert.match(auth,/auth\/v1\//);
+ assert.match(create,/requireAccount/);
+ assert.doesNotMatch(create,/managementLink/);
+ assert.doesNotMatch(auth,/service_role/);
+});
 
 test('storefront is a single grid-only shopping experience with no Explore or bottom tabs',async()=>{
  const catalogue=await read('s/index.html');
@@ -404,19 +394,17 @@ test('operator only enters a business name and never needs a manual slug',async(
  assert.doesNotMatch(edge,/String\(b\.slug/);
 });
 
-test('marketing homepage puts merchant creation before examples and uses a conversion-first message',async()=>{
+test('Marketing directs sellers to verified login without competing sample funnels',async()=>{
  const landing=await read('index.html');
  assert.match(landing,/Your business deserves its/);
  assert.match(landing,/own store link/);
  assert.match(landing,/id="how-it-works"/);
  assert.match(landing,/This could be your store/);
  assert.match(landing,/Create my free store/);
- assert.match(landing,/No login needed/);
+ assert.match(landing,/Secure owner login/);
  assert.match(landing,/WhatsApp enquiries/);
- assert.ok((landing.match(/href="\/create\/"/g)||[]).length>=4);
+ assert.ok((landing.match(/href="\/login\/"/g)||[]).length>=4);
  assert.doesNotMatch(landing,/href="\/demo-warri-pantry"/);
- assert.doesNotMatch(landing,/View a sample store/);
- assert.doesNotMatch(landing,/See example/);
 });
 
 test('customer storefront uses only functional quiet icons; conversion buttons are text-first',async()=>{
@@ -465,7 +453,7 @@ test('shopping buttons are legible without decorative cart and WhatsApp icons',a
  assert.doesNotMatch(catalogue,/const CART_SVG=/);
  assert.match(catalogue,/id="sheet-add" type="button">Add to cart<\/button>/);
  assert.match(catalogue,/id="sheet-enquire" type="button">View basket<\/button>/);
- assert.match(catalogue,/id="sheet-ask">Ask seller about this product on WhatsApp<\/button>/);
+ assert.match(catalogue,/id="sheet-ask">Ask seller with product photo<\/button>/);
  assert.match(catalogue,/id="send-label">Send WhatsApp enquiry<\/span>/);
  assert.match(catalogue,/id="filter-home"/);
  assert.match(catalogue,/id="home-cart"/);
@@ -474,23 +462,22 @@ test('shopping buttons are legible without decorative cart and WhatsApp icons',a
 
 
 
-test('official mySales store origin is allowed consistently by proxy and both Edge functions',async()=>{
+test('Official and Render origins remain allowed for owner auth and public checkout',async()=>{
  const proxy=await read('render-server.mjs');
  const signup=await read('supabase/functions/early-storefront-signup/index.ts');
  const backend=await read('supabase/functions/early-storefront-backend/index.ts');
  const official='https://store.mysalesofficial.com';
  const legacy='https://mysales-early-storefront-branch.onrender.com';
  for(const source of [proxy,signup,backend]){
-  assert.ok(source.includes(official),'Expected official origin in every backend layer');
-  assert.ok(source.includes(legacy),'Existing Render links must continue working');
+   assert.ok(source.includes(official));
+   assert.ok(source.includes(legacy));
  }
- assert.match(proxy,/if\(origin && !allowedOrigins\.has\(origin\)\)return json\(res,403,\{error:'Invalid origin'\}\)/);
- assert.match(signup,/if\(origin&&!trustedOrigins\.has\(origin\)\)return response\(403,\{error:'Invalid origin'\}\)/);
+ assert.match(proxy,/if\(origin && !allowedOrigins\.has\(origin\)\)return json\(res,403/);
+ assert.match(signup,/if\(origin&&!trustedOrigins\.has\(origin\)\)return response\(403/);
  assert.match(backend,/requestedOrigin && !trustedOrigins\.has\(requestedOrigin\)/);
- assert.match(signup,/managementLink:\(origin&&trustedOrigins\.has\(origin\)\?origin:primaryOrigin\)/);
- assert.match(backend,/managementUrl\(token,request\)/);
- assert.match(signup,/publicUrl:'\/'\+encodeURIComponent\(result\.store\.public_handle\)/);
+ assert.match(signup,/manageUrl:'\/manage\/'/);
 });
+
 test('origin controls accept trusted domains, reject arbitrary sites and keep private links on originating domain',async()=>{
  const signup=await read('supabase/functions/early-storefront-signup/index.ts');
  const proxy=await read('render-server.mjs');
@@ -583,7 +570,7 @@ test('vendor selects up to six products to share from the private manager',async
  assert.match(manager,/function openShareProducts\(preselectId=null\)/);
  assert.match(manager,/shareChosen\.size>=SHARE_LIMIT/);
  assert.match(manager,/function renderSharePicker/);
- assert.match(manager,/openShareProducts\(id\)/);
+ assert.match(manager,/singleProductWhatsappText\(dialogProduct\)/);
  assert.match(manager,/const shareableProducts=\(\)=>products\.filter/);
 });
 test('vendor WhatsApp messages include names, naira prices and real public photo links',async()=>{

@@ -2,7 +2,7 @@ import postgres from 'npm:postgres@3.4.5';
 import {createClient} from 'npm:@supabase/supabase-js@2';
 
 const origin = 'https://store.mysalesofficial.com';
-const trustedOrigins = new Set([origin,'https://mysales-early-storefront-branch.onrender.com']);
+const trustedOrigins = new Set([origin,'https://mysales-early-storefront-branch.onrender.com','https://mysales-v5-email-staging.onrender.com']);
 const originFor = (request:Request) => {
  const requested = request.headers.get('origin');
  return requested && trustedOrigins.has(requested) ? requested : origin;
@@ -48,16 +48,20 @@ const bodyJson = async (req: Request): Promise<Record<string,unknown>> => {
   if(!obj || typeof obj !== 'object' || Array.isArray(obj))throw new Error('Invalid JSON');
   return obj as Record<string,unknown>;
 };
-async function merchant(request: Request) {
-  const match = /^Bearer ([A-Za-z0-9_-]{43})$/.exec(request.headers.get('authorization')||'');
-  if (!match) return null;
-  const tokenHash = await hash(match[1]);
-  const found = await sql!`select s.id as store_id,s.slug,s.public_handle,s.name,s.description,s.whatsapp,s.status,s.whatsapp_template
-    from early_storefront.management_links l
-    join early_storefront.stores s on s.id=l.store_id
-    where l.token_hash=${tokenHash} and l.revoked_at is null and l.expires_at>now()
-    and s.status<>'suspended' limit 1`;
-  return found[0] || null;
+const accountAuth = createClient(Deno.env.get('SUPABASE_URL')||'',Deno.env.get('SUPABASE_ANON_KEY')||'',{
+ auth:{autoRefreshToken:false,persistSession:false}
+});
+async function accountUser(request:Request) {
+ const match=/^Bearer ([A-Za-z0-9._-]{40,4096})$/.exec(request.headers.get('authorization')||'');
+ if(!match)return null;
+ const result=await accountAuth.auth.getUser(match[1]);
+ return result.error||!result.data.user?.email_confirmed_at?null:result.data.user;
+}
+async function merchant(user:{id:string}) {
+ const found=await sql!`select s.id as store_id,s.slug,s.public_handle,s.name,s.description,s.whatsapp,s.status,s.whatsapp_template
+   from early_storefront.store_owners owner join early_storefront.stores s on s.id=owner.store_id
+   where owner.user_id=${user.id} and s.status<>'suspended' limit 1`;
+ return found[0]||null;
 }
 const productQuery = (storeId: string, publishedOnly: boolean) =>
   sql!`select p.id,p.name,p.description,p.category,p.image_path,p.base_unit,p.published,p.track_stock,
@@ -85,7 +89,7 @@ const issuePrivateToken=()=>{
  return btoa(String.fromCharCode(...bytes)).split('+').join('-').split('/').join('_').replaceAll('=','');
 };
 Deno.serve(async (request: Request) => {
-  const pathname = new URL(request.url).pathname.replace(/^\/early-storefront-backend/,'');
+  const pathname = new URL(request.url).pathname.replace(/^\/early-storefront-backend(?:-v5-test)?/,'');
   const query = new URL(request.url).searchParams;
   if (request.method === 'OPTIONS') return out(405,{ error:'Method not allowed' });
   if (!sql) return out(503,{ok:false,error:'Supabase internal database URL unavailable'});
@@ -307,10 +311,45 @@ Deno.serve(async (request: Request) => {
       const requestedOrigin = request.headers.get('origin');
       if (requestedOrigin && !trustedOrigins.has(requestedOrigin)) return out(403,{error:'Invalid origin'});
     }
-    // Every merchant action, including read-only exports, requires the high-entropy
-    // revocable bearer URL token. Do not accept credentials from query strings.
-    const actor = await merchant(request);
-    if (!actor) return out(401,{error:'Private management link invalid or revoked'});
+    // One-time migration for existing merchants. This is NOT used for routine
+    // store management. A verified account can claim one unowned legacy store.
+    if(pathname==='/api/merchant/transfer'&&request.method==='POST'){
+      const user=await accountUser(request);
+      if(!user)return out(401,{error:'Sign in first'});
+      const data=await bodyJson(request);
+      const legacyToken=String(data.legacyToken||'');
+      if(!link.test(legacyToken))return out(400,{error:'Invalid old management link'});
+      const digest=await hash(legacyToken);
+      const result=await sql!.begin(async tx=>{
+        const valid=await tx`select s.id from early_storefront.management_links l
+          join early_storefront.stores s on s.id=l.store_id
+          where l.token_hash=${digest} and l.revoked_at is null and l.expires_at>now()
+          and s.status<>'suspended' for update of s`;
+        if(!valid.length)return {status:404,error:'Old management link is invalid or already used'};
+        const storeId=valid[0].id;
+        const existing=await tx`select store_id from early_storefront.store_owners
+          where store_id=${storeId} or user_id=${user.id} for update`;
+        if(existing.length)return {status:409,error:'Store or account already has an owner'};
+        await tx`insert into early_storefront.store_owners(store_id,user_id) values(${storeId},${user.id})`;
+        await tx`update early_storefront.management_links set revoked_at=now()
+          where store_id=${storeId} and revoked_at is null`;
+        await tx`update early_storefront.sessions set revoked_at=now()
+          where store_id=${storeId} and revoked_at is null`;
+        return {status:200,storeId};
+      });
+      return result.error?out(result.status,{error:result.error}):out(200,{ok:true,storeId:result.storeId});
+    }
+    // Every merchant action requires a valid signed-in account and store ownership.
+    const verified=await accountUser(request);
+    if(!verified)return out(401,{error:'Please verify your email and sign in again'});
+    const actor=await merchant(verified);
+    if(!actor){
+      const isOwner=await sql!`select store_id from early_storefront.store_owners where user_id=${verified.id} limit 1`;
+      if(isOwner.length)return out(403,{error:'Your store is not available. Contact mySales support.'});
+      if(pathname==='/api/merchant/me'&&request.method==='GET')
+        return out(404,{authenticated:true,hasStore:false});
+      return out(403,{error:'Create a store before using this feature'});
+    }
     const id=actor.store_id as string;
     if (pathname === '/api/merchant/me' && request.method==='GET')
       return out(200,{authenticated:true,storeId:id,store:{slug:actor.slug,public_handle:actor.public_handle,name:actor.name,description:actor.description,whatsapp:actor.whatsapp,status:actor.status,whatsapp_template:actor.whatsapp_template}});

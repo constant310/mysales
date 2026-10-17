@@ -1,19 +1,21 @@
 // Public pilot signup: no ERP account required. Keep operator privileges separate.
 import postgres from 'npm:postgres@3.4.5';
+import {createClient} from 'npm:@supabase/supabase-js@2';
 
 const url=Deno.env.get('SUPABASE_DB_URL');
 const sql=url?postgres(url,{max:3,prepare:false,connect_timeout:7,idle_timeout:15}):null;
 const primaryOrigin='https://store.mysalesofficial.com';
-const trustedOrigins=new Set([primaryOrigin,'https://mysales-early-storefront-branch.onrender.com']);
+const trustedOrigins=new Set([primaryOrigin,'https://mysales-early-storefront-branch.onrender.com','https://mysales-v5-email-staging.onrender.com']);
 const response=(status:number,body:unknown,origin=primaryOrigin)=>new Response(JSON.stringify(body),{
  status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store',
   'x-content-type-options':'nosniff','referrer-policy':'no-referrer','access-control-allow-origin':trustedOrigins.has(origin)?origin:primaryOrigin}
 });
 const hex=(bytes:Uint8Array)=>[...bytes].map(b=>b.toString(16).padStart(2,'0')).join('');
-const randomToken=()=>btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))))
- .replaceAll('+','-').replaceAll('/','_').replaceAll('=','');
+const accountAuth=createClient(Deno.env.get('SUPABASE_URL')||'',Deno.env.get('SUPABASE_ANON_KEY')||'',{
+ auth:{autoRefreshToken:false,persistSession:false}
+});
 Deno.serve(async request=>{
- const path=new URL(request.url).pathname.replace(/^\/early-storefront-signup/,'');
+ const path=new URL(request.url).pathname.replace(/^\/early-storefront-signup(?:-v5-test)?/,'');
  if(path!=='/api/signup')return response(404,{error:'Not found'});
  if(request.method!=='POST')return response(405,{error:'Method not allowed'});
  if(!sql)return response(503,{error:'Store creation is temporarily unavailable'});
@@ -44,6 +46,11 @@ Deno.serve(async request=>{
   catch{return response(400,{error:'Invalid JSON'});}
 
   if(!data||typeof data!=='object'||Array.isArray(data))return response(400,{error:'Invalid request'});
+  const match=/^Bearer ([A-Za-z0-9._-]{40,4096})$/.exec(request.headers.get('authorization')||'');
+  if(!match)return response(401,{error:'Sign in before creating a store'});
+  const verified=await accountAuth.auth.getUser(match[1]);
+  const user=verified.error?null:verified.data.user;
+  if(!user||!user.email_confirmed_at)return response(401,{error:'Verify your email before creating a store'});
   const fields=data as Record<string,unknown>;
   if(fields.website)return response(400,{error:'Invalid request'});
   const name=typeof fields.name==='string'?fields.name.trim():'';
@@ -59,25 +66,24 @@ Deno.serve(async request=>{
     .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,48).replace(/-$/,'')||'shop';
   const suffix=hex(crypto.getRandomValues(new Uint8Array(4)));
   const slug=slugBase+'-'+suffix;
-  const token=randomToken();
-  const tokenHash=hex(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token))));
   const result=await sql.begin(async tx=>{
    await tx.unsafe('select pg_advisory_xact_lock(71836211)');
+   const owned=await tx.unsafe('select store_id from early_storefront.store_owners where user_id=$1 limit 1',[user.id]);
+   if(owned.length)return {error:'owned'};
    const existing=await tx.unsafe("select 1 from early_storefront.stores where regexp_replace(whatsapp,'[^0-9]','','g')=$1 and created_at>now()-interval '30 days' limit 1",[number.replace(/\D/g,'')]);
    if(existing.length)return {error:'phone'};
    const count=await tx.unsafe("select count(*)::int as total from early_storefront.stores where created_at>=now()-interval '1 hour'");
    if(Number(count[0].total)>=50)return {error:'limit'};
    const stores=await tx.unsafe("insert into early_storefront.stores(slug,name,description,whatsapp,status) values($1,$2,$3,$4,'draft') returning id,slug,public_handle,name",[slug,name,description,number]);
-   await tx.unsafe("insert into early_storefront.management_links(store_id,token_hash,expires_at) values($1,$2,'infinity'::timestamptz)",[stores[0].id,tokenHash]);
+   await tx.unsafe('insert into early_storefront.store_owners(store_id,user_id) values($1,$2)',[stores[0].id,user.id]);
    return {store:stores[0]};
   });
   if('error'in result){
-   if(result.error==='phone')return response(409,{error:'A store was recently created using this WhatsApp number. Open your saved management link or contact mySales for help.'});
+   if(result.error==='phone')return response(409,{error:'A store was recently created with this WhatsApp number. Contact mySales support if it belongs to you.'});
+   if(result.error==='owned')return response(409,{error:'Your account already has a store. Open your dashboard.'});
    return response(429,{error:'We are receiving too many requests. Please try again later.'});
   }
-  return response(201,{store:result.store,
-   managementLink:(origin&&trustedOrigins.has(origin)?origin:primaryOrigin)+'/manage/claim#token='+encodeURIComponent(token),
-   publicUrl:'/'+encodeURIComponent(result.store.public_handle)});
+  return response(201,{store:result.store,manageUrl:'/manage/',publicUrl:'/'+encodeURIComponent(result.store.public_handle)});
  }catch(e){
   console.error('Storefront signup failed',e instanceof Error?e.message:'Unknown error');
   return response(503,{error:'Could not create your store. Please try again.'});
