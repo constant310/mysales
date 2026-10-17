@@ -87,14 +87,14 @@ export function enquiryPortraitLayout(count,variant='enquiry'){
   const row=Math.floor(index/2),col=index%2;
   const lone=single||(total%2===1&&index===total-1);
   const x=lone?Math.round((width-cardWidth)/2):side+col*(cardWidth+gap);
-  return variant==='status'?{x:110,y:414,w:860,h:1090,single:true}:{x,y:startY+row*(cardHeight+gap),w:cardWidth,h:cardHeight,single};
+  return variant==='status'?{x:36,y:302,w:1008,h:1385,single:true}:{x,y:startY+row*(cardHeight+gap),w:cardWidth,h:cardHeight,single};
  });
- return {width,height,header:variant==='status'?290:header,footer:variant==='status'?230:footer,cards};
+ return {width,height,header:variant==='status'?290:header,footer:variant==='status'?210:footer,cards};
 }
 
 /** Builds one portrait JPEG for exactly one selected product.
      This never combines multiple product photos into a collage. */
-export async function prepareEnquiryPicture(storeName,items,{variant='enquiry'}={}){
+export async function prepareEnquiryPicture(storeName,items,{variant='enquiry',shopUrl=''}={}){
  if(items.length!==1)return null;
  const selected=items.slice(0,6),loaded=await Promise.all(selected.map(p=>imageForEnquiry(p.image_path)));
  const imageCount=loaded.filter(Boolean).length;
@@ -109,14 +109,14 @@ export async function prepareEnquiryPicture(storeName,items,{variant='enquiry'}=
   ctx.fillStyle='#F2F7F3';ctx.fillRect(0,0,width,height);
   ctx.fillStyle='#14562F';ctx.fillRect(0,0,width,layout.header);
   ctx.fillStyle='#CBF2D6';ctx.font='bold 25px Arial,sans-serif';
-  ctx.fillText(isStatus?'AVAILABLE IN OUR STORE':'WHATSAPP PRODUCT ENQUIRY',45,56,990);
+  ctx.fillText(isStatus?'AVAILABLE IN OUR STORE':'WHATSAPP PRODUCT ENQUIRY',45,isStatus?90:56,990);
   ctx.fillStyle='#FFFFFF';ctx.font='bold 55px Arial,sans-serif';
-  fitLines(ctx,storeName,45,133,990,57,1);
+  fitLines(ctx,storeName,45,isStatus?164:133,990,57,1);
   ctx.fillStyle='#DBF5E2';ctx.font='26px Arial,sans-serif';
-  ctx.fillText(isStatus?'Discover something you will love':'Photos, quantities and prices',45,187);
+  ctx.fillText(isStatus?'Discover something you will love':'Photos, quantities and prices',45,isStatus?235:187);
   selected.forEach((p,i)=>{
    const {x,y,w,h,single}=layout.cards[i];
-   const mediaHeight=isStatus?745:(single?610:350);
+   const mediaHeight=isStatus?1082:(single?610:350);
    const mediaX=x+17,mediaY=y+17,mediaW=w-34;
    ctx.fillStyle='#FFFFFF';ctx.fillRect(x,y,w,h);
    ctx.fillStyle='#F3F8F3';ctx.fillRect(mediaX,mediaY,mediaW,mediaHeight);
@@ -139,9 +139,15 @@ export async function prepareEnquiryPicture(storeName,items,{variant='enquiry'}=
   });
   if(isStatus){
    // mySales logo matches the existing mS brand mark in the dashboard.
-   const footY=height-188;
-   ctx.fillStyle='#14562F';ctx.fillRect(0,footY,width,188);
-   const logoX=365,logoY=footY+43;
+   const footY=height-210;
+   ctx.fillStyle='#14562F';ctx.fillRect(0,footY,width,210);
+   const site=String(shopUrl||'').replace(/^https?:\/\//,'').slice(0,110);
+   if(site){
+    ctx.fillStyle='#DBF5E2';ctx.font='bold 28px Arial,sans-serif';
+    ctx.textAlign='center';ctx.fillText('VIEW OUR SHOP  ·  '+site,width/2,footY+46,width-64);
+    ctx.textAlign='left';
+   }
+   const logoX=365,logoY=footY+92;
    ctx.fillStyle='#16A34A';ctx.fillRect(logoX,logoY,94,94);
    ctx.fillStyle='#FFFFFF';ctx.textAlign='center';
    ctx.font='bold 53px Arial,sans-serif';ctx.fillText('mS',logoX+47,logoY+65,90);
@@ -191,7 +197,7 @@ export async function prepareEnquiryPictures(storeName,items){
 /** Each WhatsApp Status file is a standalone 9:16 picture that never displays
  * inventory quantities. Customer enquiry files retain their quantities.
  */
-export async function prepareStatusPictures(storeName,products){
+export async function prepareStatusPictures(storeName,products,shopUrl=''){
  const files=[];
  for(const [index,product] of (Array.isArray(products)?products:[]).slice(0,MAX_ENQUIRY_IMAGES).entries()){
   if(!photoProxyPath(product.image_path))continue;
@@ -201,7 +207,7 @@ export async function prepareStatusPictures(storeName,products){
    const file=await prepareEnquiryPicture(storeName,[{
     productId:product.id,name:product.name,image_path:product.image_path,
     price:Number(unit.price),unit:unit.name||'piece',quantity:1
-   }],{variant:'status'});
+   }],{variant:'status',shopUrl});
    if(!file)continue;
    const safeName=String(product.name||'product').toLowerCase().replace(/[^a-z0-9]+/g,'-')
     .replace(/^-|-$/g,'').slice(0,32)||'product';
