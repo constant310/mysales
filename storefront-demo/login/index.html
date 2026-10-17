@@ -1,56 +1,137 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#1C8220"><meta name="robots" content="noindex,nofollow">
-<title>Sign in | mySales</title><style>
-:root{font-family:Inter,system-ui,sans-serif;color:#27372D;background:#F5FAFD}
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer"><meta name="theme-color" content="#1C8220">
+<meta name="robots" content="noindex,nofollow"><title>Login or Sign up | mySales</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#F5FAFD;color:#27372d}
 *{box-sizing:border-box}body{margin:0;min-height:100svh}
-header{padding:20px max(20px,calc((100% - 1080px)/2));display:flex;justify-content:space-between;align-items:center}
-a{color:#167d3b;text-decoration:none;font-weight:750}
-.brand{font-weight:950;color:#193b28;font-size:1.35rem;letter-spacing:-.04em}.brand b{color:#1C8220}
-main{max-width:470px;margin:5vh auto;padding:0 17px 50px}
-.card{background:white;border:1px solid #deece0;border-radius:22px;padding:29px;box-shadow:0 17px 50px #1b6b3020}
-h1{font-size:2rem;letter-spacing:-.055em;margin:7px 0 12px}
-p{font-size:.93rem;color:#617469;line-height:1.6}label{display:block;margin:23px 0 8px;font-weight:750}
-input{padding:13px;border:1px solid #c6dccb;border-radius:11px;width:100%;font:inherit;min-height:51px}
-input:focus{outline:3px solid #bbebc8}button{cursor:pointer}
-.primary{border:0;border-radius:11px;background:#1C8220;color:#fff;font:inherit;font-weight:850;padding:13px;width:100%;margin-top:17px;min-height:50px}
-.primary:disabled{opacity:.55}.note{font-size:.82rem;color:#6e8576}.message{font-size:.86rem;min-height:26px;color:#ab2f2b;margin-top:10px}
-[hidden]{display:none!important}.secondary{background:none;border:0;text-decoration:underline;color:#1C8220;font-weight:700;margin-top:12px}
-@media(max-width:540px){main{margin:35px auto}.card{padding:23px}}
+a{color:#1C8220;text-decoration:none;font-weight:800}
+header{max-width:1100px;margin:auto;padding:22px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.logo{font-size:1.35rem;font-weight:950;color:#203c2b;letter-spacing:-.065em}.logo b{color:#1C8220}
+header>a:last-child{font-size:.85rem}
+main{max-width:485px;margin:6vh auto 30px;padding:0 16px}
+.panel{background:#fff;border:1px solid #dcece1;box-shadow:0 18px 60px #155b2620;border-radius:22px;padding:30px}
+.kicker{font-weight:900;font-size:.75rem;letter-spacing:.07em;color:#15803D;text-transform:uppercase}
+h1{font-size:clamp(1.9rem,6vw,2.35rem);letter-spacing:-.065em;line-height:1.12;margin:10px 0 11px}
+p{font-size:.91rem;color:#64766b;line-height:1.65;margin:0 0 18px}
+label{display:block;font-size:.88rem;font-weight:850;margin:18px 0 8px}
+input{width:100%;border:1px solid #cddfd2;background:#fcfefc;border-radius:12px;padding:13px 15px;min-height:53px;font-size:1rem;color:#263c2c}
+input:focus{outline:3px solid #bbecc8;border-color:#16A34A}
+button{font:inherit;cursor:pointer}
+.primary{display:block;width:100%;border:0;background:#1C8220;border-radius:12px;color:white;padding:14px 18px;min-height:51px;font-weight:850;margin:18px 0 4px}
+.primary:hover{background:#15803D}.primary:disabled,.link-button:disabled{opacity:.52;cursor:not-allowed}
+.link-button{background:transparent;border:0;padding:8px 0;color:#16783c;font-weight:800}
+.controls{display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-top:12px}
+.email-address{padding:10px 13px;border:1px solid #d3ead9;background:#f4fbf5;border-radius:11px;font-size:.88rem;color:#235f36;overflow-wrap:anywhere}
+#code{font-size:1.35rem;text-align:center;letter-spacing:.22em;font-weight:800;font-variant-numeric:tabular-nums}
+#status{min-height:31px;font-size:.86rem;margin:12px 0 0;color:#177a36}
+#status[data-error="true"]{color:#ad3a31}
+.note{font-size:.77rem;color:#718477;line-height:1.7;border-top:1px solid #edf2ee;padding-top:15px;margin:20px 0 0}
+[hidden]{display:none!important}
+@media(max-width:540px){main{margin:28px auto}.panel{padding:23px;border-radius:18px}header{padding:18px 16px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 </style></head><body>
-<header><a href="/" class="brand">my<b>Sales</b></a><a href="/">About mySales</a></header>
-<main><section class="card">
-<span class="note">A simple, secure way to run your store</span>
-<h1>Welcome to mySales</h1>
-<p>Sign in or create your account to manage your online store. Customers can shop without signing in.</p>
+<header><a class="logo" href="/">my<b>Sales</b></a><a href="/">Back to mySales</a></header>
+<main><section class="panel" aria-labelledby="title">
+<div class="kicker">Free online store</div>
+<h1 id="title">Welcome to mySales</h1>
+<p id="help">Sign in or create an account with your email. Only store owners need an account; customers can browse without logging in.</p>
 <form id="email-form">
-<label for="email">Your email address</label><input id="email" type="email" autocomplete="email" placeholder="you@example.com" required>
-<button class="primary" type="submit" id="send">Continue with email</button>
+<label for="email">Email address</label>
+<input id="email" type="email" autocomplete="email" required maxlength="254" placeholder="name@example.com">
+<button type="submit" id="send" class="primary">Continue with email</button>
 </form>
-<form id="verify-form" hidden>
-<label for="code">Verification code from your email</label>
-<input id="code" inputmode="numeric" autocomplete="one-time-code" placeholder="Enter the email code" minlength="6" required>
-<button class="primary" id="verify" type="submit">Verify and continue</button>
-<button class="secondary" type="button" id="change">Use another email</button>
+<div id="verify-panel" hidden>
+<div class="email-address" id="destination-email"></div>
+<form id="verify-form">
+<label for="code">Enter your 6-digit code</label>
+<input id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code"
+ placeholder="000000" pattern="[0-9]{6}" minlength="6" maxlength="6" required>
+<button class="primary" type="submit" id="verify">Verify email &amp; continue</button>
 </form>
-<p class="message" id="message" role="status" aria-live="polite"></p>
-<p class="note">No private management links. One account securely manages your business.</p>
+<div class="controls">
+<button id="resend" class="link-button" type="button" disabled>Resend code</button>
+<button id="change" class="link-button" type="button">Change email</button>
+</div>
+<p class="note" style="border:0;margin-top:10px;padding:0">You can also open the secure sign-in link in the email if one is provided. A code expires after the time configured in Supabase; request another if needed.</p>
+</div>
+<p id="status" role="status" aria-live="polite"></p>
+<p class="note">Your store will be saved to your verified account. Never share your email verification code. Emails may take a minute to arrive; check spam or Promotions if needed.</p>
 </section></main>
 <script type="module">
-import {requestCode,verifyCode,consumeEmailLink,ownerDestination,signedIn} from '/auth/client.mjs';
-const $=id=>document.getElementById(id),message=$('message');
-async function go(){message.textContent='Finding your store…';location.replace(await ownerDestination());}
-(async()=>{try{if(await consumeEmailLink()||signedIn())await go();}catch(error){message.textContent=error.message;}})();
-$('email-form').onsubmit=async e=>{
- e.preventDefault();const b=$('send');b.disabled=true;message.textContent='Sending a verification email…';
- try{await requestCode($('email').value);$('email-form').hidden=true;$('verify-form').hidden=false;
-  message.textContent='Check your inbox. Enter the code sent to '+$('email').value+'. If you receive a sign-in link, you can tap that instead.';}
- catch(error){message.textContent=error.message;}finally{b.disabled=false;}
+import {requestCode,verifyCode,consumeEmailLink,ownerDestination,signedIn,pendingEmail,secondsUntilResend} from '/auth/client.mjs';
+const $=id=>document.getElementById(id);
+let email='';
+let busy=false;
+const setStatus=(message,error=false)=>{$('status').textContent=message;$('status').dataset.error=String(error);};
+const showCode=(value)=>{
+ email=value;
+ $('email').value=value;
+ $('destination-email').textContent='Verification sent to '+value;
+ $('email-form').hidden=true;$('verify-panel').hidden=false;
+ $('title').textContent='Check your email';
+ $('help').textContent='Enter the code from your mySales email to continue.';
+ refreshResend();
 };
-$('verify-form').onsubmit=async e=>{
- e.preventDefault();const b=$('verify');b.disabled=true;message.textContent='Verifying…';
- try{await verifyCode($('email').value,$('code').value);await go();}
- catch(error){message.textContent=error.message;b.disabled=false;}
+const showEmail=()=>{
+ $('email-form').hidden=false;$('verify-panel').hidden=true;
+ $('title').textContent='Welcome to mySales';
+ $('help').textContent='Sign in or create an account with your email. Customers can shop without logging in.';
+ $('code').value='';setStatus('');
 };
-$('change').onclick=()=>{$('verify-form').hidden=true;$('email-form').hidden=false;message.textContent='';};
+function refreshResend(){
+ const seconds=secondsUntilResend(email);
+ $('resend').disabled=busy||seconds>0;
+ $('resend').textContent=seconds>0?'Resend code in '+seconds+'s':'Resend code';
+}
+setInterval(()=>{if(!$('verify-panel').hidden)refreshResend();},1000);
+async function destination(){
+ setStatus('Checking your store…');
+ const route=await ownerDestination();
+ location.replace(route);
+}
+(async()=>{
+ try{
+  if(await consumeEmailLink()||signedIn()){await destination();return;}
+  const saved=pendingEmail();
+  if(saved){showCode(saved);setStatus('Enter the code from your email.');}
+ }catch(error){
+  showEmail();setStatus(error.message,true);
+ }
+})();
+$('email-form').addEventListener('submit',async(event)=>{
+ event.preventDefault();if(busy)return;
+ busy=true;$('send').disabled=true;setStatus('Sending your verification email…');
+ try{
+  const confirmed=await requestCode($('email').value);
+  showCode(confirmed);
+  $('code').focus();
+  setStatus('Email sent. Check your inbox for the code or sign-in link.');
+ }catch(error){setStatus(error.message,true);}
+ finally{busy=false;$('send').disabled=false;refreshResend();}
+});
+$('verify-form').addEventListener('submit',async(event)=>{
+ event.preventDefault();if(busy)return;
+ busy=true;$('verify').disabled=true;refreshResend();
+ setStatus('Verifying your email…');
+ try{
+  await verifyCode(email,$('code').value);
+  $('code').value='';
+  await destination();
+ }catch(error){setStatus(error.message,true);$('code').select();}
+ finally{busy=false;$('verify').disabled=false;refreshResend();}
+});
+$('resend').addEventListener('click',async()=>{
+ if(busy||secondsUntilResend(email)>0)return;
+ busy=true;refreshResend();setStatus('Sending a new code…');
+ try{
+  await requestCode(email);
+  $('code').value='';
+  $('code').focus();
+  setStatus('A fresh code has been sent. Use the newest code.');
+ }catch(error){setStatus(error.message,true);}
+ finally{busy=false;refreshResend();}
+});
+$('change').addEventListener('click',()=>{if(busy)return;email='';showEmail();$('email').focus();});
 </script></body></html>
