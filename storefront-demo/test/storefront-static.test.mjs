@@ -25,7 +25,7 @@ test('Merchant management requires verified account ownership, not a private lin
  const login=await read('login/index.html');
  const manager=await read('manage/index.html');
  const edge=await read('supabase/functions/early-storefront-backend/index.ts');
- assert.match(login,/requestCode,verifyCode/);
+ assert.match(login,/requestSignInLink,consumeEmailLink/);
  assert.match(manager,/import \{accessToken,requireAccount,logout\}/);
  assert.match(edge,/auth\.getUser/);
  assert.match(edge,/owner\.user_id/);
