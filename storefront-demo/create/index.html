@@ -61,6 +61,10 @@ label{margin-top:15px}input,textarea{min-height:49px;padding:12px;border-radius:
 .optional-details textarea{margin-bottom:5px}.primary{background:#1C8220;margin-top:18px}
 .fine{margin-top:13px}.secret{font-size:.76rem}
 @media(max-width:750px){.shell{margin:20px auto 50px}.panel{padding:20px}.intro h1{font-size:2.15rem}}
+.phone-entry{display:grid;grid-template-columns:minmax(136px,1fr) minmax(0,1.25fr);gap:10px;align-items:start}
+.phone-entry select,.phone-entry input{min-width:0}
+#custom-country{margin-top:10px}
+@media(max-width:370px){.phone-entry{grid-template-columns:1fr}}
 </style></head>
 <body>
 <header><a class="logo" href="/"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span><span class="product-tag">Storefronts</span></a><a class="back" href="/">← Back to mySales</a></header>
@@ -71,9 +75,10 @@ label{margin-top:15px}input,textarea{min-height:49px;padding:12px;border-radius:
 <form id="create">
 <label for="name">What's your business called?</label>
 <input id="name" name="name" type="text" autocomplete="organization" placeholder="e.g. Mariam's Beauty Store" maxlength="100" minlength="2" required>
-<label for="whatsapp">Your business WhatsApp number</label>
-<input id="whatsapp" name="whatsapp" type="tel" autocomplete="tel" inputmode="tel" placeholder="e.g. 0803 123 4567" required>
-<span class="hint">Customers will message this number to order. Nigerian 080… numbers work.</span>
+<label for="whatsapp-country">WhatsApp country code and phone number</label>
+<div class="phone-entry"><select id="whatsapp-country" aria-label="Country calling code" required></select><input id="whatsapp" name="whatsapp" type="tel" autocomplete="tel-national" inputmode="tel" maxlength="24" placeholder="803 123 4567" aria-label="WhatsApp phone number" required></div>
+<input id="custom-country" type="tel" inputmode="tel" maxlength="5" placeholder="Other calling code e.g. +49" aria-label="Other country calling code" hidden>
+<span class="hint">Nigeria (+234) is the default. Enter your local number, with or without its leading zero.</span>
 <details class="optional-details"><summary>Add a business description (optional)</summary><label for="description">What do you sell?</label><textarea id="description" name="description" maxlength="400" placeholder="Clothes, groceries, beauty products, phones..."></textarea></details>
 <div class="hp" aria-hidden="true"><label>Leave blank<input name="website" tabindex="-1" autocomplete="off"></label></div>
 <button class="primary" id="submit" type="submit">Create my store →</button>
@@ -99,7 +104,11 @@ label{margin-top:15px}input,textarea{min-height:49px;padding:12px;border-radius:
 </main>
 <script type="module">
 import {requireAccount,accessToken} from '/auth/client.mjs';
+import {fillCountryCodes,showOtherCountryCode,internationalWhatsApp} from '/auth/phone.mjs';
 const $=id=>document.getElementById(id);
+fillCountryCodes($('whatsapp-country'));
+$('whatsapp-country').addEventListener('change',()=>showOtherCountryCode($('whatsapp-country'),$('custom-country')));
+showOtherCountryCode($('whatsapp-country'),$('custom-country'));
 $('start').hidden=true;
 (async()=>{
  try{
@@ -122,6 +131,7 @@ $('create').onsubmit=async e=>{
  try{
   const token=await requireAccount();
   const payload=Object.fromEntries(new FormData(e.currentTarget));
+  payload.whatsapp=internationalWhatsApp($('whatsapp').value,$('whatsapp-country').value,$('custom-country').value);
   const response=await fetch('/api/signup',{method:'POST',
    headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
    body:JSON.stringify(payload),cache:'no-store'});
