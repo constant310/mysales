@@ -113,11 +113,19 @@ export function beginGoogleSignIn(){
 export async function consumeEmailLink(){
  const fragment=new URLSearchParams(location.hash.slice(1));
  const query=new URLSearchParams(location.search);
- const errorDescription=fragment.get('error_description')||query.get('error_description');
+ const errorDescription=fragment.get('error_description')||query.get('error_description')||'';
  if(fragment.has('error')||query.has('error')){
   // Remove transient provider details from browser history before displaying the error.
   history.replaceState(null,'',location.pathname);
-  throw Error(errorDescription||'Your email sign-in link has expired. Request a new sign-in link.');
+  // Supabase sometimes double-encodes provider errors (for example %3A and %2F).
+  // Do not show confusing OAuth internals or temporary codes to merchants.
+  let decoded=errorDescription;
+  try{decoded=decodeURIComponent(decoded);}catch{}
+  if(/Unable to exchange external code/i.test(decoded))
+   throw Error('Google sign-in is temporarily unavailable. The Google OAuth client credentials in Supabase need to be corrected. Please contact mySales support.');
+  if(/access_denied|cancelled|canceled/i.test(decoded))
+   throw Error('Google sign-in was cancelled. Please try again.');
+  throw Error('Google sign-in could not be completed. Please try again or contact mySales support.');
  }
  if(fragment.has('access_token')||fragment.has('refresh_token')){
   if(!fragment.has('access_token')||!fragment.has('refresh_token'))

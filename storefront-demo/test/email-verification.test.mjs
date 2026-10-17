@@ -69,3 +69,12 @@ test('staging proxy isolates V5 backend from production',async()=>{
  assert.match(proxy,/MYSALES_V5_AUTH_STAGING/);
  assert.match(proxy,/early-storefront-backend-v5-test/);
 });
+
+test('OAuth error responses are scrubbed and double-encoded provider errors are user-friendly',async()=>{
+ const source=await read('auth/client.mjs');
+ assert.match(source,/decodeURIComponent\(decoded\)/);
+ assert.match(source,/Unable to exchange external code/);
+ assert.match(source,/Google OAuth client credentials in Supabase need to be corrected/);
+ assert.match(source,/history\.replaceState\(null,''\,location\.pathname\)/);
+ assert.doesNotMatch(source,/throw Error\(errorDescription\|\|/);
+});
