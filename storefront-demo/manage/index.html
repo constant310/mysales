@@ -320,7 +320,7 @@ main{max-width:870px;padding-top:19px}
 @media(max-width:380px){.manager-phone-row{grid-template-columns:1fr}}
 </style></head><body>
 <header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Manage Store</span>
-<button id="exit" class="head-btn" hidden>Sign out</button></header>
+<button id="exit" class="head-btn" style="margin-left:auto" hidden>Sign out</button></header>
 <main><p id="notice" role="status" aria-live="polite">Opening your store…</p>
 
 <div id="app" hidden>
@@ -578,7 +578,6 @@ function renderProduct(p){
  if(p.units?.[0]&&currentStore?.status==='published'){
   const link=document.createElement('a');link.className='quick-share';link.target='_blank';link.rel='noopener noreferrer';
   link.textContent='↗ Share on WhatsApp';link.setAttribute('aria-label','Share '+p.name+' on WhatsApp');
-  const u=p.units[0],priceText=currency(u.price)+(u.name&&u.name!=='piece'?' / '+u.name:'');
   const message=singleProductWhatsappText(p);
   link.href='https://wa.me/?text='+encodeURIComponent(message);
   link.addEventListener('click',()=>{reportMerchantActivity('product_share');dismissRetainTip();});
