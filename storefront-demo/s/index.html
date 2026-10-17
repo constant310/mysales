@@ -12,6 +12,9 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 .brand{display:inline-flex;align-items:center;gap:10px;font-weight:950;font-size:1.15rem;letter-spacing:-.055em}
 .brand-mark{display:grid;place-items:center;height:35px;width:35px;border-radius:11px;color:white;background:#16a34a;font-size:1.05rem;letter-spacing:-.14em;padding-right:3px}
 .brand-note{font-size:.76rem;color:#718675;font-weight:750}
+.brand-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0}
+.owner-manage-link{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:10px 13px;border-radius:11px;background:#1C8220;color:#fff;font-size:.78rem;font-weight:850;white-space:nowrap}
+.owner-manage-link:hover{background:#15803D}
 .business-hero{margin:0 clamp(15px,2.5vw,28px);background:linear-gradient(120deg,#124228 0%,#15743d 72%,#168944 100%);color:#fff;border-radius:23px;overflow:hidden;position:relative}
 .business-hero:after{content:"";width:260px;height:260px;border:46px solid #ffffff09;border-radius:50%;position:absolute;right:-120px;top:-140px;pointer-events:none}
 .hero-inner{position:relative;z-index:1;padding:34px clamp(21px,3.2vw,35px)}
@@ -118,7 +121,7 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 .status{position:fixed;z-index:60;top:14px;left:50%;transform:translateX(-50%);width:min(500px,calc(100vw - 24px));padding:12px 15px;background:#fff9eb;color:#77482a;border:1px solid #ead4b2;border-radius:12px;font-size:.82rem;line-height:1.5;box-shadow:0 8px 22px #10261033}
 @media(min-width:680px){.grid-products{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(min-width:1024px){.grid-products{grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media(max-width:490px){.brandbar{padding:15px 16px}.business-hero{border-radius:20px}.hero-inner{padding:27px 22px}.hero-actions{gap:11px}.collection{padding-top:29px}.grid-products{gap:10px}.grid-content{padding:11px 10px 10px}.grid-title{font-size:.87rem;min-height:36px}.grid-add{font-size:.8rem;min-height:42px}.grid-price{font-size:1.02rem}.search-field{height:47px;padding:0 11px}.icon-control{height:47px;width:45px}.home-tools{gap:7px}.purchase-sheet{padding-left:16px;padding-right:16px}.sheet-actions button{font-size:.78rem}}
+@media(max-width:490px){.brandbar{padding:15px 16px}.owner-manage-link{padding:10px 11px;font-size:.77rem}.business-hero{border-radius:20px}.hero-inner{padding:27px 22px}.hero-actions{gap:11px}.collection{padding-top:29px}.grid-products{gap:10px}.grid-content{padding:11px 10px 10px}.grid-title{font-size:.87rem;min-height:36px}.grid-add{font-size:.8rem;min-height:42px}.grid-price{font-size:1.02rem}.search-field{height:47px;padding:0 11px}.icon-control{height:47px;width:45px}.home-tools{gap:7px}.purchase-sheet{padding-left:16px;padding-right:16px}.sheet-actions button{font-size:.78rem}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
 
 /* Quiet, consistent icon system: functional icons only, no decorative cart/arrow overload. */
@@ -155,7 +158,7 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 #sheet-ask{display:block;width:100%;margin:12px 0 0;padding:12px;border:1px solid #bde3c8;border-radius:11px;background:#e9f8ee;color:#145d31;font-weight:850;font-size:.89rem}
 #sheet-ask:disabled{opacity:.5;cursor:not-allowed}
 </style></head><body><div class="site">
-<header class="brandbar"><a class="brand" href="/" aria-label="mySales home"><span class="brand-mark" aria-hidden="true">mS</span><span>mySales</span></a><a href="/login/" class="brand-note" style="color:#167c3e;font-size:.78rem;font-weight:800;white-space:nowrap;text-decoration:none">Create your own store</a></header>
+<header class="brandbar"><a class="brand" href="/" aria-label="mySales home"><span class="brand-mark" aria-hidden="true">mS</span><span>mySales</span></a><div class="brand-actions"><a id="owner-manage-link" class="owner-manage-link" href="/manage/" aria-label="Return to manage your store" hidden>Manage store <span aria-hidden="true">↗</span></a><a id="guest-create-link" href="/login/" class="brand-note" style="color:#167c3e;font-size:.78rem;font-weight:800;white-space:nowrap;text-decoration:none">Create your own store</a></div></header>
 <aside id="demo-promo" class="demo-promo" aria-label="Create your own store" hidden>
  <div class="demo-promo-copy"><span class="demo-overline">SEE WHAT YOU CAN BUILD</span><strong>Your products. Your prices. Your own store link.</strong><p>Create a free storefront and share it with customers on WhatsApp.</p></div>
  <a href="/login/" class="demo-promo-cta">Create my free store</a>
@@ -203,6 +206,7 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 <div id="add-toast" class="toast" role="status" aria-live="polite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg><span id="toast-message">Added to basket</span><button type="button" id="toast-basket">View basket</button></div>
 <div id="status" class="status" role="alert" hidden></div>
 <script type="module">
+import {canManagePublicStore} from '/auth/owner-nav.mjs';
 function exampleImage(name){
  // Only fictional demo catalogues receive illustrative visuals. Never substitute
  // a stock photo for a real merchant's missing product photo.
@@ -475,6 +479,13 @@ $('send').onclick=()=>{
    $('business-number').textContent='Chat with us on WhatsApp';$('business-whatsapp').hidden=false;
   }
   applyFilters();renderCart();trackActivity('store_view');
+  // This is a public shop. Only the signed-in owner of this exact store
+  // gets a dashboard shortcut; shoppers never see management navigation.
+  void canManagePublicStore(store).then(isOwner=>{
+   if(!isOwner)return;
+   $('owner-manage-link').hidden=false;
+   $('guest-create-link').hidden=true;
+  });
  }catch(error){
   $('business-name').textContent='Store unavailable';
   $('business-description').textContent=error.message;
