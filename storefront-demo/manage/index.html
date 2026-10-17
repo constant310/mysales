@@ -313,6 +313,11 @@ main{max-width:870px;padding-top:19px}
 #product-section .quick-share:hover{background:#e8f6ed}
 @media(max-width:700px){#product-section .product-list{grid-template-columns:1fr}#product-section .product-open{min-height:115px}}
 @media(max-width:380px){#product-section .product-open{grid-template-columns:76px minmax(0,1fr)}#product-section .product-open img,#product-section .product-open .ph{width:76px;height:76px}}
+.manager-phone-row{display:grid;grid-template-columns:minmax(130px,1fr) minmax(0,1.1fr);gap:9px}
+.manager-phone-row select,.manager-phone-row input{min-width:0}
+#business-other-country{margin-top:9px}
+#business-other-country[hidden]{display:none!important}
+@media(max-width:380px){.manager-phone-row{grid-template-columns:1fr}}
 </style></head><body>
 <header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Manage Store</span>
 <button id="exit" class="head-btn" hidden>Sign out</button></header>
@@ -358,7 +363,7 @@ main{max-width:870px;padding-top:19px}
       <form id="settings">
         <div class="settings-form-grid">
           <div class="settings-field"><label for="business-name">Business name</label><input id="business-name" name="name" type="text" maxlength="150" autocomplete="organization" placeholder="Your business name" required></div>
-          <div class="settings-field"><label for="business-whatsapp">WhatsApp number</label><input id="business-whatsapp" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" maxlength="16" placeholder="+234 800 000 0000" required></div>
+          <div class="settings-field"><label for="business-whatsapp">WhatsApp contact</label><div class="manager-phone-row"><select id="business-country" aria-label="WhatsApp country calling code" required></select><input id="business-whatsapp" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel-national" maxlength="24" placeholder="803 123 4567" aria-label="WhatsApp phone number" required></div><input id="business-other-country" type="tel" inputmode="tel" maxlength="5" placeholder="Other calling code e.g. +49" aria-label="Other country calling code" hidden><p class="field-hint">Choose your country code and enter the local WhatsApp number.</p></div>
         </div>
         <div class="settings-field"><label for="business-description">About your business</label><textarea id="business-description" name="description" maxlength="2000" rows="3" placeholder="Tell customers what you sell and why they should shop with you."></textarea><p class="field-hint">This description appears on your storefront Home.</p></div>
         <div class="settings-field"><label for="business-status">Store visibility</label><select id="business-status" name="status"><option value="published">Public — customers can view your store</option><option value="draft">Private — only you can manage it</option></select><p class="field-hint">Choose Private to temporarily hide the storefront from customers.</p></div>
@@ -475,6 +480,7 @@ main{max-width:870px;padding-top:19px}
 <div id="manager-toast" class="manager-toast" role="status" aria-live="polite"><span aria-hidden="true">✓</span> <strong id="manager-toast-message">Product added</strong></div>
 <script type="module">
 import {accessToken,requireAccount,logout} from '/auth/client.mjs';
+import {fillCountryCodes,showOtherCountryCode,internationalWhatsApp,splitInternationalWhatsApp} from '/auth/phone.mjs';
 const $=id=>document.getElementById(id),notice=$('notice'),list=$('products');
 let currentStore=null,products=[],isAdding=new URLSearchParams(location.search).has('welcome'),managerToastTimer=0;
 function showManagerToast(message){
@@ -1107,16 +1113,29 @@ $('add').onsubmit=async e=>{
 $('add-more').onclick=()=>{isAdding=true;showManagerView();$('add-section').scrollIntoView({behavior:'smooth'});$('product-name').focus({preventScroll:true});};
 $('cancel-add').onclick=()=>{isAdding=false;showManagerView();$('product-section').scrollIntoView({behavior:'smooth'});};
 const settingsForm=$('settings'),whatsappForm=$('whatsapp-form');
+fillCountryCodes($('business-country'));
+$('business-country').addEventListener('change',()=>{
+ showOtherCountryCode($('business-country'),$('business-other-country'));
+ updateBusinessSave();
+});
+showOtherCountryCode($('business-country'),$('business-other-country'));
 const businessFields=['name','whatsapp','description','status'];
 let businessBaseline=null,whatsappBaseline=null;
 function businessValues(){
  const data=Object.fromEntries(new FormData(settingsForm));
+ try{
+  data.whatsapp=internationalWhatsApp($('business-whatsapp').value,$('business-country').value,$('business-other-country').value);
+  $('business-whatsapp').setCustomValidity('');
+ }catch{
+  data.whatsapp='';
+  $('business-whatsapp').setCustomValidity('Enter a valid phone number with country code.');
+ }
  return Object.fromEntries(businessFields.map(key=>[key,String(data[key]??'')]));
 }
 function updateBusinessSave(){
  const values=businessValues();
  const modified=businessBaseline!==null&&businessFields.some(key=>values[key]!==businessBaseline[key]);
- $('business-save').disabled=!modified||!settingsForm.checkValidity();
+ $('business-save').disabled=!modified||!values.whatsapp||!settingsForm.checkValidity();
  $('business-feedback').textContent=modified?'Unsaved changes':'No changes yet';
  $('business-feedback').style.color=modified?'#16763D':'#829183';
 }
@@ -1198,7 +1217,11 @@ async function openManager(){
   const form=$('settings');
   form.elements.namedItem('name').value=currentStore.name;
   form.elements.namedItem('description').value=currentStore.description||'';
-  form.elements.namedItem('whatsapp').value=currentStore.whatsapp;
+  const phone=splitInternationalWhatsApp(currentStore.whatsapp);
+  $('business-country').value=phone.selected;
+  $('business-whatsapp').value=phone.local;
+  $('business-other-country').value=phone.other;
+  showOtherCountryCode($('business-country'),$('business-other-country'));
   form.elements.namedItem('status').value=currentStore.status;
   $('whatsapp-template').value=currentStore.whatsapp_template||defaultWhatsApp;
   businessBaseline=businessValues();whatsappBaseline=$('whatsapp-template').value;
