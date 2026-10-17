@@ -5,7 +5,7 @@ const API='https://wsxszbdvvtowmrnxdsrp.supabase.co';
 const PUBLISHABLE_KEY='sb_publishable_JdUSYUZwX9RNdchmtUUEfw_ralc2WyT';
 const SESSION_KEY='mysales_storefront_account_v1';
 const PENDING_KEY='mysales_storefront_pending_email_v1';
-const OTP_COOLDOWN_MS=60000;
+const LINK_COOLDOWN_MS=60000;
 const commonHeaders={'apikey':PUBLISHABLE_KEY,'Content-Type':'application/json'};
 
 function getJson(storage,key){
@@ -26,7 +26,7 @@ function normalizeEmail(value){
 function currentSession(){return getJson(localStorage,SESSION_KEY);}
 function saveSession(value){
  if(!value||typeof value.access_token!=='string'||typeof value.refresh_token!=='string')
-  throw Error('Verification did not return a valid session. Request a new code.');
+  throw Error('Verification did not return a valid session. Request a new sign-in link.');
  const life=Number(value.expires_in||3600);
  if(!Number.isFinite(life)||life<=0)throw Error('Invalid session duration.');
  localStorage.setItem(SESSION_KEY,JSON.stringify({
@@ -46,7 +46,7 @@ async function authRequest(path,body,accessToken=''){
  if(!response.ok){
   const serverMessage=String(data.msg||data.error_description||data.message||'').slice(0,200);
   if(response.status===429)throw Error('Too many attempts. Wait a little before requesting another code.');
-  if(response.status===422)throw Error(serverMessage||'Your verification code is incorrect or has expired.');
+  if(response.status===422)throw Error(serverMessage||'Your sign-in link is invalid or has expired.');
   throw Error(serverMessage||'Could not complete email verification. Please try again.');
  }
  return data;
@@ -64,25 +64,17 @@ export function secondsUntilResend(email){
 }
 export function signedIn(){return Boolean(currentSession()?.access_token);}
 
-export async function requestCode(email){
+export async function requestSignInLink(email){
  const normalized=normalizeEmail(email);
  const remaining=secondsUntilResend(normalized);
- if(remaining>0)throw Error('Please wait '+remaining+' seconds before requesting another code.');
+ if(remaining>0)throw Error('Please wait '+remaining+' seconds before requesting another sign-in link.');
  await authRequest('otp?redirect_to='+encodeURIComponent(location.origin+'/login/'),{
   email:normalized,create_user:true
  });
  try{sessionStorage.setItem(PENDING_KEY,JSON.stringify({
-  email:normalized,nextSendAt:Date.now()+OTP_COOLDOWN_MS
+  email:normalized,nextSendAt:Date.now()+LINK_COOLDOWN_MS
  }));}catch{}
  return normalized;
-}
-export async function verifyCode(email,code){
- const normalized=normalizeEmail(email);
- const input=String(code||'').trim();
- if(!/^\d{6}$/.test(input))throw Error('Enter the six-digit code sent to your email.');
- const session=await authRequest('verify',{email:normalized,token:input,type:'email'});
- saveSession(session);
- return session;
 }
 export async function consumeEmailLink(){
  const fragment=new URLSearchParams(location.hash.slice(1));
@@ -91,7 +83,7 @@ export async function consumeEmailLink(){
  if(fragment.has('error')||query.has('error')){
   // Remove transient provider details from browser history before displaying the error.
   history.replaceState(null,'',location.pathname);
-  throw Error(errorDescription||'Your email sign-in link has expired. Request a new verification code.');
+  throw Error(errorDescription||'Your email sign-in link has expired. Request a new sign-in link.');
  }
  if(fragment.has('access_token')||fragment.has('refresh_token')){
   if(!fragment.has('access_token')||!fragment.has('refresh_token'))
@@ -107,7 +99,7 @@ export async function consumeEmailLink(){
  if(query.has('token_hash')){
   const type=query.get('type');
   if(!['email','signup','magiclink'].includes(type))
-   throw Error('Unrecognized verification link. Request a new code.');
+   throw Error('Unrecognized verification link. Request a new sign-in link.');
   const token_hash=query.get('token_hash');
   if(!token_hash||token_hash.length>4096)throw Error('Invalid verification link.');
   const session=await authRequest('verify',{token_hash,type});

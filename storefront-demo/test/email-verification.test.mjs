@@ -1,54 +1,47 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-
 const root=new URL('../',import.meta.url);
 const read=file=>readFile(new URL(file,root),'utf8');
 
-test('login includes email verification, code entry, resend and recovery UX',async()=>{
+test('default Supabase sign-in link replaces code-based verification UI',async()=>{
  const login=await read('login/index.html');
- for(const name of ['email-form','verify-form','code','resend','change','status'])
+ for(const name of ['email-form','link-panel','resend','change','status'])
   assert.match(login,new RegExp('id="'+name+'"'));
- assert.match(login,/inputmode="numeric"/);
- assert.match(login,/pattern="\[0-9\]\{6\}"/);
+ assert.match(login,/Send sign-in link/);
+ assert.match(login,/Tap the one-time sign-in link/);
+ assert.match(login,/requestSignInLink/);
  assert.match(login,/secondsUntilResend/);
  assert.match(login,/consumeEmailLink/);
  assert.match(login,/ownerDestination/);
- assert.doesNotMatch(login,/type="password"/);
+ assert.doesNotMatch(login,/id="code"|id="verify-form"|type="password"/);
 });
 
-test('auth API strictly validates OTP before storing session',async()=>{
+test('default Supabase Auth is used without requiring a custom email template or SMTP',async()=>{
  const source=await read('auth/client.mjs');
+ assert.match(source,/export async function requestSignInLink/);
  assert.match(source,/authRequest\('otp\?redirect_to='/);
- assert.match(source,/authRequest\('verify',\{email:normalized,token:input,type:'email'\}\)/);
- assert.match(source,/\/\^\\d\{6\}\$\/\.test\(input\)/);
- assert.match(source,/saveSession\(session\)/);
+ assert.match(source,/create_user:true/);
  assert.match(source,/token_hash/);
  assert.match(source,/access_token/);
  assert.match(source,/refresh_token/);
  assert.match(source,/auth\/v1\//);
- assert.match(source,/OTP_COOLDOWN_MS=60000/);
+ assert.match(source,/LINK_COOLDOWN_MS=60000/);
+ assert.doesNotMatch(source,/export async function verifyCode/);
  assert.doesNotMatch(source,/SUPABASE_SERVICE_ROLE_KEY|sb_secret_/);
 });
 
-test('email template contains one-time OTP and redirect-capable magic link',async()=>{
- const template=await read('docs/auth-verification-email-template.html');
- assert.match(template,/\{\{ \.Token \}\}/);
- assert.match(template,/\{\{ \.ConfirmationURL \}\}/);
- assert.match(template,/Never share your verification code/);
- assert.doesNotMatch(template,/href="http:/);
-});
-
-test('configuration guide includes both public origins and template setup',async()=>{
+test('default email restrictions and URL configuration are clearly documented',async()=>{
  const guide=await read('docs/email-verification-setup.md');
- assert.match(guide,/Authentication.*Email Templates/);
+ assert.match(guide,/Default Supabase Auth/);
+ assert.match(guide,/team member/);
  assert.match(guide,/store\.mysalesofficial\.com\/login\//);
  assert.match(guide,/mysales-early-storefront-branch\.onrender\.com\/login\//);
- assert.match(guide,/SMTP/);
- assert.match(guide,/two controlled test inboxes/);
+ assert.match(guide,/default email templates/);
+ assert.match(guide,/production/);
 });
 
-test('signed-in users without stores are distinct from unverified or invalid sessions',async()=>{
+test('verified sellers without stores are distinct from invalid or unverified sessions',async()=>{
  const edge=await read('supabase/functions/early-storefront-backend/index.ts');
  const client=await read('auth/client.mjs');
  const create=await read('create/index.html');
