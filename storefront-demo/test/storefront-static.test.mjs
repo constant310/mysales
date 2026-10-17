@@ -7,7 +7,7 @@ const read=path=>readFile(new URL(path,root),'utf8');
 
 test('Render proxies real API requests to the Supabase Edge backend',async()=>{
  const server=await read('render-server.mjs');
- assert.match(server,/functions\/v1\/early-storefront-backend/);
+ assert.match(server,/functions\/v1\/.*early-storefront-backend/);
  assert.match(server,/\/health\/db/);
  assert.match(server,/\/api\/merchant\/products/);
  assert.match(server,/\/api\/operator\/stores/);
@@ -25,7 +25,7 @@ test('Merchant management requires verified account ownership, not a private lin
  const login=await read('login/index.html');
  const manager=await read('manage/index.html');
  const edge=await read('supabase/functions/early-storefront-backend/index.ts');
- assert.match(login,/requestSignInLink,consumeEmailLink/);
+ assert.match(login,/signInWithPassword,signUpWithPassword,beginGoogleSignIn,consumeEmailLink/);
  assert.match(manager,/import \{accessToken,requireAccount,logout\}/);
  assert.match(edge,/auth\.getUser/);
  assert.match(edge,/owner\.user_id/);
@@ -249,7 +249,7 @@ test('Merchant can sign in from any device and migrate a legacy store once',asyn
  const login=await read('login/index.html');
  assert.match(create,/id="transfer-form"/);
  assert.match(create,/legacyToken/);
- assert.match(login,/Send sign-in link/);
+ assert.match(login,/Continue with Google/);
  assert.doesNotMatch(login,/id="recover-form"/);
 });
 
