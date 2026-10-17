@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {photoProxyPath,canShareEnquiryFile,enquiryItemsFromCart,photoSignature} from '../shop/whatsapp-enquiry.mjs';
+import {photoProxyPath,canShareEnquiryFile,enquiryItemsFromCart,photoSignature,enquiryPortraitLayout} from '../shop/whatsapp-enquiry.mjs';
 
 const root=new URL('../',import.meta.url);
 const read=file=>readFile(new URL(file,root),'utf8');
@@ -58,4 +58,26 @@ test('no claim of invisible automatic media attachment into a fixed WhatsApp rec
  assert.match(page,/The customer chooses WhatsApp and the recipient/);
  assert.match(page,/attach the saved picture/i);
  assert.match(page,/if\(error\?\.name!=='AbortError'\)/);
+});
+
+test('WhatsApp enquiry pictures use portrait canvases and centered product cards',()=>{
+ for(let count=1;count<=6;count++){
+  const layout=enquiryPortraitLayout(count);
+  assert.equal(layout.width,1080);
+  assert.ok(layout.height>layout.width,'portrait: '+count);
+  assert.equal(layout.cards.length,count);
+  for(const card of layout.cards){
+   assert.ok(card.x>=0&&card.y>layout.header,'card starts within content area');
+   assert.ok(card.x+card.w<=layout.width,'card stays horizontally visible');
+   assert.ok(card.y+card.h<layout.height-layout.footer,'card stays above footer');
+  }
+  if(count%2===1){
+   const last=layout.cards.at(-1);
+   assert.equal(last.x+last.w/2,layout.width/2,'single or last orphan card is centered');
+  }
+ }
+ const single=enquiryPortraitLayout(1);
+ assert.equal(single.height,1440);
+ assert.equal(single.cards[0].x,130);
+ assert.equal(single.cards[0].w,820);
 });
