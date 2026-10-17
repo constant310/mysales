@@ -570,7 +570,7 @@ test('vendor selects up to six products to share from the private manager',async
  assert.match(manager,/function openShareProducts\(preselectId=null\)/);
  assert.match(manager,/shareChosen\.size>=SHARE_LIMIT/);
  assert.match(manager,/function renderSharePicker/);
- assert.match(manager,/openShareProducts\(id\)/);
+ assert.match(manager,/singleProductWhatsappText\(dialogProduct\)/);
  assert.match(manager,/const shareableProducts=\(\)=>products\.filter/);
 });
 test('vendor WhatsApp messages include names, naira prices and real public photo links',async()=>{
