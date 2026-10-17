@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {photoProxyPath,canShareEnquiryFile,enquiryItemsFromCart,photoSignature,enquiryPortraitLayout} from '../shop/whatsapp-enquiry.mjs';
+import {photoProxyPath,canShareEnquiryFile,canShareEnquiryFiles,enquiryItemsFromCart,photoSignature,enquiryPortraitLayout,prepareEnquiryPictures,MAX_ENQUIRY_IMAGES} from '../shop/whatsapp-enquiry.mjs';
 
 const root=new URL('../',import.meta.url);
 const read=file=>readFile(new URL(file,root),'utf8');
@@ -38,24 +38,25 @@ test('enquiry basket photo preparation respects exact product and quantity',()=>
 test('customer single-product and basket WhatsApp paths use real File sharing',async()=>{
  const page=await read('s/index.html');
  const helper=await read('shop/whatsapp-enquiry.mjs');
- assert.match(page,/navigator\.share\(\{files:\[file\],title:/);
- assert.match(page,/prepareEnquiryPicture\(store\.name,items\)/);
- assert.match(page,/sendPhotoEnquiry\(state\.file,message,number\)/);
- assert.match(page,/sendPhotoEnquiry\(photo\.file,message,number\)/);
- assert.match(page,/id="enquiry-save-photo"/);
+ assert.match(page,/navigator\.share\(\{files:photos,title:/);
+ assert.match(page,/prepareEnquiryPictures\(store\.name,items\)/);
+ assert.match(page,/sendPhotoEnquiry\(state\.files,message,number\)/);
+ assert.match(page,/sendPhotoEnquiry\(photo\.files,message,number\)/);
+ assert.match(page,/id="enquiry-save-list"/);
  assert.match(page,/id="enquiry-open-chat"/);
  assert.match(page,/href='https:\/\/wa\.me\/'\+number\+'\?text='/);
  assert.match(page,/id="enquiry-fallback"/);
  assert.match(helper,/canvas\.toBlob/);
  assert.match(helper,/new File\(\[blob\]/);
- assert.match(helper,/const imageCount=loaded\.filter\(Boolean\)\.length/);
+ assert.match(helper,/prepareEnquiryPictures\(storeName,items\)/);
  assert.match(helper,/if\(!imageCount\)return null/);
+ assert.match(helper,/for\(const \[index,item\] of items\.slice\(0,MAX_ENQUIRY_IMAGES\)\.entries\(\)\)/);
  assert.match(helper,/return IMAGE_KEY\.test\(key\)/);
 });
 
 test('no claim of invisible automatic media attachment into a fixed WhatsApp recipient',async()=>{
  const page=await read('s/index.html');
- assert.match(page,/The customer chooses WhatsApp and the recipient/);
+ assert.match(page,/The buyer chooses/);
  assert.match(page,/attach the saved picture/i);
  assert.match(page,/if\(error\?\.name!=='AbortError'\)/);
 });
@@ -80,4 +81,26 @@ test('WhatsApp enquiry pictures use portrait canvases and centered product cards
  assert.equal(single.height,1440);
  assert.equal(single.cards[0].x,130);
  assert.equal(single.cards[0].w,820);
+});
+
+test('multi-file sharing checks all selected attachments rather than just the first',()=>{
+ const a={name:'fireball.jpg'},b={name:'blanket.jpg'};
+ const device={share:()=>Promise.resolve(),canShare:({files})=>files.length===2};
+ assert.equal(canShareEnquiryFiles([a,b],device),true);
+ assert.equal(canShareEnquiryFiles([a],device),false);
+ assert.equal(canShareEnquiryFiles([],device),false);
+ assert.equal(canShareEnquiryFiles(null,device),false);
+ assert.equal(MAX_ENQUIRY_IMAGES,10);
+});
+
+test('multiple enquiries generate separate files, not product collages',async()=>{
+ const helper=await read('shop/whatsapp-enquiry.mjs');
+ const page=await read('s/index.html');
+ assert.match(helper,/if\(items\.length!==1\)return null/);
+ assert.match(helper,/result\.push\(new File\(\[file\],name/);
+ assert.match(helper,/await prepareEnquiryPicture\(storeName,\[item\]\)/);
+ assert.match(page,/photos\.forEach\(\(file,index\)=>/);
+ assert.match(page,/list\.append\(link\)/);
+ assert.match(page,/save the photos below individually/i);
+ assert.match(page,/navigator\.share\(\{files:photos/);
 });
