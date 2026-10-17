@@ -628,6 +628,110 @@ function renderProduct(p){
  list.append(card);
 }
 
+
+/* Private merchant Status composer. Quantities remain in customer enquiries,
+   but these public promotional assets show each item's listed unit price only. */
+const statusChosen=new Set();
+let statusFiles=[],statusPreviewUrls=[],statusBusy=false;
+const availableStatusProducts=()=>products.filter(p=>
+ p.published===true&&p.units?.[0]&&photoProxyPath(p.image_path)
+ &&(!p.track_stock||Number(p.stock)>0)
+);
+const pickedStatusProducts=()=>availableStatusProducts().filter(p=>statusChosen.has(p.id));
+function setStatusFeedback(message,error=false){
+ $('status-feedback').textContent=message;
+ $('status-feedback').style.color=error?'#A13E35':'#52765D';
+}
+function discardStatusFiles(){
+ for(const url of statusPreviewUrls)URL.revokeObjectURL(url);
+ statusPreviewUrls=[];statusFiles=[];
+ $('status-previews').replaceChildren();
+ $('status-share').disabled=true;
+}
+function refreshStatusButtons(){
+ $('status-selection-count').textContent=pickedStatusProducts().length+' of '+MAX_ENQUIRY_IMAGES+' selected';
+ $('status-prepare').disabled=!pickedStatusProducts().length||statusBusy;
+ $('status-select-all').disabled=statusBusy;
+ $('status-clear').disabled=statusBusy;
+}
+function renderStatusPicker(){
+ const eligible=availableStatusProducts();
+ const allowed=new Set(eligible.map(p=>p.id));
+ for(const id of statusChosen)if(!allowed.has(id))statusChosen.delete(id);
+ discardStatusFiles();
+ const host=$('status-products');host.replaceChildren();
+ if(!eligible.length){
+  const empty=node('p','No public products with mySales-hosted photos are ready for Status. Publish an available product with a photo to continue.');
+  empty.className='hint';host.append(empty);
+ }else for(const p of eligible){
+  const item=node('label','');item.className='status-choice';
+  const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=statusChosen.has(p.id);
+  checkbox.setAttribute('aria-label','Post '+p.name+' to WhatsApp Status');
+  checkbox.onchange=()=>{
+   if(checkbox.checked&&statusChosen.size>=MAX_ENQUIRY_IMAGES){
+    checkbox.checked=false;setStatusFeedback('Choose up to '+MAX_ENQUIRY_IMAGES+' Status pictures per batch.',true);return;
+   }
+   if(checkbox.checked)statusChosen.add(p.id);else statusChosen.delete(p.id);
+   discardStatusFiles();refreshStatusButtons();
+   setStatusFeedback('Ready to prepare '+pickedStatusProducts().length+' product Status pictures.');
+  };
+  const picture=document.createElement('img');picture.src=p.image_path;picture.alt='';
+  const meta=node('span','');meta.append(node('strong',p.name),node('small',currency(p.units[0].price)));
+  item.append(checkbox,picture,meta);host.append(item);
+ }
+ refreshStatusButtons();
+ if(eligible.length)setStatusFeedback('Choose products, then prepare your Status pictures.');
+}
+$('status-open').onclick=()=>{
+ isAdding=false;showManagerView();
+ $('status-section').scrollIntoView({behavior:'smooth',block:'start'});
+};
+$('status-select-all').onclick=()=>{
+ for(const p of availableStatusProducts()){
+  if(statusChosen.size>=MAX_ENQUIRY_IMAGES)break;
+  statusChosen.add(p.id);
+ }
+ renderStatusPicker();setStatusFeedback('Products selected. Prepare your Status pictures.');
+};
+$('status-clear').onclick=()=>{statusChosen.clear();renderStatusPicker();};
+$('status-prepare').onclick=async()=>{
+ if(statusBusy)return;
+ const picked=pickedStatusProducts().slice(0,MAX_ENQUIRY_IMAGES);
+ if(!picked.length){setStatusFeedback('Select a product first.',true);return;}
+ discardStatusFiles();statusBusy=true;refreshStatusButtons();
+ setStatusFeedback('Preparing '+picked.length+' portrait Status picture'+(picked.length===1?'':'s')+'…');
+ try{
+  const files=await prepareStatusPictures(currentStore.name,picked);
+  statusFiles=files;
+  for(const [index,file] of files.entries()){
+   const url=URL.createObjectURL(file);statusPreviewUrls.push(url);
+   const figure=node('figure','');figure.className='status-preview';
+   const image=document.createElement('img');image.src=url;image.alt='Status picture '+(index+1);image.loading='lazy';
+   const caption=node('figcaption',file.name.replace(/^mysales-status-\d+-/,'').replace(/\.jpg$/,'').replace(/-/g,' '));
+   const download=node('a','Download picture');download.href=url;download.download=file.name;
+   figure.append(image,caption,download);$('status-previews').append(figure);
+  }
+  $('status-share').disabled=!files.length;
+  setStatusFeedback(files.length
+   ? files.length+' separate Status picture'+(files.length===1?'':'s')+' ready. Tap Share, choose WhatsApp, then My Status.'
+   :'Could not load a product photo. Try again or upload a new photo to your store.',!files.length);
+ }catch(error){setStatusFeedback('Could not prepare Status pictures: '+error.message,true);}
+ finally{statusBusy=false;refreshStatusButtons();}
+};
+$('status-share').onclick=()=>{
+ if(!statusFiles.length)return;
+ // Invoke native file share during the click. WhatsApp chooses the destination.
+ if(!canShareEnquiryFiles(statusFiles)){
+  setStatusFeedback('Your phone cannot share these pictures together. Download each picture above, then post them from WhatsApp → Updates → My Status.',true);
+  return;
+ }
+ try{
+  void navigator.share({files:statusFiles,title:currentStore.name+' products for Status'})
+   .then(()=>{reportMerchantActivity('product_share');setStatusFeedback('Images shared to the chosen app. Finish posting in WhatsApp Status.');})
+   .catch(error=>{if(error?.name!=='AbortError')setStatusFeedback('Sharing could not start. Download the pictures above and post through WhatsApp Status.',true);});
+ }catch{setStatusFeedback('This browser cannot share photos. Download and post them in WhatsApp Status.',true);}
+};
+
 /* Quick vendor catalogue: one actual image containing selected photos and prices.
    This is a private manager feature; no product or management data is sent to another service. */
 const productShareDialog=$('product-share-dialog');
