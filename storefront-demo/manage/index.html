@@ -653,6 +653,7 @@ function refreshStatusButtons(){
  $('status-prepare').disabled=!pickedStatusProducts().length||statusBusy;
  $('status-select-all').disabled=statusBusy;
  $('status-clear').disabled=statusBusy;
+ for(const input of $('status-products').querySelectorAll('input[type="checkbox"]'))input.disabled=statusBusy;
 }
 function renderStatusPicker(){
  const eligible=availableStatusProducts();
@@ -668,6 +669,7 @@ function renderStatusPicker(){
   const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=statusChosen.has(p.id);
   checkbox.setAttribute('aria-label','Post '+p.name+' to WhatsApp Status');
   checkbox.onchange=()=>{
+   if(statusBusy){checkbox.checked=statusChosen.has(p.id);return;}
    if(checkbox.checked&&statusChosen.size>=MAX_ENQUIRY_IMAGES){
     checkbox.checked=false;setStatusFeedback('Choose up to '+MAX_ENQUIRY_IMAGES+' Status pictures per batch.',true);return;
    }
