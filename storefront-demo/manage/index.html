@@ -1180,7 +1180,8 @@ async function openManager(){
   try{await refresh();reportMerchantActivity('dashboard_open');}
   catch(error){say('Your store is open, but products could not load. '+error.message,true);}
  }catch(error){
-  if(error.status===401||error.status===403)location.replace('/create/');
+  if(error.status===401)location.replace('/login/');
+  else if(error.status===404)location.replace('/create/');
   else say('Could not load your store. '+error.message,true);
  }
 }

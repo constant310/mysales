@@ -249,7 +249,7 @@ test('Merchant can sign in from any device and migrate a legacy store once',asyn
  const login=await read('login/index.html');
  assert.match(create,/id="transfer-form"/);
  assert.match(create,/legacyToken/);
- assert.match(login,/Verify and continue/);
+ assert.match(login,/Verify email &amp; continue/);
  assert.doesNotMatch(login,/id="recover-form"/);
 });
 

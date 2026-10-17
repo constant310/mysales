@@ -154,6 +154,11 @@ export async function ownerDestination(){
   result=await fetch('/api/merchant/me',{headers:{Authorization:'Bearer '+token},cache:'no-store'});
  }catch{throw Error('Could not connect to your store. Check your internet connection.');}
  if(result.ok)return '/manage/';
- if(result.status===401||result.status===404)return '/create/';
+ if(result.status===404)return '/create/';
+ if(result.status===401){
+  try{localStorage.removeItem(SESSION_KEY);}catch{}
+  return '/login/';
+ }
+ if(result.status===403)throw Error('Store access is restricted. Contact mySales support.');
  throw Error('Could not check your store right now. Please try again.');
 }

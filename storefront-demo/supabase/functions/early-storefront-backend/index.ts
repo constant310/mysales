@@ -55,11 +55,9 @@ async function accountUser(request:Request) {
  const match=/^Bearer ([A-Za-z0-9._-]{40,4096})$/.exec(request.headers.get('authorization')||'');
  if(!match)return null;
  const result=await accountAuth.auth.getUser(match[1]);
- return result.error?null:result.data.user;
+ return result.error||!result.data.user?.email_confirmed_at?null:result.data.user;
 }
-async function merchant(request:Request) {
- const user=await accountUser(request);
- if(!user)return null;
+async function merchant(user:{id:string}) {
  const found=await sql!`select s.id as store_id,s.slug,s.public_handle,s.name,s.description,s.whatsapp,s.status,s.whatsapp_template
    from early_storefront.store_owners owner join early_storefront.stores s on s.id=owner.store_id
    where owner.user_id=${user.id} and s.status<>'suspended' limit 1`;
@@ -342,8 +340,16 @@ Deno.serve(async (request: Request) => {
       return result.error?out(result.status,{error:result.error}):out(200,{ok:true,storeId:result.storeId});
     }
     // Every merchant action requires a valid signed-in account and store ownership.
-    const actor=await merchant(request);
-    if(!actor)return out(401,{error:'Sign in to manage your store'});
+    const verified=await accountUser(request);
+    if(!verified)return out(401,{error:'Please verify your email and sign in again'});
+    const actor=await merchant(verified);
+    if(!actor){
+      const isOwner=await sql!`select store_id from early_storefront.store_owners where user_id=${verified.id} limit 1`;
+      if(isOwner.length)return out(403,{error:'Your store is not available. Contact mySales support.'});
+      if(pathname==='/api/merchant/me'&&request.method==='GET')
+        return out(404,{authenticated:true,hasStore:false});
+      return out(403,{error:'Create a store before using this feature'});
+    }
     const id=actor.store_id as string;
     if (pathname === '/api/merchant/me' && request.method==='GET')
       return out(200,{authenticated:true,storeId:id,store:{slug:actor.slug,public_handle:actor.public_handle,name:actor.name,description:actor.description,whatsapp:actor.whatsapp,status:actor.status,whatsapp_template:actor.whatsapp_template}});

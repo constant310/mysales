@@ -47,3 +47,18 @@ test('configuration guide includes both public origins and template setup',async
  assert.match(guide,/SMTP/);
  assert.match(guide,/two controlled test inboxes/);
 });
+
+test('signed-in users without stores are distinct from unverified or invalid sessions',async()=>{
+ const edge=await read('supabase/functions/early-storefront-backend/index.ts');
+ const client=await read('auth/client.mjs');
+ const create=await read('create/index.html');
+ const manage=await read('manage/index.html');
+ assert.match(edge,/email_confirmed_at/);
+ assert.match(edge,/if\(!verified\)return out\(401/);
+ assert.match(edge,/return out\(404,\{authenticated:true,hasStore:false\}\)/);
+ assert.match(client,/if\(result.status===404\)return '\/create\/'/);
+ assert.match(client,/if\(result.status===401\)/);
+ assert.match(create,/if\(response.status===401\)return location.replace\('\/login\/'\)/);
+ assert.match(create,/if\(response.status!==404\)/);
+ assert.match(manage,/if\(error.status===401\)location.replace\('\/login\/'\)/);
+});
