@@ -1,4 +1,4 @@
-/* mySales Storefront: verified passwordless email login with Supabase Auth.
+/* mySales Storefront: password and Google OAuth identity through Supabase Auth.
    This is an intentionally public publishable key, NOT a service-role secret.
    Seller requests are independently authorized by the Edge backend. */
 const API='https://wsxszbdvvtowmrnxdsrp.supabase.co';
@@ -45,9 +45,9 @@ async function authRequest(path,body,accessToken=''){
  const data=await response.json().catch(()=>({}));
  if(!response.ok){
   const serverMessage=String(data.msg||data.error_description||data.message||'').slice(0,200);
-  if(response.status===429)throw Error('Too many attempts. Wait a little before requesting another code.');
+  if(response.status===429)throw Error('Too many attempts. Please wait before trying again.');
   if(response.status===422)throw Error(serverMessage||'Your sign-in link is invalid or has expired.');
-  throw Error(serverMessage||'Could not complete email verification. Please try again.');
+  throw Error(serverMessage||'Authentication failed. Please try again.');
  }
  return data;
 }
@@ -76,6 +76,40 @@ export async function requestSignInLink(email){
  }));}catch{}
  return normalized;
 }
+
+const PASSWORD_MIN_LENGTH=8;
+function checkPassword(password){
+ if(typeof password!=='string'||password.length<PASSWORD_MIN_LENGTH||password.length>128)
+  throw Error('Use a password between 8 and 128 characters.');
+ return password;
+}
+/** Sign in using native Supabase Auth email/password. Never retain a password in storage. */
+export async function signInWithPassword(email,password){
+ const result=await authRequest('token?grant_type=password',{
+  email:normalizeEmail(email),password:checkPassword(password)
+ });
+ saveSession(result);
+ return result;
+}
+/** Password signups require "Confirm email" OFF in the Supabase Email provider.
+    If the project still requires verification, do not treat the account as signed in. */
+export async function signUpWithPassword(email,password){
+ const result=await authRequest('signup',{
+  email:normalizeEmail(email),password:checkPassword(password)
+ });
+ if(!result?.session?.access_token||!result?.session?.refresh_token)
+  throw Error('Account created but email confirmation is still required. Ask the administrator to disable Confirm email in Supabase Auth before using password signup.');
+ saveSession(result.session);
+ return result.session;
+}
+/** Supabase Auth hosts the Google OAuth dance and checks Google's signed identity.
+    Google client ID/secret belong only in the Supabase dashboard, never in this code. */
+export function beginGoogleSignIn(){
+ const redirect=location.origin+'/login/';
+ const endpoint=API+'/auth/v1/authorize?provider=google&redirect_to='+encodeURIComponent(redirect);
+ location.assign(endpoint);
+}
+
 export async function consumeEmailLink(){
  const fragment=new URLSearchParams(location.hash.slice(1));
  const query=new URLSearchParams(location.search);
@@ -87,7 +121,7 @@ export async function consumeEmailLink(){
  }
  if(fragment.has('access_token')||fragment.has('refresh_token')){
   if(!fragment.has('access_token')||!fragment.has('refresh_token'))
-   throw Error('Incomplete sign-in link. Request a new verification code.');
+   throw Error('Incomplete sign-in link. Try signing in again.');
   saveSession({
    access_token:fragment.get('access_token'),
    refresh_token:fragment.get('refresh_token'),

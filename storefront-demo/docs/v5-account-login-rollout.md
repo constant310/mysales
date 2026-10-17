@@ -7,14 +7,14 @@ The V5 implementation is a development branch. **Do not point the production Ren
 service to it until the steps below are complete.**
 
 ## Routes
-- `/login/`: default Supabase one-time email sign-in link; both signup/login use one screen.
+- `/login/`: Google Sign-In or email/password sign in and signup, without mandatory password-email confirmation when configured.
 - `/create/`: sellers without an existing store, authenticated only.
 - `/manage/`: sellers with an owned store, authenticated only.
 - `/{public_handle}`: public live store, no login; preserves product list, cart, quantities and WhatsApp checkout.
 - `/buy/` and `/explore/`: reserved; do not present navigation to customers yet.
 
 ## Owner security
-Supabase Auth establishes user identity using default verified email magic links.
+Supabase Auth establishes the session through Google OAuth or password login. For password signup, Supabase Confirm email must be OFF in project settings; this implicitly marks email addresses confirmed.
 Backend validates each access token using Supabase Auth /user and checks
 `early_storefront.store_owners` for the correct store. Never trust a store ID
 provided by a browser; legacy management tokens are not valid for routine
@@ -27,10 +27,7 @@ an isolated internal access path in this phase.
 ## Release checklist
 1. Review migration; apply `sql/20261017_account_store_owners.sql` to Supabase
    project `wsxszbdvvtowmrnxdsrp` after backup and rollback plan.
-2. Keep Supabase Auth's default Magic Link and Confirm signup email templates;
-   allow exact `/login/` redirect URLs on the official and Render origins.
-   Supabase default email sending is restricted to organization/team inboxes,
-   so production merchant signup will eventually require custom SMTP.
+2. Configure Google OAuth (Google Cloud Client ID/Secret stored in Supabase) and set Confirm email OFF for instant email/password signup. This shared Supabase setting affects other apps using the project; weigh account-takeover and recovery risks. Exact /login/ redirects must be allowlisted.
 3. Deploy the updated `early-storefront-backend` and `early-storefront-signup`
    Edge Functions using verified JWT signatures / Supabase `auth.getUser`.
 4. Test two distinct accounts and both owned/unowned store cases, all protected

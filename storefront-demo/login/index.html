@@ -1,33 +1,35 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="referrer" content="no-referrer"><meta name="theme-color" content="#1C8220">
-<meta name="robots" content="noindex,nofollow"><title>Sign in or create account | mySales</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer"><meta name="theme-color" content="#1C8220"><meta name="robots" content="noindex,nofollow">
+<title>Sign in or create account | mySales</title>
 <style>
-:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#F5FAFD;color:#27372d}
-*{box-sizing:border-box}body{margin:0;min-height:100svh}
-a{color:#1C8220;text-decoration:none;font-weight:800}
+:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#F5FAFD;color:#27372D}
+*{box-sizing:border-box}body{margin:0;min-height:100svh}a{color:#1C8220;text-decoration:none;font-weight:800}
 header{max-width:1100px;margin:auto;padding:22px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px}
-.logo{font-size:1.35rem;font-weight:950;color:#203c2b;letter-spacing:-.065em}.logo b{color:#1C8220}
+.logo{font-size:1.35rem;font-weight:950;color:#203C2B;letter-spacing:-.065em}.logo b{color:#1C8220}
 header>a:last-child{font-size:.85rem}
-main{max-width:485px;margin:6vh auto 30px;padding:0 16px}
-.panel{background:#fff;border:1px solid #dcece1;box-shadow:0 18px 60px #155b2620;border-radius:22px;padding:30px}
-.kicker{font-weight:900;font-size:.75rem;letter-spacing:.07em;color:#15803D;text-transform:uppercase}
-h1{font-size:clamp(1.9rem,6vw,2.35rem);letter-spacing:-.065em;line-height:1.12;margin:10px 0 11px}
-p{font-size:.91rem;color:#64766b;line-height:1.65;margin:0 0 18px}
-label{display:block;font-size:.88rem;font-weight:850;margin:18px 0 8px}
-input{width:100%;border:1px solid #cddfd2;background:#fcfefc;border-radius:12px;padding:13px 15px;min-height:53px;font-size:1rem;color:#263c2c}
-input:focus{outline:3px solid #bbecc8;border-color:#16A34A}
-button{font:inherit;cursor:pointer}
-.primary{display:block;width:100%;border:0;background:#1C8220;border-radius:12px;color:white;padding:14px 18px;min-height:51px;font-weight:850;margin:18px 0 4px}
-.primary:hover{background:#15803D}.primary:disabled,.link-button:disabled{opacity:.52;cursor:not-allowed}
-.link-button{background:transparent;border:0;padding:8px 0;color:#16783c;font-weight:800}
-.controls{display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-top:12px}
-.email-address{padding:10px 13px;border:1px solid #d3ead9;background:#f4fbf5;border-radius:11px;font-size:.88rem;color:#235f36;overflow-wrap:anywhere}
-.tip{background:#f0fdf4;border:1px solid #cae8d2;padding:14px;border-radius:12px;font-size:.86rem;line-height:1.6;color:#356349;margin:19px 0}
-#status{min-height:31px;font-size:.86rem;margin:12px 0 0;color:#177a36}
-#status[data-error="true"]{color:#ad3a31}
-.note{font-size:.77rem;color:#718477;line-height:1.7;border-top:1px solid #edf2ee;padding-top:15px;margin:20px 0 0}
+main{max-width:485px;margin:5vh auto 30px;padding:0 16px}
+.panel{background:#fff;border:1px solid #DCECE1;box-shadow:0 18px 60px #155B2620;border-radius:22px;padding:30px}
+.kicker{font-weight:900;font-size:.76rem;letter-spacing:.075em;color:#15803D;text-transform:uppercase}
+h1{font-size:clamp(1.9rem,6vw,2.35rem);letter-spacing:-.065em;line-height:1.13;margin:10px 0 11px}
+p{font-size:.92rem;color:#64766B;line-height:1.65;margin:0 0 17px}
+button,input{font:inherit}button{cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}
+.google{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;border:1px solid #C9D7CD;border-radius:12px;background:white;padding:14px;min-height:52px;color:#263B2D;font-weight:800}
+.google:hover{background:#F2FAF4}.gicon{font-family:Arial,sans-serif;font-size:1.2rem;font-weight:950;color:#4285F4}
+.or{display:flex;align-items:center;gap:11px;color:#84988A;font-size:.75rem;text-transform:uppercase;margin:23px 0}
+.or:before,.or:after{content:"";height:1px;flex:1;background:#E4ECE5}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;background:#EFF6F0;border-radius:12px;padding:5px;margin:12px 0 20px}
+.tab{border:0;background:transparent;color:#68796D;border-radius:9px;min-height:42px;font-weight:800}
+.tab[aria-selected="true"]{background:#fff;box-shadow:0 2px 8px #234D3118;color:#1C8220}
+label{display:block;font-size:.88rem;font-weight:800;margin:17px 0 8px}
+input{width:100%;border:1px solid #CDDFD2;background:#FCFEFC;border-radius:12px;padding:13px 15px;min-height:53px;font-size:1rem;color:#263C2C}
+input:focus{outline:3px solid #BBECC8;border-color:#16A34A}
+.primary{display:block;width:100%;border:0;background:#1C8220;border-radius:12px;color:white;padding:14px 18px;min-height:51px;font-weight:850;margin:22px 0 4px}
+.primary:hover{background:#15803D}
+.hint{font-size:.78rem;color:#708476;line-height:1.6;margin:8px 0 0}
+#status{min-height:30px;font-size:.86rem;margin:14px 0 0;color:#177A36}
+#status[data-error="true"]{color:#AD3A31}
+.note{font-size:.79rem;color:#718477;line-height:1.7;border-top:1px solid #EDF2EE;padding-top:15px;margin:19px 0 0}
 [hidden]{display:none!important}
 @media(max-width:540px){main{margin:28px auto}.panel{padding:23px;border-radius:18px}header{padding:18px 16px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
@@ -36,78 +38,73 @@ button{font:inherit;cursor:pointer}
 <main><section class="panel" aria-labelledby="title">
 <div class="kicker">Free online store</div>
 <h1 id="title">Welcome to mySales</h1>
-<p id="help">Sign in or create an account with your email. Only store owners need an account; customers can browse without signing in.</p>
-<form id="email-form">
+<p>Sign in to manage your store, or create a new seller account. Customers can browse stores without logging in.</p>
+<button class="google" id="google" type="button"><span class="gicon" aria-hidden="true">G</span> Continue with Google</button>
+<div class="or">or use your email</div>
+<div class="tabs" role="tablist" aria-label="Email account options">
+<button class="tab" type="button" id="tab-signin" role="tab" aria-selected="true">Sign in</button>
+<button class="tab" type="button" id="tab-signup" role="tab" aria-selected="false">Create account</button>
+</div>
+<form id="password-form">
 <label for="email">Email address</label>
-<input id="email" type="email" autocomplete="email" required maxlength="254" placeholder="name@example.com">
-<button type="submit" id="send" class="primary">Send sign-in link</button>
+<input id="email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
+<label for="password">Password</label>
+<input id="password" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required>
+<div id="confirm-wrap" hidden>
+<label for="confirm-password">Confirm password</label>
+<input id="confirm-password" name="confirm-password" type="password" autocomplete="new-password" minlength="8" maxlength="128">
+</div>
+<p class="hint" id="password-hint">Sign in using your mySales password. No OTP or email code needed.</p>
+<button class="primary" id="submit-password" type="submit">Sign in</button>
 </form>
-<div id="link-panel" hidden>
-<div class="email-address" id="destination-email"></div>
-<div class="tip"><strong>Check your inbox.</strong> Open the email from Supabase and tap its sign-in link. You will return to mySales automatically.</div>
-<div class="controls">
-<button id="resend" class="link-button" type="button" disabled>Resend link</button>
-<button id="change" class="link-button" type="button">Change email</button>
-</div>
-<p class="note" style="border:0;margin-top:12px;padding:0">It may take a moment to arrive. Check Spam or Promotions. The link expires; request a new one if needed.</p>
-</div>
 <p id="status" role="status" aria-live="polite"></p>
-<p class="note">Your store is attached to your verified email account. Never forward a sign-in link to anyone. No password or custom email template is required.</p>
+<p class="note">By continuing, you agree to use your account only to manage stores you own. Keep your password private. Password recovery by email will require an email sender to be configured later.</p>
 </section></main>
 <script type="module">
-import {requestSignInLink,consumeEmailLink,ownerDestination,signedIn,pendingEmail,secondsUntilResend} from '/auth/client.mjs';
+import {signInWithPassword,signUpWithPassword,beginGoogleSignIn,consumeEmailLink,ownerDestination,signedIn} from '/auth/client.mjs';
 const $=id=>document.getElementById(id);
-let email='';
-let busy=false;
+let mode='signin',busy=false;
 function say(message,error=false){$('status').textContent=message;$('status').dataset.error=String(error);}
-function showWaiting(value){
- email=value;$('email').value=value;
- $('destination-email').textContent='Sign-in link requested for '+value;
- $('email-form').hidden=true;$('link-panel').hidden=false;
- $('title').textContent='Check your email';
- $('help').textContent='Tap the one-time sign-in link in your email to continue.';
- refreshResend();
-}
-function showEmail(){
- $('email-form').hidden=false;$('link-panel').hidden=true;
- $('title').textContent='Welcome to mySales';
- $('help').textContent='Sign in or create an account with your email. Customers can shop without signing in.';
+function setMode(next){
+ if(busy)return;
+ mode=next;
+ $('tab-signin').setAttribute('aria-selected',String(next==='signin'));
+ $('tab-signup').setAttribute('aria-selected',String(next==='signup'));
+ $('confirm-wrap').hidden=next!=='signup';
+ $('confirm-password').required=next==='signup';
+ $('password').autocomplete=next==='signup'?'new-password':'current-password';
+ $('password-hint').textContent=next==='signup'
+  ?'Choose a password of at least 8 characters. Email confirmation is not required when the Supabase project setting is disabled.'
+  :'Sign in using your mySales password. No OTP or email code needed.';
+ $('submit-password').textContent=next==='signup'?'Create my account':'Sign in';
+ $('password').value='';$('confirm-password').value='';
  say('');
 }
-function refreshResend(){
- const seconds=secondsUntilResend(email);
- $('resend').disabled=busy||seconds>0;
- $('resend').textContent=seconds>0?'Resend link in '+seconds+'s':'Resend link';
-}
-setInterval(()=>{if(!$('link-panel').hidden)refreshResend();},1000);
-async function destination(){
- say('Checking your store…');
- const route=await ownerDestination();
- location.replace(route);
-}
+async function go(){say('Opening your store…');location.replace(await ownerDestination());}
 (async()=>{
- try{
-  if(await consumeEmailLink()||signedIn()){await destination();return;}
-  const saved=pendingEmail();
-  if(saved){showWaiting(saved);say('If the email has not arrived, you can resend the link below.');}
- }catch(error){showEmail();say(error.message,true);}
-})();
-$('email-form').addEventListener('submit',async(event)=>{
- event.preventDefault();if(busy)return;
- busy=true;$('send').disabled=true;say('Requesting your sign-in link…');
- try{
-  const confirmed=await requestSignInLink($('email').value);
-  showWaiting(confirmed);
-  say('Request submitted. Open the sign-in link in your email.');
- }catch(error){say(error.message,true);}
- finally{busy=false;$('send').disabled=false;refreshResend();}
-});
-$('resend').addEventListener('click',async()=>{
- if(busy||secondsUntilResend(email)>0)return;
- busy=true;refreshResend();say('Requesting a new link…');
- try{await requestSignInLink(email);say('New link requested. Use the most recent email.');}
+ try{if(await consumeEmailLink()||signedIn())await go();}
  catch(error){say(error.message,true);}
- finally{busy=false;refreshResend();}
+})();
+$('tab-signin').addEventListener('click',()=>setMode('signin'));
+$('tab-signup').addEventListener('click',()=>setMode('signup'));
+$('google').addEventListener('click',()=>{
+ if(busy)return;
+ busy=true;$('google').disabled=true;
+ say('Taking you to Google…');
+ try{beginGoogleSignIn();}catch(error){busy=false;$('google').disabled=false;say(error.message,true);}
 });
-$('change').addEventListener('click',()=>{if(busy)return;email='';showEmail();$('email').focus();});
+$('password-form').addEventListener('submit',async(event)=>{
+ event.preventDefault();if(busy)return;
+ const email=$('email').value, password=$('password').value;
+ if(mode==='signup'&&password!==$('confirm-password').value){say('Passwords do not match.',true);return;}
+ busy=true;$('submit-password').disabled=true;$('google').disabled=true;
+ say(mode==='signup'?'Creating your account…':'Signing in…');
+ try{
+  if(mode==='signup')await signUpWithPassword(email,password);
+  else await signInWithPassword(email,password);
+  $('password').value='';$('confirm-password').value='';
+  await go();
+ }catch(error){say(error.message,true);}
+ finally{busy=false;$('submit-password').disabled=false;$('google').disabled=false;}
+});
 </script></body></html>
