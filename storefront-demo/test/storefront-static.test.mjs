@@ -142,7 +142,7 @@ test('focused landing and demo do not show competing marketing messages',async()
  const signup=await read('create/index.html');
  const catalogue=await read('s/index.html');
  assert.match(home,/Your business deserves its/);
- assert.match(home,/href="\/create\/"/);
+ assert.match(home,/href="\/login\/"/);
  assert.match(signup,/optional-details/);
  assert.doesNotMatch(home,/faq/);
  assert.doesNotMatch(catalogue,/id="floating"/);
@@ -250,7 +250,7 @@ test('Merchant can sign in from any device and migrate a legacy store once',asyn
  assert.match(create,/id="transfer-form"/);
  assert.match(create,/legacyToken/);
  assert.match(login,/Verify and continue/);
- assert.doesNotMatch(login,/private management link/);
+ assert.doesNotMatch(login,/id="recover-form"/);
 });
 
 test('Login uses renewable account tokens instead of permanent store capabilities',async()=>{
