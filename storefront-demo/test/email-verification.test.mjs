@@ -17,7 +17,7 @@ test('default Supabase sign-in link replaces code-based verification UI',async()
  assert.doesNotMatch(login,/id="code"|id="verify-form"|type="password"/);
 });
 
-test('default Supabase Auth is used without requiring a custom email template or SMTP',async()=>{
+test('Supabase Auth remains native while Resend handles the mailer',async()=>{
  const source=await read('auth/client.mjs');
  assert.match(source,/export async function requestSignInLink/);
  assert.match(source,/authRequest\('otp\?redirect_to='/);
@@ -31,14 +31,20 @@ test('default Supabase Auth is used without requiring a custom email template or
  assert.doesNotMatch(source,/SUPABASE_SERVICE_ROLE_KEY|sb_secret_/);
 });
 
-test('default email restrictions and URL configuration are clearly documented',async()=>{
+test('Resend SMTP configuration and branded link template are documented',async()=>{
  const guide=await read('docs/email-verification-setup.md');
- assert.match(guide,/Default Supabase Auth/);
- assert.match(guide,/team member/);
- assert.match(guide,/store\.mysalesofficial\.com\/login\//);
- assert.match(guide,/mysales-early-storefront-branch\.onrender\.com\/login\//);
- assert.match(guide,/default email templates/);
- assert.match(guide,/production/);
+ const setup=await read('docs/resend-supabase-setup.md');
+ const template=await read('docs/auth-verification-email-template.html');
+ assert.match(guide,/Resend/);
+ assert.match(setup,/no-reply@mysalesofficial.com/);
+ assert.match(setup,/smtp.resend.com/);
+ assert.match(setup,/resend/);
+ assert.match(setup,/465/);
+ assert.match(setup,/mysales-v5-email-staging.onrender.com\/login\//);
+ assert.match(setup,/Keep the production Render branch unchanged/i);
+ assert.match(template,/\{\{ \.ConfirmationURL \}\}/);
+ assert.doesNotMatch(template,/\{\{ \.Token \}\}/);
+ assert.match(template,/Sign in securely/);
 });
 
 test('verified sellers without stores are distinct from invalid or unverified sessions',async()=>{
