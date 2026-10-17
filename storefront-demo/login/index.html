@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1C8220"><meta name="robots" content="noindex,nofollow">
+<title>Sign in | mySales</title><style>
+:root{font-family:Inter,system-ui,sans-serif;color:#27372D;background:#F5FAFD}
+*{box-sizing:border-box}body{margin:0;min-height:100svh}
+header{padding:20px max(20px,calc((100% - 1080px)/2));display:flex;justify-content:space-between;align-items:center}
+a{color:#167d3b;text-decoration:none;font-weight:750}
+.brand{font-weight:950;color:#193b28;font-size:1.35rem;letter-spacing:-.04em}.brand b{color:#1C8220}
+main{max-width:470px;margin:5vh auto;padding:0 17px 50px}
+.card{background:white;border:1px solid #deece0;border-radius:22px;padding:29px;box-shadow:0 17px 50px #1b6b3020}
+h1{font-size:2rem;letter-spacing:-.055em;margin:7px 0 12px}
+p{font-size:.93rem;color:#617469;line-height:1.6}label{display:block;margin:23px 0 8px;font-weight:750}
+input{padding:13px;border:1px solid #c6dccb;border-radius:11px;width:100%;font:inherit;min-height:51px}
+input:focus{outline:3px solid #bbebc8}button{cursor:pointer}
+.primary{border:0;border-radius:11px;background:#1C8220;color:#fff;font:inherit;font-weight:850;padding:13px;width:100%;margin-top:17px;min-height:50px}
+.primary:disabled{opacity:.55}.note{font-size:.82rem;color:#6e8576}.message{font-size:.86rem;min-height:26px;color:#ab2f2b;margin-top:10px}
+[hidden]{display:none!important}.secondary{background:none;border:0;text-decoration:underline;color:#1C8220;font-weight:700;margin-top:12px}
+@media(max-width:540px){main{margin:35px auto}.card{padding:23px}}
+</style></head><body>
+<header><a href="/" class="brand">my<b>Sales</b></a><a href="/">About mySales</a></header>
+<main><section class="card">
+<span class="note">A simple, secure way to run your store</span>
+<h1>Welcome to mySales</h1>
+<p>Sign in or create your account to manage your online store. Customers can shop without signing in.</p>
+<form id="email-form">
+<label for="email">Your email address</label><input id="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+<button class="primary" type="submit" id="send">Continue with email</button>
+</form>
+<form id="verify-form" hidden>
+<label for="code">Verification code from your email</label>
+<input id="code" inputmode="numeric" autocomplete="one-time-code" placeholder="Enter the email code" minlength="6" required>
+<button class="primary" id="verify" type="submit">Verify and continue</button>
+<button class="secondary" type="button" id="change">Use another email</button>
+</form>
+<p class="message" id="message" role="status" aria-live="polite"></p>
+<p class="note">No private management links. One account securely manages your business.</p>
+</section></main>
+<script type="module">
+import {requestCode,verifyCode,consumeEmailLink,ownerDestination,signedIn} from '/auth/client.mjs';
+const $=id=>document.getElementById(id),message=$('message');
+async function go(){message.textContent='Finding your store…';location.replace(await ownerDestination());}
+(async()=>{try{if(await consumeEmailLink()||signedIn())await go();}catch(error){message.textContent=error.message;}})();
+$('email-form').onsubmit=async e=>{
+ e.preventDefault();const b=$('send');b.disabled=true;message.textContent='Sending a verification email…';
+ try{await requestCode($('email').value);$('email-form').hidden=true;$('verify-form').hidden=false;
+  message.textContent='Check your inbox. Enter the code sent to '+$('email').value+'. If you receive a sign-in link, you can tap that instead.';}
+ catch(error){message.textContent=error.message;}finally{b.disabled=false;}
+};
+$('verify-form').onsubmit=async e=>{
+ e.preventDefault();const b=$('verify');b.disabled=true;message.textContent='Verifying…';
+ try{await verifyCode($('email').value,$('code').value);await go();}
+ catch(error){message.textContent=error.message;b.disabled=false;}
+};
+$('change').onclick=()=>{$('verify-form').hidden=true;$('email-form').hidden=false;message.textContent='';};
+</script></body></html>
