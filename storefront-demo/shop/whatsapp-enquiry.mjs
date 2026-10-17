@@ -75,31 +75,32 @@ async function imageForEnquiry(raw){
  }
 }
 /** Portrait-oriented layout; centre a single card or an incomplete last row. */
-export function enquiryPortraitLayout(count){
+export function enquiryPortraitLayout(count,variant='enquiry'){
  const total=Math.max(1,Math.min(6,Math.floor(Number(count)||1)));
  const width=1080,header=230,footer=125,gap=24,side=44,rows=Math.ceil(total/2);
  const single=total===1,cardHeight=single?900:575;
  const cardWidth=single?820:(width-2*side-gap)/2;
  const gridHeight=rows*cardHeight+(rows-1)*gap;
- const height=Math.max(1440,header+gridHeight+footer+110);
+ const height=variant==='status'?1920:Math.max(1440,header+gridHeight+footer+110);
  const startY=Math.round(header+(height-header-footer-gridHeight)/2);
  const cards=Array.from({length:total},(_,index)=>{
   const row=Math.floor(index/2),col=index%2;
   const lone=single||(total%2===1&&index===total-1);
   const x=lone?Math.round((width-cardWidth)/2):side+col*(cardWidth+gap);
-  return {x,y:startY+row*(cardHeight+gap),w:cardWidth,h:cardHeight,single};
+  return variant==='status'?{x:110,y:414,w:860,h:1090,single:true}:{x,y:startY+row*(cardHeight+gap),w:cardWidth,h:cardHeight,single};
  });
- return {width,height,header,footer,cards};
+ return {width,height,header:variant==='status'?290:header,footer:variant==='status'?230:footer,cards};
 }
 
 /** Builds one portrait JPEG for exactly one selected product.
      This never combines multiple product photos into a collage. */
-export async function prepareEnquiryPicture(storeName,items){
+export async function prepareEnquiryPicture(storeName,items,{variant='enquiry'}={}){
  if(items.length!==1)return null;
  const selected=items.slice(0,6),loaded=await Promise.all(selected.map(p=>imageForEnquiry(p.image_path)));
  const imageCount=loaded.filter(Boolean).length;
  if(!imageCount)return null;
- const layout=enquiryPortraitLayout(selected.length);
+ const isStatus=variant==='status';
+ const layout=enquiryPortraitLayout(selected.length,variant);
  const {width,height}=layout;
  const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
  const ctx=canvas.getContext('2d',{alpha:false});
@@ -108,14 +109,14 @@ export async function prepareEnquiryPicture(storeName,items){
   ctx.fillStyle='#F2F7F3';ctx.fillRect(0,0,width,height);
   ctx.fillStyle='#14562F';ctx.fillRect(0,0,width,layout.header);
   ctx.fillStyle='#CBF2D6';ctx.font='bold 25px Arial,sans-serif';
-  ctx.fillText('WHATSAPP PRODUCT ENQUIRY',45,56,990);
+  ctx.fillText(isStatus?'AVAILABLE IN OUR STORE':'WHATSAPP PRODUCT ENQUIRY',45,56,990);
   ctx.fillStyle='#FFFFFF';ctx.font='bold 55px Arial,sans-serif';
   fitLines(ctx,storeName,45,133,990,57,1);
   ctx.fillStyle='#DBF5E2';ctx.font='26px Arial,sans-serif';
-  ctx.fillText('Photos, quantities and prices',45,187);
+  ctx.fillText(isStatus?'Discover something you will love':'Photos, quantities and prices',45,187);
   selected.forEach((p,i)=>{
    const {x,y,w,h,single}=layout.cards[i];
-   const mediaHeight=single?610:350;
+   const mediaHeight=isStatus?745:(single?610:350);
    const mediaX=x+17,mediaY=y+17,mediaW=w-34;
    ctx.fillStyle='#FFFFFF';ctx.fillRect(x,y,w,h);
    ctx.fillStyle='#F3F8F3';ctx.fillRect(mediaX,mediaY,mediaW,mediaHeight);
@@ -130,14 +131,26 @@ export async function prepareEnquiryPicture(storeName,items){
     ctx.fillText('Product photo not available',x+w/2,mediaY+mediaHeight/2,w-54);
     ctx.textAlign='left';
    }
-   ctx.fillStyle='#233A2A';ctx.font=single?'bold 42px Arial,sans-serif':'bold 29px Arial,sans-serif';
+   ctx.fillStyle='#233A2A';ctx.font=isStatus?'bold 46px Arial,sans-serif':(single?'bold 42px Arial,sans-serif':'bold 29px Arial,sans-serif');
    fitLines(ctx,p.name,x+24,mediaY+mediaHeight+(single?72:61),w-48,single?49:35,2);
-   ctx.fillStyle='#13843B';ctx.font=single?'bold 39px Arial,sans-serif':'bold 28px Arial,sans-serif';
+   ctx.fillStyle='#13843B';ctx.font=isStatus?'bold 46px Arial,sans-serif':(single?'bold 39px Arial,sans-serif':'bold 28px Arial,sans-serif');
    const total=Number(p.quantity)*Number(p.price);
-   ctx.fillText(p.quantity+' × '+(p.unit||'piece')+'  ·  ₦'+total.toLocaleString('en-NG'),x+24,y+h-45,w-48);
+   ctx.fillText(isStatus?'₦'+Number(p.price).toLocaleString('en-NG'):p.quantity+' × '+(p.unit||'piece')+'  ·  ₦'+total.toLocaleString('en-NG'),x+24,y+h-45,w-48);
   });
-  ctx.fillStyle='#244D31';ctx.font='bold 23px Arial,sans-serif';
-  ctx.fillText('Made with mySales',30,height-45,920);
+  if(isStatus){
+   // mySales logo matches the existing mS brand mark in the dashboard.
+   const footY=height-188;
+   ctx.fillStyle='#14562F';ctx.fillRect(0,footY,width,188);
+   const logoX=365,logoY=footY+43;
+   ctx.fillStyle='#16A34A';ctx.fillRect(logoX,logoY,94,94);
+   ctx.fillStyle='#FFFFFF';ctx.textAlign='center';
+   ctx.font='bold 53px Arial,sans-serif';ctx.fillText('mS',logoX+47,logoY+65,90);
+   ctx.textAlign='left';ctx.font='bold 54px Arial,sans-serif';
+   ctx.fillText('mySales',logoX+114,logoY+66,510);
+  }else{
+   ctx.fillStyle='#244D31';ctx.font='bold 23px Arial,sans-serif';
+   ctx.fillText('Made with mySales',30,height-45,920);
+  }
   const blob=await new Promise((resolve,reject)=>{
    try{canvas.toBlob(b=>b?resolve(b):reject(Error('Unable to create picture')),'image/jpeg',.84);}
    catch(error){reject(error);}
@@ -172,4 +185,28 @@ export async function prepareEnquiryPictures(storeName,items){
   }
  }
  return result;
+}
+
+
+/** Each WhatsApp Status file is a standalone 9:16 picture that never displays
+ * inventory quantities. Customer enquiry files retain their quantities.
+ */
+export async function prepareStatusPictures(storeName,products){
+ const files=[];
+ for(const [index,product] of (Array.isArray(products)?products:[]).slice(0,MAX_ENQUIRY_IMAGES).entries()){
+  if(!photoProxyPath(product.image_path))continue;
+  const unit=product.units?.[0];
+  if(!unit||!Number.isFinite(Number(unit.price)))continue;
+  try{
+   const file=await prepareEnquiryPicture(storeName,[{
+    productId:product.id,name:product.name,image_path:product.image_path,
+    price:Number(unit.price),unit:unit.name||'piece',quantity:1
+   }],{variant:'status'});
+   if(!file)continue;
+   const safeName=String(product.name||'product').toLowerCase().replace(/[^a-z0-9]+/g,'-')
+    .replace(/^-|-$/g,'').slice(0,32)||'product';
+   files.push(new File([file],'mysales-status-'+String(index+1).padStart(2,'0')+'-'+safeName+'.jpg',{type:'image/jpeg'}));
+  }catch{}
+ }
+ return files;
 }
