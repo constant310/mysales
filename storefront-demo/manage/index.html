@@ -345,6 +345,13 @@ main{max-width:870px;padding-top:19px}
 .status-preview a{display:block;text-decoration:none;text-align:center;padding:9px;border-radius:8px;background:#E6F6EB;color:#18743B;font-size:.78rem;font-weight:850}
 #status-feedback{font-size:.8rem;color:#52765D;line-height:1.6;margin:9px 0}
 .status-guide{margin:13px 0 0;font-size:.75rem;line-height:1.65;color:#718373}
+.status-link-tools{margin:15px 0 8px;background:#F3FBF5;border:1px solid #D8E9DE;padding:15px;border-radius:12px}
+.status-link-tools h3{margin:0 0 5px;font-size:.91rem;color:#214F30}
+.status-link-tools p{font-size:.78rem;line-height:1.55;color:#647B6A;margin:0 0 10px}
+.status-link-tools a{font-size:.78rem;word-break:break-all;color:#126B34;font-weight:800}
+.status-link-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:11px}
+.status-link-actions .btn{min-height:42px;font-size:.79rem;flex:1;min-width:165px}
+.status-link-tools .status-guide{margin-top:11px;font-size:.74rem}
 @media(max-width:500px){.status-grid{grid-template-columns:1fr}.status-actions .btn{min-width:100%}}
 </style></head><body>
 <header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><button id="exit" class="head-btn" style="margin-left:auto" hidden>Sign out</button></header>
@@ -386,7 +393,17 @@ main{max-width:870px;padding-top:19px}
  <div class="status-actions"><button type="button" class="btn" id="status-prepare" disabled>Prepare Status pictures</button><button type="button" class="btn btn-outline" id="status-share" disabled>Share to WhatsApp Status</button></div>
  <p id="status-feedback" role="status" aria-live="polite">Select products to create your Status pictures.</p>
  <div id="status-previews" class="status-previews" aria-label="Prepared Status pictures"></div>
- <p class="status-guide">After tapping <strong>Share to WhatsApp Status</strong>, select <strong>WhatsApp → My Status</strong> in your phone's sharing menu. If your phone does not support multiple images, save each image above and post from WhatsApp. Posting requires your confirmation; mySales cannot post automatically.</p>
+ <div class="status-link-tools" aria-labelledby="status-link-title">
+  <h3 id="status-link-title">Add a link to your online shop</h3>
+  <p>Copy your public shop link and paste it into WhatsApp Status. Customers can then visit your catalogue directly.</p>
+  <a id="status-shop-url" target="_blank" rel="noopener noreferrer" href="https://store.mysalesofficial.com/">Your shop link</a>
+  <div class="status-link-actions">
+   <button class="btn" type="button" id="status-copy-link">Copy link for Status</button>
+   <button class="btn btn-outline" type="button" id="status-share-link">Share shop link</button>
+  </div>
+  <p class="status-guide">For a reliably <strong>clickable</strong> link, publish a second <strong>text Status</strong> containing the URL, immediately after your product photo Status. You can also paste the link onto a photo Status using WhatsApp's text tool, but tap-through behavior may vary by app version.</p>
+ </div>
+ <p class="status-guide">Tap <strong>Share to WhatsApp Status</strong>, choose WhatsApp, then select <strong>My Status</strong>. If your device doesn't support multiple images, download them individually. Photos don't contain clickable hotspots, and WhatsApp requires you to confirm posting.</p>
 </section>
 <section class="settings-hub" aria-labelledby="settings-heading">
   <div class="settings-intro"><span class="settings-overline">STORE MANAGEMENT</span><h2 id="settings-heading">Store settings</h2><p>Keep your shop details and customer messages in one place.</p></div>
@@ -638,6 +655,36 @@ const availableStatusProducts=()=>products.filter(p=>
  &&(!p.track_stock||Number(p.stock)>0)
 );
 const pickedStatusProducts=()=>availableStatusProducts().filter(p=>statusChosen.has(p.id));
+function statusShopUrl(){
+ const handle=String(currentStore?.public_handle||currentStore?.slug||'').trim();
+ return handle?'https://store.mysalesofficial.com/'+encodeURIComponent(handle):'';
+}
+function statusLinkMessage(){
+ return 'See everything '+currentStore.name+' has available. Browse products and prices: '+statusShopUrl();
+}
+function refreshStatusShopLink(){
+ const url=statusShopUrl();
+ const link=$('status-shop-url');link.textContent=url||'Shop link unavailable';
+ if(url){link.href=url;link.removeAttribute('aria-disabled');}
+ else{link.removeAttribute('href');link.setAttribute('aria-disabled','true');}
+ $('status-copy-link').disabled=!url;
+ $('status-share-link').disabled=!url;
+}
+$('status-copy-link').onclick=async()=>{
+ const url=statusShopUrl();if(!url)return;
+ try{
+  await navigator.clipboard.writeText(statusLinkMessage());
+  setStatusFeedback('Shop link copied. Open WhatsApp → Updates → text Status and paste it for a tappable link.');
+ }catch{window.prompt('Copy this shop link for your WhatsApp Status:',statusLinkMessage());}
+};
+$('status-share-link').onclick=()=>{
+ const url=statusShopUrl();if(!url)return;
+ if(typeof navigator.share==='function'){
+  try{void navigator.share({title:currentStore.name+' online shop',text:statusLinkMessage(),url})
+   .catch(error=>{if(error?.name!=='AbortError')window.prompt('Copy the shop link into a WhatsApp text Status:',url);});}
+  catch{window.prompt('Copy the shop link into a WhatsApp text Status:',url);}
+ }else window.prompt('Copy the shop link into a WhatsApp text Status:',url);
+};
 function setStatusFeedback(message,error=false){
  $('status-feedback').textContent=message;
  $('status-feedback').style.color=error?'#A13E35':'#52765D';
@@ -703,7 +750,7 @@ $('status-prepare').onclick=async()=>{
  discardStatusFiles();statusBusy=true;refreshStatusButtons();
  setStatusFeedback('Preparing '+picked.length+' portrait Status picture'+(picked.length===1?'':'s')+'…');
  try{
-  const files=await prepareStatusPictures(currentStore.name,picked);
+  const files=await prepareStatusPictures(currentStore.name,picked,statusShopUrl());
   statusFiles=files;
   for(const [index,file] of files.entries()){
    const url=URL.createObjectURL(file);statusPreviewUrls.push(url);
@@ -1372,6 +1419,7 @@ async function openManager(){
   form.elements.namedItem('status').value=currentStore.status;
   $('whatsapp-template').value=currentStore.whatsapp_template||defaultWhatsApp;
   businessBaseline=businessValues();whatsappBaseline=$('whatsapp-template').value;
+  refreshStatusShopLink();
   updateBusinessSave();updateWhatsAppSave();updateHero();
   $('app').hidden=false;$('exit').hidden=false;
   say(new URLSearchParams(location.search).has('welcome')
