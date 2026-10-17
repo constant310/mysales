@@ -155,6 +155,10 @@ $('transfer-form').onsubmit=async e=>{
   const data=await response.json().catch(()=>({}));
   if(!response.ok)throw Error(data.error||'Could not transfer store');
   $('old-link').value='';
+  try{
+   sessionStorage.removeItem('mysales_legacy_claim_proof');
+   localStorage.removeItem('mysales_private_management_token');
+  }catch{}
   location.replace('/manage/');
  }catch(error){$('transfer-msg').textContent=error.message;button.disabled=false;}
 };
