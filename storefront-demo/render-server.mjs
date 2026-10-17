@@ -178,6 +178,27 @@ http.createServer(async(req,res)=>{
  }
 }).listen(Number(process.env.PORT)||10000,'0.0.0.0',()=>{
  console.log('Early Storefront is listening; backend is Supabase Edge');
+ // Staging-only OAuth configuration smoke test: log only public OAuth metadata.
+ // Never log the authorization state, cookies, entire Google URL, or OAuth secrets.
+ if(staging){
+  (async()=>{
+   try{
+    const callback=new URL('/login/','https://mysales-v5-email-staging.onrender.com').href;
+    const authorize='https://wsxszbdvvtowmrnxdsrp.supabase.co/auth/v1/authorize?provider=google&redirect_to='+encodeURIComponent(callback);
+    const first=await fetch(authorize,{redirect:'manual',signal:AbortSignal.timeout(10000)});
+    const next=first.headers.get('location');
+    const google=next?new URL(next):null;
+    const safe={supabaseStatus:first.status,providerHost:google?.hostname||'',clientId:google?.searchParams.get('client_id')||'',redirectUri:google?.searchParams.get('redirect_uri')||'',hasState:Boolean(google?.searchParams.get('state'))};
+    console.log('Staging OAuth metadata check',JSON.stringify(safe));
+    if(google&&google.hostname.endsWith('.google.com')){
+     const rsp=await fetch(google.href,{redirect:'manual',signal:AbortSignal.timeout(13000)});
+     const html=await rsp.text();
+     console.log('Staging Google OAuth request check',JSON.stringify({httpStatus:rsp.status,redirectUriMismatch:html.includes('redirect_uri_mismatch'),accessBlocked:html.includes('Access blocked')}));
+    }
+   }catch(e){console.warn('Staging OAuth metadata check failed',e?.message);}
+  })();
+ }
+
  edgeFetch('/health').then(({response,raw})=>{
   const data=JSON.parse(raw);
   console.log(response.ok&&data.databaseConnected?'Early Storefront Supabase Edge database READY':'Early Storefront Supabase Edge database NOT READY',response.status);
