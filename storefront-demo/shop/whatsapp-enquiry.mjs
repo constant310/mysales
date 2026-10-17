@@ -13,9 +13,14 @@ export function photoProxyPath(url){
   return IMAGE_KEY.test(key)?'/api/catalogue-photo?key='+encodeURIComponent(key):'';
  }catch{return '';}
 }
-export function canShareEnquiryFile(file,device=navigator){
- if(!file||typeof device?.share!=='function'||typeof device?.canShare!=='function')return false;
- try{return device.canShare({files:[file]})===true;}catch{return false;}
+export const MAX_ENQUIRY_IMAGES=10;
+export function canShareEnquiryFiles(files,device=typeof navigator==='undefined'?null:navigator){
+ if(!Array.isArray(files)||!files.length||typeof device?.share!=='function'||typeof device?.canShare!=='function')return false;
+ try{return device.canShare({files})===true;}catch{return false;}
+}
+// Backwards-compatible helper for existing one-product checks.
+export function canShareEnquiryFile(file,device=typeof navigator==='undefined'?null:navigator){
+ return canShareEnquiryFiles(file?[file]:[],device);
 }
 export function enquiryItemsFromCart(cart,products){
  return [...cart.values()].map(item=>{
@@ -87,11 +92,10 @@ export function enquiryPortraitLayout(count){
  return {width,height,header,footer,cards};
 }
 
-/** Creates a single JPEG attachment with actual product photos and order details.
-    For baskets over six lines, the image previews the first six; complete details
-    remain in the separate WhatsApp text message. Never uploads data to a new server. */
+/** Builds one portrait JPEG for exactly one selected product.
+     This never combines multiple product photos into a collage. */
 export async function prepareEnquiryPicture(storeName,items){
- if(!items.length)return null;
+ if(items.length!==1)return null;
  const selected=items.slice(0,6),loaded=await Promise.all(selected.map(p=>imageForEnquiry(p.image_path)));
  const imageCount=loaded.filter(Boolean).length;
  if(!imageCount)return null;
@@ -133,8 +137,7 @@ export async function prepareEnquiryPicture(storeName,items){
    ctx.fillText(p.quantity+' × '+(p.unit||'piece')+'  ·  ₦'+total.toLocaleString('en-NG'),x+24,y+h-45,w-48);
   });
   ctx.fillStyle='#244D31';ctx.font='bold 23px Arial,sans-serif';
-  const extra=items.length-selected.length;
-  ctx.fillText(extra>0?'Plus '+extra+' more product'+(extra>1?'s':'')+' in the enquiry message':'Made with mySales',30,height-45,920);
+  ctx.fillText('Made with mySales',30,height-45,920);
   const blob=await new Promise((resolve,reject)=>{
    try{canvas.toBlob(b=>b?resolve(b):reject(Error('Unable to create picture')),'image/jpeg',.84);}
    catch(error){reject(error);}
@@ -144,4 +147,29 @@ export async function prepareEnquiryPicture(storeName,items){
  }finally{
   for(const part of loaded)part?.release();
  }
+}
+
+
+/** Creates separate, portrait JPEG files for multiple products.
+ * Missing/unavailable product photos are omitted from attachments, not replaced
+ * with random stock images. The WhatsApp text continues to describe all items.
+ * Process sequentially to avoid many large canvases in memory at once.
+ */
+export async function prepareEnquiryPictures(storeName,items){
+ const result=[];
+ if(!Array.isArray(items)||!items.length)return result;
+ for(const [index,item] of items.slice(0,MAX_ENQUIRY_IMAGES).entries()){
+  try{
+   if(!photoProxyPath(item.image_path))continue;
+   const file=await prepareEnquiryPicture(storeName,[item]);
+   if(!file)continue;
+   const safeName=String(item.name||'product').toLowerCase()
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,36)||'product';
+   const name='mysales-'+String(index+1).padStart(2,'0')+'-'+safeName+'.jpg';
+   result.push(new File([file],name,{type:'image/jpeg'}));
+  }catch{
+   // An individual broken photo must not block the rest of the basket.
+  }
+ }
+ return result;
 }
