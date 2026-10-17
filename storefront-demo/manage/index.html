@@ -325,7 +325,7 @@ main{max-width:870px;padding-top:19px}
 <button id="share" class="btn btn-light" type="button">Share my shop</button>
 <a id="public-link" class="btn btn-light" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;align-items:center">View my shop</a>
 </div><p class="share-link" id="public-url" hidden></p></section>
-<section id="retain-tip" class="retain-tip" hidden><strong>✓ Your products are ready. Share one with a customer.</strong><p>Tap “Share on WhatsApp” below a product to send its name, price, picture link and shop link.</p><button type="button" id="dismiss-retain-tip" class="btn btn-outline btn-small" style="margin-top:10px">Got it</button></section>
+<section id="retain-tip" class="retain-tip" hidden><strong>✓ Your products are ready. Share one with a customer.</strong><p>Tap “Share on WhatsApp” below a product to send its name, description, price, photo link and shop link.</p><button type="button" id="dismiss-retain-tip" class="btn btn-outline btn-small" style="margin-top:10px">Got it</button></section>
 <div class="columns">
 <section class="panel" id="add-section"><div class="panel-top"><div><span class="pill">New product</span><h2 style="margin-top:12px">Add a product</h2></div><button class="btn btn-outline btn-small" type="button" id="cancel-add" hidden>My products</button></div>
  <p class="muted">Choose a photo, name your product and enter the price.</p>
@@ -424,7 +424,7 @@ main{max-width:870px;padding-top:19px}
         <div><small>Selling unit</small><strong id="dialog-unit"></strong></div>
       </div>
       <div class="modal-description"><h3>Description</h3><p id="dialog-description"></p></div>
-      <button id="share-one-product" type="button" class="share-single-product">Share picture &amp; price with a customer</button>
+      <button id="share-one-product" type="button" class="share-single-product">Share this product on WhatsApp</button>
 
     </div>
     <form id="dialog-form" class="modal-form" hidden>
@@ -573,7 +573,7 @@ function renderProduct(p){
   const link=document.createElement('a');link.className='quick-share';link.target='_blank';link.rel='noopener noreferrer';
   link.textContent='↗ Share on WhatsApp';link.setAttribute('aria-label','Share '+p.name+' on WhatsApp');
   const u=p.units[0],priceText=currency(u.price)+(u.name&&u.name!=='piece'?' / '+u.name:'');
-  const photo=safeProductImage(p),message=p.name+' — '+priceText+(photo?'\nPhoto: '+photo:'')+'\nSee more: '+publicUrl();
+  const message=singleProductWhatsappText(p);
   link.href='https://wa.me/?text='+encodeURIComponent(message);
   link.addEventListener('click',()=>{reportMerchantActivity('product_share');dismissRetainTip();});
   card.append(link);
@@ -608,12 +608,21 @@ const imageForCatalogue=p=>{
  }catch{}
  return original;
 };
+function singleProductWhatsappText(p){
+ const unit=p.units?.[0];
+ const price=unit?currency(unit.price)+(unit.name&&unit.name!=='piece'?' / '+unit.name:''):'Ask for price';
+ const details=String(p.description||'').trim().slice(0,600);
+ const photo=safeProductImage(p);
+ return [p.name,details,'Price: '+price,photo?'Photo: '+photo:'',currentStore?.status==='published'?'See more: '+publicUrl():''].filter(Boolean).join('\n');
+}
 function shareProductText(){
  const picked=selectedShareProducts();
  if(!picked.length)return '';
  const lines=['Hello! Here are the products you requested from '+currentStore.name+':',''];
  picked.forEach((p,i)=>{
   lines.push((i+1)+'. '+p.name+' — '+currency(p.units[0].price)+(p.units[0].name&&p.units[0].name!=='piece'?' / '+p.units[0].name:''));
+  const details=String(p.description||'').trim().slice(0,350);
+  if(details)lines.push(details);
   const photo=safeProductImage(p);
   if(photo)lines.push('Photo: '+photo);
   lines.push('');
@@ -685,9 +694,8 @@ function openShareProducts(preselectId=null){
 $('share-products').onclick=()=>openShareProducts();
 $('share-one-product').onclick=()=>{
  if(!dialogProduct)return;
- const id=dialogProduct.id;
- productDialog.close();
- openShareProducts(id);
+ reportMerchantActivity('product_share');
+ window.open('https://wa.me/?text='+encodeURIComponent(singleProductWhatsappText(dialogProduct)),'_blank','noopener,noreferrer');
 };
 $('share-search').oninput=renderSharePicker;
 $('share-select-all').onclick=()=>{
