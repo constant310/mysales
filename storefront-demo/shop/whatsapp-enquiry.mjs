@@ -69,6 +69,24 @@ async function imageForEnquiry(raw){
   return null;
  }
 }
+/** Portrait-oriented layout; centre a single card or an incomplete last row. */
+export function enquiryPortraitLayout(count){
+ const total=Math.max(1,Math.min(6,Math.floor(Number(count)||1)));
+ const width=1080,header=230,footer=125,gap=24,side=44,rows=Math.ceil(total/2);
+ const single=total===1,cardHeight=single?900:575;
+ const cardWidth=single?820:(width-2*side-gap)/2;
+ const gridHeight=rows*cardHeight+(rows-1)*gap;
+ const height=Math.max(1440,header+gridHeight+footer+110);
+ const startY=Math.round(header+(height-header-footer-gridHeight)/2);
+ const cards=Array.from({length:total},(_,index)=>{
+  const row=Math.floor(index/2),col=index%2;
+  const lone=single||(total%2===1&&index===total-1);
+  const x=lone?Math.round((width-cardWidth)/2):side+col*(cardWidth+gap);
+  return {x,y:startY+row*(cardHeight+gap),w:cardWidth,h:cardHeight,single};
+ });
+ return {width,height,header,footer,cards};
+}
+
 /** Creates a single JPEG attachment with actual product photos and order details.
     For baskets over six lines, the image previews the first six; complete details
     remain in the separate WhatsApp text message. Never uploads data to a new server. */
@@ -77,38 +95,42 @@ export async function prepareEnquiryPicture(storeName,items){
  const selected=items.slice(0,6),loaded=await Promise.all(selected.map(p=>imageForEnquiry(p.image_path)));
  const imageCount=loaded.filter(Boolean).length;
  if(!imageCount)return null;
- const rows=Math.ceil(selected.length/2),width=980,height=180+rows*435+96;
- const canvas=document.createElement('canvas');
- canvas.width=width;canvas.height=height;
+ const layout=enquiryPortraitLayout(selected.length);
+ const {width,height}=layout;
+ const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
  const ctx=canvas.getContext('2d',{alpha:false});
  if(!ctx){for(const part of loaded)part?.release();return null;}
  try{
   ctx.fillStyle='#F2F7F3';ctx.fillRect(0,0,width,height);
-  ctx.fillStyle='#14562F';ctx.fillRect(0,0,width,180);
-  ctx.fillStyle='#CBF2D6';ctx.font='bold 23px Arial,sans-serif';
-  ctx.fillText('WHATSAPP PRODUCT ENQUIRY',30,46,930);
-  ctx.fillStyle='#FFFFFF';ctx.font='bold 42px Arial,sans-serif';
-  fitLines(ctx,storeName,30,108,910,44,1);
-  ctx.fillStyle='#DBF5E2';ctx.font='23px Arial,sans-serif';
-  ctx.fillText('Photos, quantities and prices',30,152);
+  ctx.fillStyle='#14562F';ctx.fillRect(0,0,width,layout.header);
+  ctx.fillStyle='#CBF2D6';ctx.font='bold 25px Arial,sans-serif';
+  ctx.fillText('WHATSAPP PRODUCT ENQUIRY',45,56,990);
+  ctx.fillStyle='#FFFFFF';ctx.font='bold 55px Arial,sans-serif';
+  fitLines(ctx,storeName,45,133,990,57,1);
+  ctx.fillStyle='#DBF5E2';ctx.font='26px Arial,sans-serif';
+  ctx.fillText('Photos, quantities and prices',45,187);
   selected.forEach((p,i)=>{
-   const col=i%2,row=Math.floor(i/2),x=20+col*485,y=196+row*435,w=455,h=414;
+   const {x,y,w,h,single}=layout.cards[i];
+   const mediaHeight=single?610:350;
+   const mediaX=x+17,mediaY=y+17,mediaW=w-34;
    ctx.fillStyle='#FFFFFF';ctx.fillRect(x,y,w,h);
-   ctx.fillStyle='#F3F8F3';ctx.fillRect(x+13,y+13,w-26,272);
-   const loadedPicture=loaded[i];
-   if(loadedPicture){
-    const im=loadedPicture.image,scale=Math.min((w-42)/im.naturalWidth,248/im.naturalHeight);
+   ctx.fillStyle='#F3F8F3';ctx.fillRect(mediaX,mediaY,mediaW,mediaHeight);
+   const picture=loaded[i];
+   if(picture){
+    const im=picture.image,scale=Math.min((mediaW-60)/im.naturalWidth,(mediaHeight-54)/im.naturalHeight);
     const iw=im.naturalWidth*scale,ih=im.naturalHeight*scale;
-    ctx.drawImage(im,x+(w-iw)/2,y+17+(265-ih)/2,iw,ih);
+    ctx.drawImage(im,x+(w-iw)/2,mediaY+(mediaHeight-ih)/2,iw,ih);
    }else{
-    ctx.fillStyle='#718675';ctx.font='21px Arial,sans-serif';
-    ctx.fillText('Product photo not available',x+25,y+145,w-50);
+    ctx.fillStyle='#718675';ctx.font=single?'bold 27px Arial,sans-serif':'21px Arial,sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText('Product photo not available',x+w/2,mediaY+mediaHeight/2,w-54);
+    ctx.textAlign='left';
    }
-   ctx.fillStyle='#233A2A';ctx.font='bold 25px Arial,sans-serif';
-   fitLines(ctx,p.name,x+20,y+322,w-40,28,2);
-   ctx.fillStyle='#13843B';ctx.font='bold 27px Arial,sans-serif';
+   ctx.fillStyle='#233A2A';ctx.font=single?'bold 42px Arial,sans-serif':'bold 29px Arial,sans-serif';
+   fitLines(ctx,p.name,x+24,mediaY+mediaHeight+(single?72:61),w-48,single?49:35,2);
+   ctx.fillStyle='#13843B';ctx.font=single?'bold 39px Arial,sans-serif':'bold 28px Arial,sans-serif';
    const total=Number(p.quantity)*Number(p.price);
-   ctx.fillText(p.quantity+' × '+(p.unit||'piece')+'  ·  ₦'+total.toLocaleString('en-NG'),x+20,y+392,w-40);
+   ctx.fillText(p.quantity+' × '+(p.unit||'piece')+'  ·  ₦'+total.toLocaleString('en-NG'),x+24,y+h-45,w-48);
   });
   ctx.fillStyle='#244D31';ctx.font='bold 23px Arial,sans-serif';
   const extra=items.length-selected.length;
