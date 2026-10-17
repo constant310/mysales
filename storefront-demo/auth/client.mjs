@@ -19,7 +19,7 @@ async function request(path,body,access_token){
 export async function requestCode(email){
  const value=String(email||'').trim().toLowerCase();
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)||value.length>254)throw Error('Enter a valid email address.');
- return request('otp',{email:value,create_user:true,options:{email_redirect_to:location.origin+'/login/'}});
+ return request('otp?redirect_to='+encodeURIComponent(location.origin+'/login/'),{email:value,create_user:true});
 }
 export async function verifyCode(email,code){
  const value=await request('verify',{email:String(email).trim().toLowerCase(),token:String(code).trim(),type:'email'});

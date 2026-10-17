@@ -110,6 +110,10 @@ $('start').hidden=true;
   $('start').hidden=false;
  }catch(error){$('message').textContent=error.message;}
 })();
+try{
+ const legacy=sessionStorage.getItem('mysales_legacy_claim_proof')||localStorage.getItem('mysales_private_management_token')||'';
+ if(/^[A-Za-z0-9_-]{43}$/.test(legacy)){$('old-link').value=legacy;$('transfer-msg').textContent='Your existing store can be linked to this account.';}
+}catch{}
 $('create').onsubmit=async e=>{
  e.preventDefault();
  const button=$('submit');button.disabled=true;button.textContent='Creating…';$('message').textContent='';
