@@ -293,8 +293,28 @@ main{max-width:870px;padding-top:19px}
 .quick-share{display:flex;align-items:center;justify-content:center;width:calc(100% - 24px);margin:0 12px 12px;min-height:42px;border:1px solid #c8e6d1;border-radius:10px;background:#f1faf3;color:#146c37;text-decoration:none;font-weight:850;font-size:.82rem}
 .retain-tip{background:#f1faf3;border:1px solid #cbe9d2;border-radius:14px;padding:15px 17px;margin:0 0 19px;color:#1a6439;line-height:1.45}.retain-tip strong{display:block;margin-bottom:4px;font-size:.93rem}.retain-tip p{margin:0;font-size:.8rem}
 #stock-count[hidden],#edit-stock-count[hidden]{display:none}
+
+/* Consistent two-column product cards; phones use one clear column. */
+#product-section .product-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:14px}
+#product-section .product{display:flex;flex-direction:column;min-width:0;height:100%;border:1px solid #e1eae3;border-radius:16px;overflow:hidden}
+#product-section .product-open{display:grid;grid-template-columns:88px minmax(0,1fr);gap:13px;align-items:start;min-height:140px;flex:1;padding:15px;width:100%}
+#product-section .product-open img,#product-section .product-open .ph{width:88px;height:88px;object-fit:contain;background:#f5f9f5;border:1px solid #eaf0ec;border-radius:11px}
+#product-section .product-body{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+#product-section .product-body h3{font-size:.91rem;line-height:1.35;min-height:2.5em;margin:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+#product-section .product-body .price{font-size:1.04rem;margin:0;color:#147a37}
+#product-section .product-view{display:none}
+#product-section .product-badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+#product-section .product-badge{display:inline-flex;font-size:.69rem;padding:4px 7px;font-weight:750;border-radius:6px;line-height:1.3}
+#product-section .badge-live{color:#16773b;background:#eaf7ee}
+#product-section .badge-muted{color:#68766c;background:#f0f1f0}
+#product-section .badge-stock{color:#4c6858;background:#edf4ef}
+#product-section .badge-out{color:#9d4735;background:#fff0ed}
+#product-section .quick-share{display:flex;align-items:center;justify-content:center;width:100%;min-height:45px;border:0;border-top:1px solid #e2eee6;border-radius:0;margin:0;padding:12px;color:#166b39;background:#f2faf4;font-size:.81rem}
+#product-section .quick-share:hover{background:#e8f6ed}
+@media(max-width:700px){#product-section .product-list{grid-template-columns:1fr}#product-section .product-open{min-height:115px}}
+@media(max-width:380px){#product-section .product-open{grid-template-columns:76px minmax(0,1fr)}#product-section .product-open img,#product-section .product-open .ph{width:76px;height:76px}}
 </style></head><body>
-<header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Manage Store</span> <a class="head-btn" href="/manage/" style="margin-left:auto;text-decoration:none">Manage Store</a> <a class="head-btn" id="header-live-store" target="_blank" rel="noopener noreferrer" style="text-decoration:none" href="/">Live Store</a>
+<header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Manage Store</span>
 <button id="exit" class="head-btn" hidden>Sign out</button></header>
 <main><p id="notice" role="status" aria-live="polite">Opening your store…</p>
 
@@ -377,7 +397,7 @@ main{max-width:870px;padding-top:19px}
     <div class="settings-content">
       <div class="settings-security-note"><span aria-hidden="true">🔒</span><p><strong>Your store is secured by your signed-in mySales account.</strong> Never share your login password or Google account credentials.</p></div>
       <div class="settings-access-actions">
-        <a class="btn settings-secondary" href="/manage/" style="text-decoration:none">Manage Store</a>
+        
         <button class="btn settings-secondary" id="export" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4"/><path d="M5 17v3h14v-3"/></svg>Download store backup</button>
       </div>
     </div>
@@ -540,9 +560,11 @@ function renderProduct(p){
  const content=node('div','');content.className='product-body';
  content.append(node('h3',p.name));
  const price=node('div',unit?currency(unit.price):'Contact for price');price.className='price';content.append(price);
- const stockLabel=p.track_stock?(Number(p.stock)>0?Number(p.stock)+' in stock':'Sold out'):'Availability by enquiry';
- const status=node('p',(p.published?'Visible':'Hidden')+' · '+stockLabel+(p.image_path?'':' · No photo'));
- status.className='meta';content.append(status);
+ const stockLabel=p.track_stock?(Number(p.stock)>0?Number(p.stock)+' in stock':'Sold out'):'Ask for availability';
+ const badges=node('div','');badges.className='product-badges';
+ const visibility=node('span',p.published?'Visible':'Hidden');visibility.className='product-badge '+(p.published?'badge-live':'badge-muted');
+ const available=node('span',stockLabel);available.className='product-badge '+(p.track_stock&&Number(p.stock)===0?'badge-out':'badge-stock');
+ badges.append(visibility,available);content.append(badges);
  open.append(content);
  const view=node('span','View');view.className='product-view';view.setAttribute('aria-hidden','true');open.append(view);
  open.onclick=()=>openProductDialog(p.id);
@@ -1173,7 +1195,6 @@ async function openManager(){
   $('whatsapp-template').value=currentStore.whatsapp_template||defaultWhatsApp;
   businessBaseline=businessValues();whatsappBaseline=$('whatsapp-template').value;
   updateBusinessSave();updateWhatsAppSave();updateHero();
-  $('header-live-store').href=publicUrl();
   $('app').hidden=false;$('exit').hidden=false;
   say(new URLSearchParams(location.search).has('welcome')
    ?'Welcome! Add your first product to launch your store.':'Manage your store or open your Live Store.');
