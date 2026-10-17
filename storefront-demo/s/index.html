@@ -155,10 +155,10 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 #sheet-ask{display:block;width:100%;margin:12px 0 0;padding:12px;border:1px solid #bde3c8;border-radius:11px;background:#e9f8ee;color:#145d31;font-weight:850;font-size:.89rem}
 #sheet-ask:disabled{opacity:.5;cursor:not-allowed}
 </style></head><body><div class="site">
-<header class="brandbar"><a class="brand" href="/" aria-label="mySales home"><span class="brand-mark" aria-hidden="true">mS</span><span>mySales</span></a><span class="brand-note">Online storefront</span></header>
+<header class="brandbar"><a class="brand" href="/" aria-label="mySales home"><span class="brand-mark" aria-hidden="true">mS</span><span>mySales</span></a><a href="/login/" class="brand-note" style="color:#167c3e;font-size:.78rem;font-weight:800;white-space:nowrap;text-decoration:none">Create your own store</a></header>
 <aside id="demo-promo" class="demo-promo" aria-label="Create your own store" hidden>
  <div class="demo-promo-copy"><span class="demo-overline">SEE WHAT YOU CAN BUILD</span><strong>Your products. Your prices. Your own store link.</strong><p>Create a free storefront and share it with customers on WhatsApp.</p></div>
- <a href="/create/" class="demo-promo-cta">Create my free store</a>
+ <a href="/login/" class="demo-promo-cta">Create my free store</a>
 </aside>
 <main>
 <section class="business-hero" aria-labelledby="business-name"><div class="hero-inner">
@@ -166,7 +166,7 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 <p id="business-description">Browse our products and prices.</p>
 <a id="business-whatsapp" class="hero-whatsapp" target="_blank" rel="noopener noreferrer" href="#" hidden><span id="business-number"></span></a>
 <div class="hero-actions"><a class="shop-cta" href="#products">Browse products</a><span id="business-count" class="product-stat"></span></div>
-<a id="home-demo" href="/create/" hidden>Create my free store</a>
+<a id="home-demo" href="/login/" hidden>Create my free store</a>
 </div></section>
 <section id="products" class="collection" aria-labelledby="products-title">
 <div class="collection-head"><div><h2 id="products-title">Our collection</h2><p id="grid-count">Browse what’s available</p></div></div>
@@ -176,7 +176,7 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 <button type="button" id="home-cart" class="icon-control" aria-label="Open enquiry basket"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h16l-1 12H5L4 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg><span id="home-count" class="cart-count">0</span></button>
 </div>
 <div id="grid-products" class="grid-products" aria-live="polite"></div>
-<div id="demo-last-cta" class="demo-last-cta" hidden><p>Imagine your products in a store like this.</p><a href="/create/">Create my free store</a><small>Upload your product photos and prices in minutes.</small></div><p class="powered">Powered by <strong>mySales Storefronts</strong></p>
+<div id="demo-last-cta" class="demo-last-cta" hidden><p>Imagine your products in a store like this.</p><a href="/login/">Create my free store</a><small>Upload your product photos and prices in minutes.</small></div><p class="powered">Powered by <strong>mySales Storefronts</strong></p>
 </section></section></main></div>
 <div id="overlay" class="overlay"></div>
 <aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="drawer-title">
@@ -184,7 +184,7 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 <div class="drawer-body"><div id="cart-lines"></div><div class="total"><span>Estimated subtotal</span><strong id="cart-total">₦0</strong></div>
 <label class="drawer-label" for="customer-note">Message to seller (optional)</label><textarea id="customer-note" maxlength="300" placeholder="Questions or delivery details…"></textarea>
 <button type="button" id="send" class="checkout"><span id="send-label">Send WhatsApp enquiry</span></button>
-<p id="checkout-help" class="help">The seller confirms availability and final prices. No payment is collected here.</p><a id="demo-signup" href="/create/" hidden>Create your own free store →</a>
+<p id="checkout-help" class="help">The seller confirms availability and final prices. No payment is collected here.</p><a id="demo-signup" href="/login/" hidden>Create your own free store →</a>
 </div></aside>
 <div id="sheet-backdrop" class="sheet-backdrop"></div>
 <section id="purchase-sheet" class="purchase-sheet" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="sheet-name">
