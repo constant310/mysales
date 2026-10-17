@@ -56,6 +56,6 @@ test('customer single-product and basket WhatsApp paths use real File sharing',a
 test('no claim of invisible automatic media attachment into a fixed WhatsApp recipient',async()=>{
  const page=await read('s/index.html');
  assert.match(page,/The customer chooses WhatsApp and the recipient/);
- assert.match(page,/Attach the saved picture/);
+ assert.match(page,/attach the saved picture/i);
  assert.match(page,/if\(error\?\.name!=='AbortError'\)/);
 });
