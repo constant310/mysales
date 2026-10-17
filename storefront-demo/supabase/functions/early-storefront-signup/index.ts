@@ -5,7 +5,7 @@ import {createClient} from 'npm:@supabase/supabase-js@2';
 const url=Deno.env.get('SUPABASE_DB_URL');
 const sql=url?postgres(url,{max:3,prepare:false,connect_timeout:7,idle_timeout:15}):null;
 const primaryOrigin='https://store.mysalesofficial.com';
-const trustedOrigins=new Set([primaryOrigin,'https://mysales-early-storefront-branch.onrender.com']);
+const trustedOrigins=new Set([primaryOrigin,'https://mysales-early-storefront-branch.onrender.com','https://mysales-v5-email-staging.onrender.com']);
 const response=(status:number,body:unknown,origin=primaryOrigin)=>new Response(JSON.stringify(body),{
  status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store',
   'x-content-type-options':'nosniff','referrer-policy':'no-referrer','access-control-allow-origin':trustedOrigins.has(origin)?origin:primaryOrigin}
@@ -15,7 +15,7 @@ const accountAuth=createClient(Deno.env.get('SUPABASE_URL')||'',Deno.env.get('SU
  auth:{autoRefreshToken:false,persistSession:false}
 });
 Deno.serve(async request=>{
- const path=new URL(request.url).pathname.replace(/^\/early-storefront-signup/,'');
+ const path=new URL(request.url).pathname.replace(/^\/early-storefront-signup(?:-v5-test)?/,'');
  if(path!=='/api/signup')return response(404,{error:'Not found'});
  if(request.method!=='POST')return response(405,{error:'Method not allowed'});
  if(!sql)return response(503,{error:'Store creation is temporarily unavailable'});

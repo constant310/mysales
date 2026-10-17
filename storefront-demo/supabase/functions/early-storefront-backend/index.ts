@@ -2,7 +2,7 @@ import postgres from 'npm:postgres@3.4.5';
 import {createClient} from 'npm:@supabase/supabase-js@2';
 
 const origin = 'https://store.mysalesofficial.com';
-const trustedOrigins = new Set([origin,'https://mysales-early-storefront-branch.onrender.com']);
+const trustedOrigins = new Set([origin,'https://mysales-early-storefront-branch.onrender.com','https://mysales-v5-email-staging.onrender.com']);
 const originFor = (request:Request) => {
  const requested = request.headers.get('origin');
  return requested && trustedOrigins.has(requested) ? requested : origin;
@@ -89,7 +89,7 @@ const issuePrivateToken=()=>{
  return btoa(String.fromCharCode(...bytes)).split('+').join('-').split('/').join('_').replaceAll('=','');
 };
 Deno.serve(async (request: Request) => {
-  const pathname = new URL(request.url).pathname.replace(/^\/early-storefront-backend/,'');
+  const pathname = new URL(request.url).pathname.replace(/^\/early-storefront-backend(?:-v5-test)?/,'');
   const query = new URL(request.url).searchParams;
   if (request.method === 'OPTIONS') return out(405,{ error:'Method not allowed' });
   if (!sql) return out(503,{ok:false,error:'Supabase internal database URL unavailable'});

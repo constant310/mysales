@@ -5,9 +5,10 @@ import {readFile} from 'node:fs/promises';
 import {resolve,extname,sep} from 'node:path';
 
 const root=resolve('storefront-demo');
-const edgeBase='https://wsxszbdvvtowmrnxdsrp.supabase.co/functions/v1/early-storefront-backend';
+const staging=process.env.MYSALES_V5_AUTH_STAGING==='true';
+const edgeBase='https://wsxszbdvvtowmrnxdsrp.supabase.co/functions/v1/'+(staging?'early-storefront-backend-v5-test':'early-storefront-backend');
 // Exact public origins accepted for browser POST requests; never trust wildcard origins.
-const allowedOrigins=new Set(['https://store.mysalesofficial.com','https://mysales-early-storefront-branch.onrender.com']);
+const allowedOrigins=new Set(['https://store.mysalesofficial.com','https://mysales-early-storefront-branch.onrender.com', 'https://mysales-v5-email-staging.onrender.com']);
 const allowed=new Set([
  '/api/store','/api/discover','/api/signup',
  '/api/merchant/me','/api/merchant/transfer','/api/merchant/products','/api/merchant/activity',

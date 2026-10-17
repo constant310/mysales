@@ -55,3 +55,13 @@ test('verified sellers without stores are distinct from invalid or unverified se
  assert.match(create,/if\(response.status!==404\)/);
  assert.match(manage,/if\(error.status===401\)location.replace\('\/login\/'\)/);
 });
+test('staging proxy is isolated from the production V5 rollout',async()=>{
+ const proxy=await read('render-server.mjs');
+ const backend=await read('supabase/functions/early-storefront-backend/index.ts');
+ const signup=await read('supabase/functions/early-storefront-signup/index.ts');
+ assert.match(proxy,/MYSALES_V5_AUTH_STAGING/);
+ assert.match(proxy,/early-storefront-backend-v5-test/);
+ assert.match(backend,/early-storefront-backend\(\?:-v5-test\)\?/);
+ assert.match(signup,/early-storefront-signup\(\?:-v5-test\)\?/);
+ for(const text of [proxy,backend,signup])assert.match(text,/mysales-v5-email-staging.onrender.com/);
+});
