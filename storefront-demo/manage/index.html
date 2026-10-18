@@ -356,6 +356,20 @@ main{max-width:870px;padding-top:19px}
 .status-price-toggle{display:flex;align-items:center;gap:12px;background:#F6FBF7;border:1px solid #DCEBE0;border-radius:12px;padding:12px 14px;margin-bottom:14px;cursor:pointer}
 .status-price-toggle input{width:21px!important;min-width:21px;height:21px!important;min-height:21px!important;accent-color:#1C8220;margin:0!important}
 .status-price-toggle span{display:flex;flex-direction:column;gap:3px}.status-price-toggle strong{color:#244530;font-size:.87rem}.status-price-toggle small{color:#708575;font-size:.74rem}
+
+/* Product photo framing, with a centered square live preview. */
+.frame-dialog{border:0;border-radius:19px;padding:0;width:min(470px,calc(100vw - 18px));max-height:96dvh;background:#fff;color:#254130;box-shadow:0 25px 70px #07180966;overflow:auto}
+.frame-dialog::backdrop{background:#091c13b7}
+.frame-header{padding:17px 18px 9px}.frame-header h2{font-size:1.22rem;color:#183f27;margin:0 0 6px}.frame-header p{font-size:.78rem;color:#698373;margin:0;line-height:1.5}
+.frame-stage{padding:12px 20px 8px;display:grid;place-items:center}
+#framer-canvas{display:block;width:min(100%,360px);height:auto;aspect-ratio:1;border:1px solid #dee9df;border-radius:12px;cursor:grab;touch-action:none;user-select:none}
+#framer-canvas:active{cursor:grabbing}
+.frame-tools{padding:9px 20px 20px}.frame-tools label{margin:4px 0 7px;font-size:.82rem;color:#315a3c}
+#framer-zoom{accent-color:#1c8220;min-height:23px;padding:0;width:100%}
+.frame-hint{font-size:.74rem;line-height:1.5;color:#667d6b;min-height:35px;margin:8px 0}
+.frame-buttons{display:grid;grid-template-columns:1fr 1.3fr;gap:8px}.frame-buttons button{min-height:46px;padding:10px;font-size:.82rem}
+#framer-fit{background:#f0f8f1;color:#1a773b;border:1px solid #cde4d2;margin:0 0 13px;border-radius:10px;padding:9px;font-size:.78rem;font-weight:850}
+#preview,.product-open img,.product img,.modal-photo img{object-fit:contain;background:#f4f9f5}
 </style></head><body>
 <header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><button id="exit" class="head-btn" style="margin-left:auto" hidden>Sign out</button></header>
 <main><p id="notice" role="status" aria-live="polite">Opening your store…</p>
@@ -536,6 +550,14 @@ main{max-width:870px;padding-top:19px}
   </div>
  </div>
 </dialog>
+<dialog id="photo-framer" class="frame-dialog" aria-modal="true" aria-labelledby="framer-title">
+ <div class="frame-header"><h2 id="framer-title">Adjust product photo</h2><p>Fit the whole product, or drag and zoom to choose what customers see.</p></div>
+ <div class="frame-stage"><canvas id="framer-canvas" width="960" height="960" aria-label="Square product photo preview. Drag to reposition."></canvas></div>
+ <div class="frame-tools"><button id="framer-fit" type="button">Fit entire photo</button>
+ <label for="framer-zoom">Zoom in</label><input type="range" id="framer-zoom" min="100" max="250" step="5" value="100">
+ <p id="framer-message" class="frame-hint" role="status">The entire photo will fit inside the square.</p>
+ <div class="frame-buttons"><button id="framer-cancel" class="btn btn-outline" type="button">Cancel</button><button id="framer-save" class="btn" type="button">Use this photo</button></div></div>
+</dialog>
 <dialog id="merchant-photo-fallback" style="max-width:420px;width:calc(100% - 24px);border:0;border-radius:16px;padding:22px;background:#fff;color:#233b2b;box-shadow:0 20px 80px #0005">
  <h2 style="font-size:1.2rem;margin:0 0 12px">Share product photo</h2>
  <p style="line-height:1.5;color:#526854">Your browser cannot attach this image directly to WhatsApp. Download the photo, then attach it to the WhatsApp chat.</p>
@@ -546,7 +568,10 @@ main{max-width:870px;padding-top:19px}
 import {accessToken,requireAccount,logout} from '/auth/client.mjs';
 import {fillCountryCodes,showOtherCountryCode,internationalWhatsApp,splitInternationalWhatsApp} from '/auth/phone.mjs';
 import {photoProxyPath,prepareStatusPictures,canShareEnquiryFiles,MAX_ENQUIRY_IMAGES} from '/shop/whatsapp-enquiry.mjs';
+import {createPhotoFramer} from '/photo-framing.mjs';
 const $=id=>document.getElementById(id),notice=$('notice'),list=$('products');
+const photoFramer=createPhotoFramer($('photo-framer'));
+let framedNewPhoto=null;
 const productPhotoCache=new Map();
 let merchantFallbackUrl='';
 $('merchant-photo-close').onclick=()=>$('merchant-photo-fallback').close();
@@ -1195,15 +1220,17 @@ for(const id of Object.values(detailFieldIds)){
  $(id).addEventListener('input',updateDetailSave);
  $(id).addEventListener('change',updateDetailSave);
 }
-$('dialog-photo').addEventListener('change',event=>{
+$('dialog-photo').addEventListener('change',async event=>{
  const file=event.target.files?.[0]||null;
- clearDialogPhotoUrl();dialogPhotoFile=file;
- if(file){dialogPhotoUrl=URL.createObjectURL(file);showDetailPhoto(dialogPhotoUrl);
-  $('dialog-photo-label').textContent=file.name||'New photo selected';
- }else{showDetailPhoto(dialogProduct?.image_path||'');
-  $('dialog-photo-label').textContent=dialogProduct?.image_path?'Change photo':'Add a photo';
- }
- updateDetailSave();
+ if(!file)return;
+ try{
+  const framed=await photoFramer.open(file);
+  if(!framed){$('dialog-photo').value='';return;}
+  clearDialogPhotoUrl();dialogPhotoFile=framed;
+  dialogPhotoUrl=URL.createObjectURL(framed);showDetailPhoto(dialogPhotoUrl);
+  $('dialog-photo-label').textContent='Adjusted photo ready';
+  updateDetailSave();
+ }catch(error){$('dialog-photo').value='';say(error.message,true);}
 });
 function cancelProductEdit(){
  if(!dialogProduct||dialogBusy)return;
@@ -1313,10 +1340,16 @@ $('stock-mode').onchange=()=>{
  $('product-stock').required=enabled;
 };
 $('stock-mode').onchange();
-$('product-photo').onchange=e=>{
- const file=e.target.files?.[0];const old=$('preview').dataset.url;if(old)URL.revokeObjectURL(old);
- if(file){const url=URL.createObjectURL(file);$('preview').dataset.url=url;$('preview').src=url;$('preview').style.display='block';$('photo-icon').style.display='none';$('photo-label').textContent=file.name||'Photo selected';}
- else{$('preview').style.display='none';$('photo-icon').style.display='block';$('photo-label').textContent='Add a product photo';}
+$('product-photo').onchange=async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ try{
+  const framed=await photoFramer.open(file);
+  if(!framed){if(!framedNewPhoto)$('product-photo').value='';return;}
+  framedNewPhoto=framed;
+  const old=$('preview').dataset.url;if(old)URL.revokeObjectURL(old);
+  const url=URL.createObjectURL(framed);$('preview').dataset.url=url;$('preview').src=url;
+  $('preview').style.display='block';$('photo-icon').style.display='none';$('photo-label').textContent='Adjusted photo ready';
+ }catch(error){$('product-photo').value='';framedNewPhoto=null;say(error.message,true);}
 };
 $('add').onsubmit=async e=>{
  e.preventDefault();
@@ -1326,7 +1359,7 @@ $('add').onsubmit=async e=>{
  try{
   // Process the photo before creating the product, so an unreadable image
   // cannot create a duplicate or automatically publish a photo-less item.
-  const photo=await preparePhoto(data.photo);
+  const photo=await preparePhoto(framedNewPhoto||data.photo);
   const result=await post('products',{
    name:data.name,price:Number(data.price),description:data.description||'',
    category:data.category||'',trackStock:data.trackStock==='true',baseUnit:'piece',unitName:'piece',factor:1
@@ -1357,7 +1390,7 @@ $('add').onsubmit=async e=>{
     }catch(err){errors.push('Store could not go live: '+err.message);}
    }
   }
-  form.reset();$('extras').open=false;$('stock-count').hidden=true;$('preview').style.display='none';
+  form.reset();framedNewPhoto=null;const previewUrl=$('preview').dataset.url;if(previewUrl)URL.revokeObjectURL(previewUrl);delete $('preview').dataset.url;$('extras').open=false;$('stock-count').hidden=true;$('preview').style.display='none';
   $('photo-icon').style.display='block';$('photo-label').textContent='Choose a product photo';
   say(errors.length?'Product saved as a draft or with an issue. '+errors.join(' ')+' Use its photo button below to retry.':
    '🎉 Product and picture added! Share your storefront with customers.',errors.length>0);
