@@ -536,12 +536,68 @@ main{max-width:870px;padding-top:19px}
   </div>
  </div>
 </dialog>
+<dialog id="merchant-photo-fallback" style="max-width:420px;width:calc(100% - 24px);border:0;border-radius:16px;padding:22px;background:#fff;color:#233b2b;box-shadow:0 20px 80px #0005">
+ <h2 style="font-size:1.2rem;margin:0 0 12px">Share product photo</h2>
+ <p style="line-height:1.5;color:#526854">Your browser cannot attach this image directly to WhatsApp. Download the photo, then attach it to the WhatsApp chat.</p>
+ <div style="display:grid;gap:9px"><a id="merchant-photo-download" class="btn" download="mysales-product.jpg" style="text-align:center;text-decoration:none">Download product photo</a><a id="merchant-photo-whatsapp" class="btn btn-outline" target="_blank" rel="noopener noreferrer" style="text-align:center;text-decoration:none">Open WhatsApp with product details</a><button type="button" id="merchant-photo-close" class="btn btn-outline">Close</button></div>
+</dialog>
 <div id="manager-toast" class="manager-toast" role="status" aria-live="polite"><span aria-hidden="true">✓</span> <strong id="manager-toast-message">Product added</strong></div>
 <script type="module">
 import {accessToken,requireAccount,logout} from '/auth/client.mjs';
 import {fillCountryCodes,showOtherCountryCode,internationalWhatsApp,splitInternationalWhatsApp} from '/auth/phone.mjs';
 import {photoProxyPath,prepareStatusPictures,canShareEnquiryFiles,MAX_ENQUIRY_IMAGES} from '/shop/whatsapp-enquiry.mjs';
 const $=id=>document.getElementById(id),notice=$('notice'),list=$('products');
+const productPhotoCache=new Map();
+let merchantFallbackUrl='';
+$('merchant-photo-close').onclick=()=>$('merchant-photo-fallback').close();
+$('merchant-photo-fallback').addEventListener('close',()=>{if(merchantFallbackUrl)URL.revokeObjectURL(merchantFallbackUrl);merchantFallbackUrl='';});
+function productPhotoState(p){
+ const key=p.id+'|'+(p.image_path||'');
+ if(productPhotoCache.has(key))return productPhotoCache.get(key);
+ const state={ready:false,file:null,promise:null};
+ productPhotoCache.set(key,state);
+ if(productPhotoCache.size>100)productPhotoCache.delete(productPhotoCache.keys().next().value);
+ if(!p.image_path){state.ready=true;return state;}
+ state.promise=(async()=>{
+  try{
+   const token=await accessToken();
+   if(!token)return;
+   const response=await fetch('/api/merchant/share-image?productId='+encodeURIComponent(p.id),{
+    headers:{Authorization:'Bearer '+token},cache:'no-store'
+   });
+   if(!response.ok)throw Error('Image unavailable');
+   const blob=await response.blob();
+   if(!/^image\/(jpeg|png|webp)$/.test(blob.type)||blob.size>12_000_000||blob.size<30)return;
+   const suffix=blob.type==='image/png'?'png':blob.type==='image/webp'?'webp':'jpg';
+   state.file=new File([blob],'mysales-'+String(p.name||'product').replace(/[^a-z0-9]/gi,'-').slice(0,35)+'.'+suffix,{type:blob.type});
+  }catch{}finally{state.ready=true;}
+ })();
+ return state;
+}
+function showPhotoShareFallback(p,file){
+ const dialog=$('merchant-photo-fallback');
+ if(merchantFallbackUrl)URL.revokeObjectURL(merchantFallbackUrl);
+ merchantFallbackUrl=file?URL.createObjectURL(file):'';
+ const save=$('merchant-photo-download');
+ save.hidden=!file;if(file){save.href=merchantFallbackUrl;save.download=file.name;}
+ $('merchant-photo-whatsapp').href='https://wa.me/?text='+encodeURIComponent(singleProductWhatsappText(p));
+ dialog.showModal();
+}
+function shareMerchantProductPhoto(p){
+ const state=productPhotoState(p);
+ if(!state.ready){showManagerToast('Preparing product photo. Tap again in a moment.');return;}
+ const file=state.file;
+ if(file&&canShareEnquiryFiles([file])){
+  try{
+   void navigator.share({files:[file],title:p.name,text:singleProductWhatsappText(p)})
+    .then(()=>reportMerchantActivity('product_share'))
+    .catch(e=>{if(e?.name!=='AbortError')showPhotoShareFallback(p,file);});
+   return;
+  }catch{}
+ }
+ showPhotoShareFallback(p,file);
+}
+
 let currentStore=null,products=[],isAdding=new URLSearchParams(location.search).has('welcome'),managerToastTimer=0;
 function showManagerToast(message){
  $('manager-toast-message').textContent=message;
@@ -641,9 +697,16 @@ function renderProduct(p){
  if(p.units?.[0]&&currentStore?.status==='published'){
   const link=document.createElement('a');link.className='quick-share';link.target='_blank';link.rel='noopener noreferrer';
   link.textContent='↗ Share on WhatsApp';link.setAttribute('aria-label','Share '+p.name+' on WhatsApp');
-  const message=singleProductWhatsappText(p);
-  link.href='https://wa.me/?text='+encodeURIComponent(message);
-  link.addEventListener('click',()=>{reportMerchantActivity('product_share');dismissRetainTip();});
+  link.href='#share-product-photo';
+  link.addEventListener('click',event=>{
+   event.preventDefault();dismissRetainTip();shareMerchantProductPhoto(p);
+  });
+  const state=productPhotoState(p);
+  link.textContent=state.ready?'↗ Share photo on WhatsApp':'Preparing product photo…';
+  state.promise?.then(()=>{
+   if(!link.isConnected)return;
+   link.textContent=state.file?'↗ Share photo on WhatsApp':'↗ Share product details';
+  });
   card.append(link);
  }
  list.append(card);
@@ -817,7 +880,6 @@ function singleProductWhatsappText(p){
  const unit=p.units?.[0];
  const price=unit?currency(unit.price)+(unit.name&&unit.name!=='piece'?' / '+unit.name:''):'Ask for price';
  const details=String(p.description||'').trim().slice(0,600);
- const photo=safeProductImage(p);
  return [p.name,details,'Price: '+price,currentStore?.status==='published'?'Shop here: '+publicUrl():''].filter(Boolean).join('\n');
 }
 function shareProductText(){
@@ -896,11 +958,7 @@ function openShareProducts(preselectId=null){
  if(!productShareDialog.open)productShareDialog.showModal();
 }
 $('share-products').onclick=()=>openShareProducts();
-$('share-one-product').onclick=()=>{
- if(!dialogProduct)return;
- reportMerchantActivity('product_share');
- window.open('https://wa.me/?text='+encodeURIComponent(singleProductWhatsappText(dialogProduct)),'_blank','noopener,noreferrer');
-};
+$('share-one-product').onclick=()=>{if(dialogProduct)shareMerchantProductPhoto(dialogProduct);};
 $('share-search').oninput=renderSharePicker;
 $('share-select-all').onclick=()=>{
  const search=$('share-search').value.toLowerCase().trim();
