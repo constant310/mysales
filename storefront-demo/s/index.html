@@ -12,6 +12,9 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 .brand{display:inline-flex;align-items:center;gap:10px;font-weight:950;font-size:1.15rem;letter-spacing:-.055em}
 .brand-mark{display:grid;place-items:center;height:35px;width:35px;border-radius:11px;color:white;background:#16a34a;font-size:1.05rem;letter-spacing:-.14em;padding-right:3px}
 .brand-note{font-size:.76rem;color:#718675;font-weight:750}
+.brand-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0}
+.owner-manage-link{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:10px 13px;border-radius:11px;background:#1C8220;color:#fff;font-size:.78rem;font-weight:850;white-space:nowrap}
+.owner-manage-link:hover{background:#15803D}
 .business-hero{margin:0 clamp(15px,2.5vw,28px);background:linear-gradient(120deg,#124228 0%,#15743d 72%,#168944 100%);color:#fff;border-radius:23px;overflow:hidden;position:relative}
 .business-hero:after{content:"";width:260px;height:260px;border:46px solid #ffffff09;border-radius:50%;position:absolute;right:-120px;top:-140px;pointer-events:none}
 .hero-inner{position:relative;z-index:1;padding:34px clamp(21px,3.2vw,35px)}
@@ -118,7 +121,7 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 .status{position:fixed;z-index:60;top:14px;left:50%;transform:translateX(-50%);width:min(500px,calc(100vw - 24px));padding:12px 15px;background:#fff9eb;color:#77482a;border:1px solid #ead4b2;border-radius:12px;font-size:.82rem;line-height:1.5;box-shadow:0 8px 22px #10261033}
 @media(min-width:680px){.grid-products{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(min-width:1024px){.grid-products{grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media(max-width:490px){.brandbar{padding:15px 16px}.business-hero{border-radius:20px}.hero-inner{padding:27px 22px}.hero-actions{gap:11px}.collection{padding-top:29px}.grid-products{gap:10px}.grid-content{padding:11px 10px 10px}.grid-title{font-size:.87rem;min-height:36px}.grid-add{font-size:.8rem;min-height:42px}.grid-price{font-size:1.02rem}.search-field{height:47px;padding:0 11px}.icon-control{height:47px;width:45px}.home-tools{gap:7px}.purchase-sheet{padding-left:16px;padding-right:16px}.sheet-actions button{font-size:.78rem}}
+@media(max-width:490px){.brandbar{padding:15px 16px}.owner-manage-link{padding:10px 11px;font-size:.77rem}.business-hero{border-radius:20px}.hero-inner{padding:27px 22px}.hero-actions{gap:11px}.collection{padding-top:29px}.grid-products{gap:10px}.grid-content{padding:11px 10px 10px}.grid-title{font-size:.87rem;min-height:36px}.grid-add{font-size:.8rem;min-height:42px}.grid-price{font-size:1.02rem}.search-field{height:47px;padding:0 11px}.icon-control{height:47px;width:45px}.home-tools{gap:7px}.purchase-sheet{padding-left:16px;padding-right:16px}.sheet-actions button{font-size:.78rem}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
 
 /* Quiet, consistent icon system: functional icons only, no decorative cart/arrow overload. */
@@ -154,11 +157,54 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 
 #sheet-ask{display:block;width:100%;margin:12px 0 0;padding:12px;border:1px solid #bde3c8;border-radius:11px;background:#e9f8ee;color:#145d31;font-weight:850;font-size:.89rem}
 #sheet-ask:disabled{opacity:.5;cursor:not-allowed}
+
+/* Keep customer-facing product grids aligned regardless of photo proportions or title lengths. */
+.grid-products{align-items:stretch}
+.grid-item{height:100%;min-width:0;box-shadow:none}
+.grid-media{flex:none;aspect-ratio:1;display:grid;place-items:center;background:#f5f9f6}
+.grid-image{width:100%;height:100%;object-fit:contain}
+.grid-content{display:flex;flex-direction:column;flex:1;min-height:171px}
+.grid-title{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.4;min-height:2.8em;max-height:2.8em;font-weight:850}
+.grid-category{min-height:1.35em}
+.grid-price{margin-top:auto;margin-bottom:12px;padding-top:9px;line-height:1.25}
+.grid-add{margin-top:0}
+@media(max-width:490px){.grid-item{border-radius:13px}.grid-content{min-height:159px}.grid-title{font-size:.84rem}.grid-price{font-size:1.01rem}}
+
+.enquiry-fallback{border:0;border-radius:19px;width:min(440px,calc(100vw - 22px));padding:24px 20px;background:white;color:#29412F;box-shadow:0 20px 60px #081e124f}
+.enquiry-fallback::backdrop{background:#081b0bb8}
+.enquiry-fallback h2{font-size:1.28rem;line-height:1.28;margin:0 0 12px;letter-spacing:-.03em}
+.enquiry-fallback p{color:#597161;font-size:.86rem;line-height:1.6}
+.enquiry-seller-number{font-weight:850;color:#166C35!important;overflow-wrap:anywhere}
+.enquiry-fallback-actions{display:grid;gap:9px;margin-top:17px}
+.enquiry-fallback-actions button,.enquiry-fallback-actions a{display:grid;place-items:center;min-height:46px;border-radius:10px;background:#1C8220;border:1px solid #1C8220;color:white;font-weight:850;font-size:.84rem;text-align:center;padding:10px}
+#enquiry-fallback-close{background:#F1F8F2;color:#2A5836;border-color:#D3E9D7}
+.enquiry-save-list{display:grid;gap:8px}
+.enquiry-save-list:empty{display:none}
+.enquiry-save-list a{display:grid;place-items:center;min-height:43px;border-radius:10px;background:#EFF7F0;color:#175F33;border:1px solid #CFE8D6;font-weight:800;padding:9px 12px;text-align:center}
+.enquiry-save-list a:hover{background:#E4F4E8}
+
+/* Product thumbnails must not stretch the CSS Grid track or crop the source photo. */
+.grid-media{position:relative;display:block;min-width:0;aspect-ratio:1;overflow:hidden;background:#f5f9f6}
+.grid-image{position:absolute;inset:0;display:block;width:100%;height:100%;min-width:0;min-height:0;padding:8px;object-fit:contain;object-position:50% 50%;background:transparent}
+.grid-fallback{position:absolute;inset:0;width:100%;height:100%}
+/* Fullscreen, zoomable customer photo preview. */
+.photo-viewer{border:0;border-radius:17px;padding:0;width:min(700px,calc(100vw - 12px));max-height:96dvh;background:white;color:#24402d;box-shadow:0 25px 65px #071d1166;overflow:hidden}
+.photo-viewer[open]{display:flex;flex-direction:column}
+.photo-viewer::backdrop{background:#08160fda}
+.viewer-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px}
+.viewer-head strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.94rem}
+.viewer-close{border:0;background:#eaf5ed;color:#2c5537;width:37px;height:37px;border-radius:50%;font-size:1.4rem;flex:none}
+.viewer-stage{height:min(69dvh,620px);background:#f5f9f6;display:grid;place-items:center;overflow:hidden;position:relative;touch-action:none}
+.viewer-image{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;transform-origin:center;user-select:none;-webkit-user-drag:none}
+.viewer-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px}
+.viewer-actions button{min-height:41px;border-radius:9px;font-weight:800;font-size:.83rem;padding:8px 12px}
+.viewer-zoom{display:flex;gap:6px}.viewer-zoom button{border:1px solid #d0e4d5;background:#f1f8f2;color:#25653a;min-width:40px}
+#viewer-details{border:0;background:#16853d;color:white;flex:1;max-width:180px}
 </style></head><body><div class="site">
-<header class="brandbar"><a class="brand" href="/" aria-label="mySales home"><span class="brand-mark" aria-hidden="true">mS</span><span>mySales</span></a><span class="brand-note">Online storefront</span></header>
+<header class="brandbar"><a class="brand" href="/" aria-label="mySales home"><span class="brand-mark" aria-hidden="true">mS</span><span>mySales</span></a><div class="brand-actions"><a id="owner-manage-link" class="owner-manage-link" href="/manage/" aria-label="Return to manage your store" hidden>Manage store <span aria-hidden="true">↗</span></a><a id="guest-create-link" href="/login/" class="brand-note" style="color:#167c3e;font-size:.78rem;font-weight:800;white-space:nowrap;text-decoration:none">Create your own store</a></div></header>
 <aside id="demo-promo" class="demo-promo" aria-label="Create your own store" hidden>
  <div class="demo-promo-copy"><span class="demo-overline">SEE WHAT YOU CAN BUILD</span><strong>Your products. Your prices. Your own store link.</strong><p>Create a free storefront and share it with customers on WhatsApp.</p></div>
- <a href="/create/" class="demo-promo-cta">Create my free store</a>
+ <a href="/login/" class="demo-promo-cta">Create my free store</a>
 </aside>
 <main>
 <section class="business-hero" aria-labelledby="business-name"><div class="hero-inner">
@@ -166,7 +212,7 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 <p id="business-description">Browse our products and prices.</p>
 <a id="business-whatsapp" class="hero-whatsapp" target="_blank" rel="noopener noreferrer" href="#" hidden><span id="business-number"></span></a>
 <div class="hero-actions"><a class="shop-cta" href="#products">Browse products</a><span id="business-count" class="product-stat"></span></div>
-<a id="home-demo" href="/create/" hidden>Create my free store</a>
+<a id="home-demo" href="/login/" hidden>Create my free store</a>
 </div></section>
 <section id="products" class="collection" aria-labelledby="products-title">
 <div class="collection-head"><div><h2 id="products-title">Our collection</h2><p id="grid-count">Browse what’s available</p></div></div>
@@ -176,7 +222,7 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 <button type="button" id="home-cart" class="icon-control" aria-label="Open enquiry basket"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h16l-1 12H5L4 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg><span id="home-count" class="cart-count">0</span></button>
 </div>
 <div id="grid-products" class="grid-products" aria-live="polite"></div>
-<div id="demo-last-cta" class="demo-last-cta" hidden><p>Imagine your products in a store like this.</p><a href="/create/">Create my free store</a><small>Upload your product photos and prices in minutes.</small></div><p class="powered">Powered by <strong>mySales Storefronts</strong></p>
+<div id="demo-last-cta" class="demo-last-cta" hidden><p>Imagine your products in a store like this.</p><a href="/login/">Create my free store</a><small>Upload your product photos and prices in minutes.</small></div><p class="powered">Powered by <strong>mySales Storefronts</strong></p>
 </section></section></main></div>
 <div id="overlay" class="overlay"></div>
 <aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="drawer-title">
@@ -184,15 +230,20 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 <div class="drawer-body"><div id="cart-lines"></div><div class="total"><span>Estimated subtotal</span><strong id="cart-total">₦0</strong></div>
 <label class="drawer-label" for="customer-note">Message to seller (optional)</label><textarea id="customer-note" maxlength="300" placeholder="Questions or delivery details…"></textarea>
 <button type="button" id="send" class="checkout"><span id="send-label">Send WhatsApp enquiry</span></button>
-<p id="checkout-help" class="help">The seller confirms availability and final prices. No payment is collected here.</p><a id="demo-signup" href="/create/" hidden>Create your own free store →</a>
+<p id="checkout-help" class="help">The seller confirms availability and final prices. No payment is collected here.</p><a id="demo-signup" href="/login/" hidden>Create your own free store →</a>
 </div></aside>
+<dialog id="photo-viewer" class="photo-viewer" aria-labelledby="viewer-title">
+ <div class="viewer-head"><strong id="viewer-title">Product photo</strong><button type="button" class="viewer-close" id="viewer-close" aria-label="Close photo">×</button></div>
+ <div id="viewer-stage" class="viewer-stage"><img class="viewer-image" id="viewer-image" alt="Full product photo" draggable="false"></div>
+ <div class="viewer-actions"><div class="viewer-zoom"><button type="button" id="viewer-minus" aria-label="Zoom out">−</button><button type="button" id="viewer-reset" aria-label="Reset zoom">Fit</button><button type="button" id="viewer-plus" aria-label="Zoom in">+</button></div><button type="button" id="viewer-details">View details</button></div>
+</dialog>
 <div id="sheet-backdrop" class="sheet-backdrop"></div>
 <section id="purchase-sheet" class="purchase-sheet" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="sheet-name">
 <div class="sheet-head"><img id="sheet-thumb" class="sheet-thumb" alt="Selected product photo"><div class="sheet-title"><small id="sheet-category">Product</small><h2 id="sheet-name">Product</h2><strong id="sheet-price">₦0</strong></div><button id="sheet-close" class="close-button" type="button" aria-label="Close product options">×</button></div>
 <p id="sheet-description" class="sheet-description" hidden></p>
 <div class="qty-row"><label>Quantity</label><div class="counter"><button id="minus" type="button" aria-label="Decrease quantity">−</button><span id="qty" aria-live="polite">1</span><button id="plus" type="button" aria-label="Increase quantity">+</button></div></div>
 <div class="sheet-actions"><button id="sheet-add" type="button">Add to cart</button><button id="sheet-enquire" type="button">View basket</button></div>
-<button type="button" id="sheet-ask">Ask seller about this product on WhatsApp</button>
+<button type="button" id="sheet-ask">Ask seller with product photo</button>
 <p class="sheet-help">This is an enquiry, not an online payment. The seller confirms availability.</p>
 </section>
 <dialog id="filter-dialog" class="filter-dialog" aria-labelledby="filter-title">
@@ -202,7 +253,19 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 </dialog>
 <div id="add-toast" class="toast" role="status" aria-live="polite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg><span id="toast-message">Added to basket</span><button type="button" id="toast-basket">View basket</button></div>
 <div id="status" class="status" role="alert" hidden></div>
+<dialog id="enquiry-fallback" class="enquiry-fallback" aria-labelledby="enquiry-fallback-title">
+ <h2 id="enquiry-fallback-title">Send your product picture</h2>
+ <p id="enquiry-fallback-info">Save the product photos individually, then attach them in the seller’s WhatsApp chat.</p>
+ <p id="enquiry-seller-number" class="enquiry-seller-number"></p>
+ <div class="enquiry-fallback-actions">
+  <div id="enquiry-save-list" class="enquiry-save-list"></div>
+  <a id="enquiry-open-chat" rel="noopener noreferrer" target="_blank">Open seller’s WhatsApp chat</a>
+  <button type="button" id="enquiry-fallback-close">Close</button>
+ </div>
+</dialog>
 <script type="module">
+import {canManagePublicStore} from '/auth/owner-nav.mjs';
+import {canShareEnquiryFiles,enquiryItemsFromCart,photoSignature,prepareEnquiryPictures,MAX_ENQUIRY_IMAGES} from '/shop/whatsapp-enquiry.mjs';
 function exampleImage(name){
  // Only fictional demo catalogues receive illustrative visuals. Never substitute
  // a stock photo for a real merchant's missing product photo.
@@ -243,6 +306,65 @@ const defaultWhatsApp='Hello {store_name}, I would like to enquire about:\n\n{it
 const PHOTO_SVG="<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"2.5\" y=\"3.5\" width=\"19\" height=\"17\" rx=\"2\"/><circle cx=\"8\" cy=\"9\" r=\"2\"/><path d=\"m4.5 18 5.5-6 4.5 3 3.2-4 3.3 4\"/></svg>";
 let store=null,products=[],visible=[],isDemo=false,categoryFilter='',searchText='',selectedProduct=null,selectedQuantity=1,lastSheetButton=null,toastTimeout=null,statusTimeout=null;
 const cart=new Map();
+
+const photoCache=new Map();
+let fallbackPhotoUrls=[];
+function enquiryCartItems(){return enquiryItemsFromCart(cart,products);}
+function photoState(items){
+ if(!store||!items.length)return {ready:true,files:[]};
+ const signature=photoSignature(store.name,items);
+ let state=photoCache.get(signature);
+ if(state)return state;
+ state={ready:false,files:[]};
+ photoCache.set(signature,state);
+ if(photoCache.size>14)photoCache.delete(photoCache.keys().next().value);
+ state.promise=prepareEnquiryPictures(store.name,items)
+  .then(files=>{state.files=files;state.ready=true;})
+  .catch(()=>{state.files=[];state.ready=true;});
+ return state;
+}
+function prewarmPhoto(items,callback){
+ const state=photoState(items);
+ if(!state.ready&&state.promise)void state.promise.then(callback);
+ return state;
+}
+function clearFallbackPhotos(){
+ for(const url of fallbackPhotoUrls)URL.revokeObjectURL(url);
+ fallbackPhotoUrls=[];
+ $('enquiry-save-list').replaceChildren();
+}
+function showEnquiryFallback(files,message,number){
+ clearFallbackPhotos();
+ const photos=Array.isArray(files)?files:[];
+ $('enquiry-fallback-info').textContent=photos.length
+  ?'Your phone cannot share all these pictures together. Save the photos below individually, then open the seller’s WhatsApp chat and attach them.'
+  :'The product photos could not be prepared on this device. You can still send the enquiry text to the seller.';
+ $('enquiry-seller-number').textContent='Seller WhatsApp: +'+number;
+ const list=$('enquiry-save-list');
+ photos.forEach((file,index)=>{
+  const url=URL.createObjectURL(file);fallbackPhotoUrls.push(url);
+  const link=document.createElement('a');
+  link.href=url;link.download=file.name;
+  link.textContent='Save photo '+(index+1)+' of '+photos.length;
+  list.append(link);
+ });
+ $('enquiry-open-chat').href='https://wa.me/'+number+'?text='+encodeURIComponent(message);
+ if(!$('enquiry-fallback').open)$('enquiry-fallback').showModal();
+}
+$('enquiry-fallback-close').onclick=()=>$('enquiry-fallback').close();
+$('enquiry-fallback').addEventListener('close',clearFallbackPhotos);
+function sendPhotoEnquiry(files,message,number){
+ // Native sharing begins directly inside the click gesture. The buyer chooses
+ // WhatsApp and the recipient; web pages cannot send silently to a contact.
+ const photos=Array.isArray(files)?files:[];
+ if(photos.length&&canShareEnquiryFiles(photos)){
+  try{
+   void navigator.share({files:photos,title:'Product enquiry from '+store.name,text:message})
+    .catch(error=>{if(error?.name!=='AbortError')showEnquiryFallback(photos,message,number);});
+  }catch{showEnquiryFallback(photos,message,number);}
+ }else showEnquiryFallback(photos,message,number);
+}
+
 const node=(tag,value)=>{const element=document.createElement(tag);if(value!==undefined)element.textContent=String(value);return element;};
 const unitOf=p=>p?.units?.find(u=>Number.isFinite(Number(u.price)))||null;
 const stockOf=p=>Math.max(0,Number(p?.stock)||0);
@@ -289,6 +411,58 @@ function fillPhoto(host,p,click=null){
  if(click)host.addEventListener('click',click);
 }
 
+const photoViewer=$('photo-viewer'),viewerImage=$('viewer-image');
+let viewingProduct=null,viewingSource=null,viewerZoom=1,viewerX=0,viewerY=0;
+const viewerPointers=new Map();let viewerPinchDistance=0;
+function renderViewerZoom(){
+ viewerImage.style.transform='translate('+viewerX+'px,'+viewerY+'px) scale('+viewerZoom+')';
+ $('viewer-minus').disabled=viewerZoom<=1;
+ $('viewer-plus').disabled=viewerZoom>=4;
+}
+function zoomPhoto(next){
+ viewerZoom=Math.max(1,Math.min(4,next));
+ if(viewerZoom===1){viewerX=0;viewerY=0;}
+ renderViewerZoom();
+}
+function openPhotoViewer(product,source){
+ const url=productPhoto(product);
+ if(!url){openSheet(product,source);return;}
+ viewingProduct=product;viewingSource=source;viewerZoom=1;viewerX=0;viewerY=0;
+ $('viewer-title').textContent=product.name;
+ viewerImage.alt='Full photo of '+product.name;viewerImage.src=url;
+ viewerImage.onerror=()=>{viewerImage.removeAttribute('src');$('viewer-title').textContent='Photo could not load';};
+ renderViewerZoom();photoViewer.showModal();$('viewer-close').focus({preventScroll:true});
+}
+$('viewer-close').onclick=()=>photoViewer.close();
+photoViewer.addEventListener('close',()=>{const source=viewingSource;viewingProduct=null;viewingSource=null;viewerPointers.clear();viewerPinchDistance=0;if(source?.isConnected)source.focus({preventScroll:true});});
+$('viewer-minus').onclick=()=>zoomPhoto(viewerZoom-.5);
+$('viewer-plus').onclick=()=>zoomPhoto(viewerZoom+.5);
+$('viewer-reset').onclick=()=>zoomPhoto(1);
+$('viewer-details').onclick=()=>{
+ const p=viewingProduct,source=viewingSource;
+ photoViewer.close();if(p)openSheet(p,source);
+};
+$('viewer-stage').addEventListener('pointerdown',event=>{
+ if(!photoViewer.open)return;
+ viewerPointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+ event.currentTarget.setPointerCapture(event.pointerId);
+ if(viewerPointers.size===2){const [a,b]=[...viewerPointers.values()];viewerPinchDistance=Math.hypot(a.x-b.x,a.y-b.y);}
+});
+$('viewer-stage').addEventListener('pointermove',event=>{
+ const old=viewerPointers.get(event.pointerId);if(!old)return;
+ viewerPointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+ if(viewerPointers.size===2){
+  const [a,b]=[...viewerPointers.values()];const distance=Math.hypot(a.x-b.x,a.y-b.y);
+  if(viewerPinchDistance>0)zoomPhoto(viewerZoom*distance/viewerPinchDistance);
+  viewerPinchDistance=distance;
+ }else if(viewerZoom>1){
+  viewerX+=event.clientX-old.x;viewerY+=event.clientY-old.y;renderViewerZoom();
+ }
+});
+for(const type of ['pointerup','pointercancel','lostpointercapture'])$('viewer-stage').addEventListener(type,event=>{
+ viewerPointers.delete(event.pointerId);viewerPinchDistance=0;
+});
+
 function renderProducts(){
  const host=$('grid-products');host.replaceChildren();
  $('grid-count').textContent=visible.length+' product'+(visible.length===1?'':'s');
@@ -300,7 +474,7 @@ function renderProducts(){
  for(const p of visible){
   const card=node('article');card.className='grid-item';
   const media=node('button');media.className='grid-media';media.type='button';media.setAttribute('aria-label','View '+p.name);
-  fillPhoto(media,p,()=>openSheet(p,media));card.append(media);
+  fillPhoto(media,p,()=>openPhotoViewer(p,media));card.append(media);
   const details=node('div');details.className='grid-content';
   const title=node('button',p.name);title.className='grid-title';title.type='button';title.onclick=()=>openSheet(p,title);
   details.append(title);
@@ -353,7 +527,11 @@ function updateSheet(){
  $('plus').disabled=!p||selectedQuantity>=Math.min(99,remaining(p));
  const enable=!!p&&!!unitOf(p)&&selectedQuantity<=remaining(p);
  $('sheet-add').disabled=!enable;$('sheet-enquire').disabled=!enable;
- $('sheet-ask').disabled=isDemo||!/^[1-9]\d{7,14}$/.test(String(store?.whatsapp||'').replace(/\D/g,''));
+ const allowed=!isDemo&&/^[1-9]\d{7,14}$/.test(String(store?.whatsapp||'').replace(/\D/g,''));
+ const items=p&&unitOf(p)?[{productId:p.id,name:p.name,quantity:selectedQuantity,unit:unitOf(p).name,price:Number(unitOf(p).price),image_path:p.image_path||''}]:[];
+ const state=allowed&&items.length?prewarmPhoto(items,()=>{if(selectedProduct===p)updateSheet();}):{ready:true,files:[]};
+ $('sheet-ask').disabled=!allowed||!state.ready;
+ $('sheet-ask').textContent=!state.ready?'Preparing photo…':state.files.length?'Ask seller with photo':'Ask seller on WhatsApp';
  $('sheet-add').textContent=p?.track_stock&&remaining(p)<1?'Sold out':'Add to cart';
 }
 function openSheet(p,source){
@@ -381,6 +559,11 @@ $('sheet-close').onclick=()=>closeSheet();
 $('sheet-backdrop').onclick=()=>closeSheet();
 $('minus').onclick=()=>{selectedQuantity=Math.max(1,selectedQuantity-1);updateSheet();};
 $('plus').onclick=()=>{selectedQuantity=Math.min(99,remaining(selectedProduct),selectedQuantity+1);updateSheet();};
+function refreshCartShareLabel(){
+ const items=enquiryCartItems(),state=photoState(items);
+ $('send').disabled=!cart.size||isDemo||!state.ready;
+ $('send-label').textContent=isDemo?'Demo only · Enquiries disabled':!state.ready?'Preparing product photos…':state.files.length?'Share '+state.files.length+' photos & enquiry':'Send WhatsApp enquiry';
+}
 function renderCart(){
  const host=$('cart-lines');host.replaceChildren();let qty=0,total=0;
  for(const [key,item] of cart){
@@ -397,10 +580,14 @@ function renderCart(){
  $('home-cart').setAttribute('aria-label','Open basket, '+qty+' items');
  $('cart-title-count').textContent=qty?'('+qty+')':'';
  $('cart-total').textContent=currency(total);
- $('send').disabled=!qty||isDemo;
- $('send-label').textContent=isDemo?'Demo only · Enquiries disabled':'Send WhatsApp enquiry';
+ const items=qty?enquiryCartItems():[];
+ const state=qty&&!isDemo?prewarmPhoto(items,()=>{
+  if(photoSignature(store?.name,enquiryCartItems())===photoSignature(store?.name,items))refreshCartShareLabel();
+ }):{ready:true,files:[]};
+ $('send').disabled=!qty||isDemo||!state.ready;
+ $('send-label').textContent=isDemo?'Demo only · Enquiries disabled':!state.ready?'Preparing product photos…':state.files.length?'Share '+state.files.length+' photos & enquiry':'Send WhatsApp enquiry';
  $('demo-signup').hidden=!isDemo;
- $('checkout-help').textContent=isDemo?'This is a sample shop. Orders and enquiries are disabled. Create a store to receive customers.':'The seller confirms availability and final prices. No payment is collected here.';
+ $('checkout-help').textContent=isDemo?'This is a sample shop. Orders and enquiries are disabled. Create a store to receive customers.':'Share up to '+MAX_ENQUIRY_IMAGES+' separate product photos. Choose WhatsApp and the seller’s chat. Your full basket remains in the message. No payment is collected here.';
 }
 function addSelected(openBasket=false){
  const p=selectedProduct,u=unitOf(p);
@@ -419,9 +606,12 @@ $('sheet-ask').onclick=()=>{
  const number=String(store?.whatsapp||'').replace(/\D/g,'');
  if(!/^[1-9]\d{7,14}$/.test(number)){notify('This seller is not available on WhatsApp.');return;}
  const p=selectedProduct,u=unitOf(p);
- const message='Hello '+store.name+', I saw '+p.name+(u?' ('+currency(u.price)+')':'')+' in your online shop. Is it available?';
+ const items=[{productId:p.id,name:p.name,quantity:selectedQuantity,unit:u?.name||'piece',price:Number(u?.price||0),image_path:p.image_path||''}];
+ const state=photoState(items);
+ if(!state.ready){notify('Preparing your product picture. Please tap again in a moment.');return;}
+ const message='Hello '+store.name+', I want to ask about '+selectedQuantity+' × '+p.name+' ('+currency(Number(u?.price||0)*selectedQuantity)+'). Is it available?';
  trackActivity('whatsapp_click');
- location.href='https://wa.me/'+number+'?text='+encodeURIComponent(message);
+ sendPhotoEnquiry(state.files,message,number);
 };
 function openCart(){
  closeSheet(false);$('overlay').classList.add('open');$('drawer').classList.add('open');
@@ -445,14 +635,16 @@ $('send').onclick=()=>{
  if(isDemo||!cart.size)return;
  const number=String(store?.whatsapp||'').replace(/\D/g,'');
  if(!/^[1-9]\d{7,14}$/.test(number)){notify('The seller has no valid WhatsApp number.');return;}
- const items=[...cart.values()].map(item=>item.quantity+' × '+item.name+' ('+item.unit+') — '+currency(item.price*item.quantity)).join('\n');
- const subtotal=[...cart.values()].reduce((sum,item)=>sum+item.quantity*item.price,0);
+ const selected=enquiryCartItems(),photo=photoState(selected);
+ if(!photo.ready){notify('Preparing product photos. Please tap again in a moment.');return;}
+ const items=selected.map(item=>item.quantity+' × '+item.name+' ('+item.unit+') — '+currency(item.price*item.quantity)).join('\n');
+ const subtotal=selected.reduce((sum,item)=>sum+item.quantity*item.price,0);
  const note=$('customer-note').value.trim();
  const replacement={store_name:store.name,items,subtotal:currency(subtotal),customer_note:note?'Customer note: '+note:''};
  const template=typeof store.whatsapp_template==='string'&&store.whatsapp_template.trim()?store.whatsapp_template:defaultWhatsApp;
  const message=template.replace(/\{(store_name|items|subtotal|customer_note)\}/g,(_,key)=>replacement[key]).trim();
  trackActivity('whatsapp_click');
- location.href='https://wa.me/'+number+'?text='+encodeURIComponent(message);
+ sendPhotoEnquiry(photo.files,message,number);
 };
 (async()=>{
  try{
@@ -475,6 +667,13 @@ $('send').onclick=()=>{
    $('business-number').textContent='Chat with us on WhatsApp';$('business-whatsapp').hidden=false;
   }
   applyFilters();renderCart();trackActivity('store_view');
+  // This is a public shop. Only the signed-in owner of this exact store
+  // gets a dashboard shortcut; shoppers never see management navigation.
+  void canManagePublicStore(store).then(isOwner=>{
+   if(!isOwner)return;
+   $('owner-manage-link').hidden=false;
+   $('guest-create-link').hidden=true;
+  });
  }catch(error){
   $('business-name').textContent='Store unavailable';
   $('business-description').textContent=error.message;
