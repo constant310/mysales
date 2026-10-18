@@ -74,7 +74,7 @@ function setMode(next){
  $('confirm-password').required=next==='signup';
  $('password').autocomplete=next==='signup'?'new-password':'current-password';
  $('password-hint').textContent=next==='signup'
-  ?'Choose a password of at least 8 characters. Email confirmation is not required when the Supabase project setting is disabled.'
+  ?'Choose a password of at least 8 characters. If email verification is enabled, check your inbox to activate your account.'
   :'Sign in using your mySales password. No OTP or email code needed.';
  $('submit-password').textContent=next==='signup'?'Create my account':'Sign in';
  $('password').value='';$('confirm-password').value='';
