@@ -368,7 +368,7 @@ main{max-width:870px;padding-top:19px}
 <button id="status-open" class="btn btn-light" type="button" hidden>Post to Status</button>
 <a id="public-link" class="btn btn-light" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;align-items:center">View my shop</a>
 </div><p class="share-link" id="public-url" hidden></p></section>
-<section id="retain-tip" class="retain-tip" hidden><strong>✓ Your products are ready. Share one with a customer.</strong><p>Tap “Share on WhatsApp” below a product to send its name, description, price, photo link and shop link.</p><button type="button" id="dismiss-retain-tip" class="btn btn-outline btn-small" style="margin-top:10px">Got it</button></section>
+<section id="retain-tip" class="retain-tip" hidden><strong>✓ Your products are ready. Share one with a customer.</strong><p>Tap “Share on WhatsApp” below a product to send its name, description, price and your shop link. To attach an actual photo, use the picture-sharing tool.</p><button type="button" id="dismiss-retain-tip" class="btn btn-outline btn-small" style="margin-top:10px">Got it</button></section>
 <div class="columns">
 <section class="panel" id="add-section"><div class="panel-top"><div><span class="pill">New product</span><h2 style="margin-top:12px">Add a product</h2></div><button class="btn btn-outline btn-small" type="button" id="cancel-add" hidden>My products</button></div>
  <p class="muted">Choose a photo, name your product and enter the price.</p>
@@ -512,7 +512,7 @@ main{max-width:870px;padding-top:19px}
 
 <dialog id="product-share-dialog" class="product-share-dialog" aria-modal="true" aria-labelledby="share-heading">
  <div class="product-share-header">
-  <div><span class="share-eyebrow">VENDOR TOOLS</span><h2 id="share-heading">Share products with a customer</h2><p>Select products to send their pictures, names and prices.</p></div>
+  <div><span class="share-eyebrow">VENDOR TOOLS</span><h2 id="share-heading">Share products with a customer</h2><p>Select products to send names, prices and your shop link. Prepare a picture when you want image attachments.</p></div>
   <button id="share-close" type="button" class="share-close" aria-label="Close product sharing">×</button>
  </div>
  <div class="share-body">
@@ -818,7 +818,7 @@ function singleProductWhatsappText(p){
  const price=unit?currency(unit.price)+(unit.name&&unit.name!=='piece'?' / '+unit.name:''):'Ask for price';
  const details=String(p.description||'').trim().slice(0,600);
  const photo=safeProductImage(p);
- return [p.name,details,'Price: '+price,photo?'Photo: '+photo:'',currentStore?.status==='published'?'See more: '+publicUrl():''].filter(Boolean).join('\n');
+ return [p.name,details,'Price: '+price,currentStore?.status==='published'?'Shop here: '+publicUrl():''].filter(Boolean).join('\n');
 }
 function shareProductText(){
  const picked=selectedShareProducts();
