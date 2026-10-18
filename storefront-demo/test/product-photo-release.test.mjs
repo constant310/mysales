@@ -43,8 +43,9 @@ test('modified storefront and manager scripts are syntactically valid',async()=>
   const page=await read(path);
   const script=page.match(/<script\b[^>]*>([\s\S]*?)<\/script>/)?.[1];
   assert.ok(script,'Expected classic script in '+path);
-  assert.doesNotThrow(()=>new vm.SourceTextModule(script,{identifier:path}),path);
+  assert.doesNotThrow(()=>typeof vm.SourceTextModule==='function'?new vm.SourceTextModule(script,{identifier:path}):new vm.Script(script,{filename:path}),path);
  }
  const framer=await read('photo-framing.mjs');
- assert.doesNotThrow(()=>new vm.SourceTextModule(framer,{identifier:'photo-framing.mjs'}));
+ if(typeof vm.SourceTextModule==='function') assert.doesNotThrow(()=>new vm.SourceTextModule(framer,{identifier:'photo-framing.mjs'}));
+ else await assert.doesNotReject(()=>import('data:text/javascript,'+encodeURIComponent(framer)));
 });
