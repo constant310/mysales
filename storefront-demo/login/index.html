@@ -100,8 +100,14 @@ $('password-form').addEventListener('submit',async(event)=>{
  busy=true;$('submit-password').disabled=true;$('google').disabled=true;
  say(mode==='signup'?'Creating your account…':'Signing in…');
  try{
-  if(mode==='signup')await signUpWithPassword(email,password);
-  else await signInWithPassword(email,password);
+  if(mode==='signup'){
+   const signup=await signUpWithPassword(email,password);
+   if(signup.emailConfirmationRequired){
+    $('password').value='';$('confirm-password').value='';
+    say('Account created. Check your email and confirm your address, then sign in.');
+    return;
+   }
+  }else await signInWithPassword(email,password);
   $('password').value='';$('confirm-password').value='';
   await go();
  }catch(error){say(error.message,true);}
