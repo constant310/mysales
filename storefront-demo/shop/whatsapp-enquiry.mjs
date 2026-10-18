@@ -144,7 +144,7 @@ export async function prepareEnquiryPicture(storeName,items,{variant='enquiry',s
    const site=String(shopUrl||'').replace(/^https?:\/\//,'').slice(0,110);
    if(site){
     ctx.fillStyle='#DBF5E2';ctx.font='bold 28px Arial,sans-serif';
-    ctx.textAlign='center';ctx.fillText('VIEW OUR SHOP  ·  '+site,width/2,footY+46,width-64);
+    ctx.textAlign='center';ctx.fillText('Shop here: '+site,width/2,footY+46,width-64);
     ctx.textAlign='left';
    }
    const logoX=365,logoY=footY+92;
