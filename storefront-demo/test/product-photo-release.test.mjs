@@ -41,9 +41,9 @@ test('public storefront contains rather than crops image and enables fullscreen 
 test('modified storefront and manager scripts are syntactically valid',async()=>{
  for(const path of ['manage/index.html','s/index.html']){
   const page=await read(path);
-  const script=page.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+  const script=page.match(/<script\b[^>]*>([\s\S]*?)<\/script>/)?.[1];
   assert.ok(script,'Expected classic script in '+path);
-  assert.doesNotThrow(()=>new vm.Script(script,{filename:path}),path);
+  assert.doesNotThrow(()=>new vm.SourceTextModule(script,{identifier:path}),path);
  }
  const framer=await read('photo-framing.mjs');
  assert.doesNotThrow(()=>new vm.SourceTextModule(framer,{identifier:'photo-framing.mjs'}));
