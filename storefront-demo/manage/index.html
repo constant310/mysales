@@ -505,7 +505,7 @@ main{max-width:870px;padding-top:19px}
       <button id="share-one-product" type="button" class="share-single-product">Share this product on WhatsApp</button>
 
     </div>
-    <form id="dialog-form" class="modal-form" hidden>
+    <form id="dialog-form" class="modal-form" hidden><button type="button" id="dialog-reframe" class="btn btn-outline btn-small" style="margin:1px 0 12px;width:100%" hidden>Adjust current product photo</button>
       <label for="dialog-name">Product name</label><input id="dialog-name" name="name" maxlength="150" required>
       <div class="modal-field-grid"><div><label for="dialog-edit-price">Selling price (₦)</label><input id="dialog-edit-price" name="price" type="number" min="0" max="10000000000" step="1" inputmode="numeric" required></div>
       <div><label for="dialog-track-stock">Track exact stock?</label><select id="dialog-track-stock" name="trackStock"><option value="false">No — enquiry only</option><option value="true">Yes — track quantity</option></select><div id="edit-stock-count" hidden><label for="dialog-edit-stock">Quantity in stock</label><input id="dialog-edit-stock" name="stock" type="number" min="0" max="10000000" step="1" inputmode="numeric"></div></div></div>
@@ -1186,7 +1186,7 @@ function populateProductDialog(product){
  for(const [key,id] of Object.entries(detailFieldIds))$(id).value=dialogBaseline[key];
  $('dialog-read').hidden=false;dialogForm.hidden=true;$('dialog-footer').hidden=true;$('dialog-advanced').hidden=true;
  toggleDetailStock();
- $('dialog-photo-picker').hidden=true;$('dialog-edit').hidden=false;
+ $('dialog-photo-picker').hidden=true;$('dialog-reframe').hidden=true;$('dialog-edit').hidden=false;
  $('dialog-error').hidden=true;$('dialog-error').textContent='';
  $('dialog-save').textContent='Save changes';dialogSave.disabled=true;
  $('dialog-sale-form').reset();saleRequestKey=null;
@@ -1204,7 +1204,7 @@ function enterProductEdit(){
  dialogEditing=true;
  $('dialog-eyebrow').textContent='Editing product';
  $('dialog-edit').hidden=true;$('dialog-read').hidden=true;dialogForm.hidden=false;
- $('dialog-photo-picker').hidden=false;$('dialog-footer').hidden=false;$('dialog-advanced').hidden=!dialogProduct.track_stock;
+ $('dialog-photo-picker').hidden=false;$('dialog-reframe').hidden=!dialogProduct.image_path;$('dialog-footer').hidden=false;$('dialog-advanced').hidden=!dialogProduct.track_stock;
  $('dialog-name').focus({preventScroll:true});
  updateDetailSave();
 }
@@ -1232,6 +1232,25 @@ $('dialog-photo').addEventListener('change',async event=>{
   updateDetailSave();
  }catch(error){$('dialog-photo').value='';say(error.message,true);}
 });
+$('dialog-reframe').onclick=async()=>{
+ if(!dialogEditing||!dialogProduct?.image_path||dialogBusy)return;
+ const button=$('dialog-reframe');button.disabled=true;button.textContent='Opening current photo…';
+ try{
+  const response=await fetch('/api/merchant/share-image?productId='+encodeURIComponent(dialogProduct.id),{
+   headers:{Authorization:'Bearer '+await accessToken()},cache:'no-store'
+  });
+  if(!response.ok)throw Error('Could not load this photo. Choose a new photo instead.');
+  const blob=await response.blob();
+  if(!['image/jpeg','image/png','image/webp'].includes(blob.type)||blob.size>18000000||blob.size<20)
+   throw Error('Photo format not supported. Choose a new JPG or PNG photo.');
+  const framed=await photoFramer.open(new File([blob],'current-photo',{type:blob.type}));
+  if(!framed)return;
+  clearDialogPhotoUrl();dialogPhotoFile=framed;
+  dialogPhotoUrl=URL.createObjectURL(framed);showDetailPhoto(dialogPhotoUrl);
+  $('dialog-photo-label').textContent='Adjusted photo ready';updateDetailSave();
+ }catch(error){say(error.message,true);}
+ finally{button.disabled=false;button.textContent='Adjust current product photo';}
+};
 function cancelProductEdit(){
  if(!dialogProduct||dialogBusy)return;
  populateProductDialog(dialogProduct);
