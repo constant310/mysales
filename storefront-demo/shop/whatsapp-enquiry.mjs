@@ -94,7 +94,7 @@ export function enquiryPortraitLayout(count,variant='enquiry'){
 
 /** Builds one portrait JPEG for exactly one selected product.
      This never combines multiple product photos into a collage. */
-export async function prepareEnquiryPicture(storeName,items,{variant='enquiry',shopUrl=''}={}){
+export async function prepareEnquiryPicture(storeName,items,{variant='enquiry',shopUrl='',showPrice=true}={}){
  if(items.length!==1)return null;
  const selected=items.slice(0,6),loaded=await Promise.all(selected.map(p=>imageForEnquiry(p.image_path)));
  const imageCount=loaded.filter(Boolean).length;
@@ -135,7 +135,7 @@ export async function prepareEnquiryPicture(storeName,items,{variant='enquiry',s
    fitLines(ctx,p.name,x+24,mediaY+mediaHeight+(single?72:61),w-48,single?49:35,2);
    ctx.fillStyle='#13843B';ctx.font=isStatus?'bold 46px Arial,sans-serif':(single?'bold 39px Arial,sans-serif':'bold 28px Arial,sans-serif');
    const total=Number(p.quantity)*Number(p.price);
-   ctx.fillText(isStatus?'₦'+Number(p.price).toLocaleString('en-NG'):p.quantity+' × '+(p.unit||'piece')+'  ·  ₦'+total.toLocaleString('en-NG'),x+24,y+h-45,w-48);
+   if(!isStatus||showPrice)ctx.fillText(isStatus?'₦'+Number(p.price).toLocaleString('en-NG'):p.quantity+' × '+(p.unit||'piece')+'  ·  ₦'+total.toLocaleString('en-NG'),x+24,y+h-45,w-48);
   });
   if(isStatus){
    // mySales logo matches the existing mS brand mark in the dashboard.
@@ -197,7 +197,8 @@ export async function prepareEnquiryPictures(storeName,items){
 /** Each WhatsApp Status file is a standalone 9:16 picture that never displays
  * inventory quantities. Customer enquiry files retain their quantities.
  */
-export async function prepareStatusPictures(storeName,products,shopUrl=''){
+export async function prepareStatusPictures(storeName,products,shopUrl='',options={}){
+ const showPrice=options?.showPrice!==false;
  const files=[];
  for(const [index,product] of (Array.isArray(products)?products:[]).slice(0,MAX_ENQUIRY_IMAGES).entries()){
   if(!photoProxyPath(product.image_path))continue;
@@ -207,7 +208,7 @@ export async function prepareStatusPictures(storeName,products,shopUrl=''){
    const file=await prepareEnquiryPicture(storeName,[{
     productId:product.id,name:product.name,image_path:product.image_path,
     price:Number(unit.price),unit:unit.name||'piece',quantity:1
-   }],{variant:'status',shopUrl});
+   }],{variant:'status',shopUrl,showPrice});
    if(!file)continue;
    const safeName=String(product.name||'product').toLowerCase().replace(/[^a-z0-9]+/g,'-')
     .replace(/^-|-$/g,'').slice(0,32)||'product';
