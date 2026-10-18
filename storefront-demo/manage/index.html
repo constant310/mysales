@@ -403,7 +403,7 @@ main{max-width:870px;padding-top:19px}
   </div>
   <p class="status-guide">For a reliably <strong>clickable</strong> link, publish a second <strong>text Status</strong> containing the URL, immediately after your product photo Status. You can also paste the link onto a photo Status using WhatsApp's text tool, but tap-through behavior may vary by app version.</p>
  </div>
- <p class="status-guide">Tap <strong>Share to WhatsApp Status</strong>, choose WhatsApp, then select <strong>My Status</strong>. If your device doesn't support multiple images, download them individually. Photos don't contain clickable hotspots, and WhatsApp requires you to confirm posting.</p>
+ <p class="status-guide">Tap <strong>Share to WhatsApp Status</strong>, choose WhatsApp, then select <strong>My Status</strong>. Your shop link is included with the photos, but WhatsApp controls whether it appears clickable. If your device doesn't support multiple images, download them individually. Photos don't contain clickable hotspots, and WhatsApp requires you to confirm posting.</p>
 </section>
 <section class="settings-hub" aria-labelledby="settings-heading">
   <div class="settings-intro"><span class="settings-overline">STORE MANAGEMENT</span><h2 id="settings-heading">Store settings</h2><p>Keep your shop details and customer messages in one place.</p></div>
@@ -775,7 +775,7 @@ $('status-share').onclick=()=>{
   return;
  }
  try{
-  void navigator.share({files:statusFiles,title:currentStore.name+' products for Status'})
+  void navigator.share({files:statusFiles,title:currentStore.name+' products for Status',text:'Shop here: '+statusShopUrl(),url:statusShopUrl()})
    .then(()=>{reportMerchantActivity('product_share');setStatusFeedback('Images shared to the chosen app. Finish posting in WhatsApp Status.');})
    .catch(error=>{if(error?.name!=='AbortError')setStatusFeedback('Sharing could not start. Download the pictures above and post through WhatsApp Status.',true);});
  }catch{setStatusFeedback('This browser cannot share photos. Download and post them in WhatsApp Status.',true);}
