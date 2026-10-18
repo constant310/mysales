@@ -16,5 +16,7 @@ jobs:
           node-version: '22'
       - name: Install storefront dependencies
         run: npm --prefix storefront-demo install --no-audit --no-fund
+      - name: Validate photo framing and browser module syntax
+        run: node --experimental-vm-modules --test storefront-demo/test/photo-framing.test.mjs
       - name: Run automated storefront tests
         run: npm --prefix storefront-demo test
