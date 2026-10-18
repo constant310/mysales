@@ -293,6 +293,19 @@ main{max-width:870px;padding-top:19px}
 .quick-share{display:flex;align-items:center;justify-content:center;width:calc(100% - 24px);margin:0 12px 12px;min-height:42px;border:1px solid #c8e6d1;border-radius:10px;background:#f1faf3;color:#146c37;text-decoration:none;font-weight:850;font-size:.82rem}
 .retain-tip{background:#f1faf3;border:1px solid #cbe9d2;border-radius:14px;padding:15px 17px;margin:0 0 19px;color:#1a6439;line-height:1.45}.retain-tip strong{display:block;margin-bottom:4px;font-size:.93rem}.retain-tip p{margin:0;font-size:.8rem}
 #stock-count[hidden],#edit-stock-count[hidden]{display:none}
+/* Product photo framing, with a centered square live preview. */
+.frame-dialog{border:0;border-radius:19px;padding:0;width:min(470px,calc(100vw - 18px));max-height:96dvh;background:#fff;color:#254130;box-shadow:0 25px 70px #07180966;overflow:auto}
+.frame-dialog::backdrop{background:#091c13b7}
+.frame-header{padding:17px 18px 9px}.frame-header h2{font-size:1.22rem;color:#183f27;margin:0 0 6px}.frame-header p{font-size:.78rem;color:#698373;margin:0;line-height:1.5}
+.frame-stage{padding:12px 20px 8px;display:grid;place-items:center}
+#framer-canvas{display:block;width:min(100%,360px);height:auto;aspect-ratio:1;border:1px solid #dee9df;border-radius:12px;cursor:grab;touch-action:none;user-select:none}
+#framer-canvas:active{cursor:grabbing}
+.frame-tools{padding:9px 20px 20px}.frame-tools label{margin:4px 0 7px;font-size:.82rem;color:#315a3c}
+#framer-zoom{accent-color:#1c8220;min-height:23px;padding:0;width:100%}
+.frame-hint{font-size:.74rem;line-height:1.5;color:#667d6b;min-height:35px;margin:8px 0}
+.frame-buttons{display:grid;grid-template-columns:1fr 1.3fr;gap:8px}.frame-buttons button{min-height:46px;padding:10px;font-size:.82rem}
+#framer-fit{background:#f0f8f1;color:#1a773b;border:1px solid #cde4d2;margin:0 0 13px;border-radius:10px;padding:9px;font-size:.78rem;font-weight:850}
+#preview,.product-open img,.product img,.modal-photo img{object-fit:contain;background:#f4f9f5}
 </style></head><body>
 <header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Storefront Manager</span>
 <button id="exit" class="head-btn" hidden>Close private access</button></header>
@@ -396,6 +409,14 @@ main{max-width:870px;padding-top:19px}
   </details>
 </section>
 </div></main>
+<dialog id="photo-framer" class="frame-dialog" aria-modal="true" aria-labelledby="framer-title">
+ <div class="frame-header"><h2 id="framer-title">Adjust product photo</h2><p>Fit the whole product, or drag and zoom to choose what customers see.</p></div>
+ <div class="frame-stage"><canvas id="framer-canvas" width="960" height="960" aria-label="Square product photo preview. Drag to reposition."></canvas></div>
+ <div class="frame-tools"><button id="framer-fit" type="button">Fit entire photo</button>
+ <label for="framer-zoom">Zoom in</label><input type="range" id="framer-zoom" min="100" max="250" step="5" value="100">
+ <p id="framer-message" class="frame-hint" role="status">The entire photo will fit inside the square.</p>
+ <div class="frame-buttons"><button id="framer-cancel" class="btn btn-outline" type="button">Cancel</button><button id="framer-save" class="btn" type="button">Use this photo</button></div></div>
+</dialog>
 <dialog id="product-dialog" class="product-dialog" aria-modal="true" aria-labelledby="dialog-title">
   <div class="modal-header">
     <div class="modal-header-text"><span class="modal-overline" id="dialog-eyebrow">Product details</span><h2 id="dialog-title">Product details</h2></div>
@@ -419,7 +440,7 @@ main{max-width:870px;padding-top:19px}
       <button id="share-one-product" type="button" class="share-single-product">Share picture &amp; price with a customer</button>
 
     </div>
-    <form id="dialog-form" class="modal-form" hidden>
+    <form id="dialog-form" class="modal-form" hidden><button type="button" id="dialog-reframe" class="btn btn-outline btn-small" style="margin:1px 0 12px;width:100%" hidden>Adjust current product photo</button>
       <label for="dialog-name">Product name</label><input id="dialog-name" name="name" maxlength="150" required>
       <div class="modal-field-grid"><div><label for="dialog-edit-price">Selling price (₦)</label><input id="dialog-edit-price" name="price" type="number" min="0" max="10000000000" step="1" inputmode="numeric" required></div>
       <div><label for="dialog-track-stock">Track exact stock?</label><select id="dialog-track-stock" name="trackStock"><option value="false">No — enquiry only</option><option value="true">Yes — track quantity</option></select><div id="edit-stock-count" hidden><label for="dialog-edit-stock">Quantity in stock</label><input id="dialog-edit-stock" name="stock" type="number" min="0" max="10000000" step="1" inputmode="numeric"></div></div></div>
@@ -498,6 +519,8 @@ const parsePrivateLink=input=>{
 };
 let token=readManagerToken();
 const $=id=>document.getElementById(id),notice=$('notice'),list=$('products');
+const photoFramerPromise=import('/photo-framing.mjs').then(({createPhotoFramer})=>createPhotoFramer($('photo-framer')));
+let framedNewPhoto=null;
 let currentStore=null,products=[],isAdding=new URLSearchParams(location.search).has('welcome'),managerToastTimer=0;
 function showManagerToast(message){
  $('manager-toast-message').textContent=message;
@@ -910,7 +933,7 @@ function populateProductDialog(product){
  for(const [key,id] of Object.entries(detailFieldIds))$(id).value=dialogBaseline[key];
  $('dialog-read').hidden=false;dialogForm.hidden=true;$('dialog-footer').hidden=true;$('dialog-advanced').hidden=true;
  toggleDetailStock();
- $('dialog-photo-picker').hidden=true;$('dialog-edit').hidden=false;
+ $('dialog-photo-picker').hidden=true;$('dialog-reframe').hidden=true;$('dialog-edit').hidden=false;
  $('dialog-error').hidden=true;$('dialog-error').textContent='';
  $('dialog-save').textContent='Save changes';dialogSave.disabled=true;
  $('dialog-sale-form').reset();saleRequestKey=null;
@@ -928,7 +951,7 @@ function enterProductEdit(){
  dialogEditing=true;
  $('dialog-eyebrow').textContent='Editing product';
  $('dialog-edit').hidden=true;$('dialog-read').hidden=true;dialogForm.hidden=false;
- $('dialog-photo-picker').hidden=false;$('dialog-footer').hidden=false;$('dialog-advanced').hidden=!dialogProduct.track_stock;
+ $('dialog-photo-picker').hidden=false;$('dialog-reframe').hidden=!dialogProduct.image_path;$('dialog-footer').hidden=false;$('dialog-advanced').hidden=!dialogProduct.track_stock;
  $('dialog-name').focus({preventScroll:true});
  updateDetailSave();
 }
@@ -944,16 +967,37 @@ for(const id of Object.values(detailFieldIds)){
  $(id).addEventListener('input',updateDetailSave);
  $(id).addEventListener('change',updateDetailSave);
 }
-$('dialog-photo').addEventListener('change',event=>{
+$('dialog-photo').addEventListener('change',async event=>{
  const file=event.target.files?.[0]||null;
- clearDialogPhotoUrl();dialogPhotoFile=file;
- if(file){dialogPhotoUrl=URL.createObjectURL(file);showDetailPhoto(dialogPhotoUrl);
-  $('dialog-photo-label').textContent=file.name||'New photo selected';
- }else{showDetailPhoto(dialogProduct?.image_path||'');
-  $('dialog-photo-label').textContent=dialogProduct?.image_path?'Change photo':'Add a photo';
- }
- updateDetailSave();
+ if(!file)return;
+ try{
+  const framed=await (await photoFramerPromise).open(file);
+  if(!framed){$('dialog-photo').value='';return;}
+  clearDialogPhotoUrl();dialogPhotoFile=framed;
+  dialogPhotoUrl=URL.createObjectURL(framed);showDetailPhoto(dialogPhotoUrl);
+  $('dialog-photo-label').textContent='Adjusted photo ready';
+  updateDetailSave();
+ }catch(error){$('dialog-photo').value='';say(error.message,true);}
 });
+$('dialog-reframe').onclick=async()=>{
+ if(!dialogEditing||!dialogProduct?.image_path||dialogBusy)return;
+ const button=$('dialog-reframe');button.disabled=true;button.textContent='Opening current photo…';
+ try{
+  const response=await fetch('/api/merchant/share-image?productId='+encodeURIComponent(dialogProduct.id),{
+   headers:{Authorization:'Bearer '+token},cache:'no-store'
+  });
+  if(!response.ok)throw Error('Could not load this photo. Choose a new photo instead.');
+  const blob=await response.blob();
+  if(!['image/jpeg','image/png','image/webp'].includes(blob.type)||blob.size>18000000||blob.size<20)
+   throw Error('Photo format not supported. Choose a new JPG or PNG photo.');
+  const framed=await (await photoFramerPromise).open(new File([blob],'current-photo',{type:blob.type}));
+  if(!framed)return;
+  clearDialogPhotoUrl();dialogPhotoFile=framed;
+  dialogPhotoUrl=URL.createObjectURL(framed);showDetailPhoto(dialogPhotoUrl);
+  $('dialog-photo-label').textContent='Adjusted photo ready';updateDetailSave();
+ }catch(error){say(error.message,true);}
+ finally{button.disabled=false;button.textContent='Adjust current product photo';}
+};
 function cancelProductEdit(){
  if(!dialogProduct||dialogBusy)return;
  populateProductDialog(dialogProduct);
@@ -1062,10 +1106,16 @@ $('stock-mode').onchange=()=>{
  $('product-stock').required=enabled;
 };
 $('stock-mode').onchange();
-$('product-photo').onchange=e=>{
- const file=e.target.files?.[0];const old=$('preview').dataset.url;if(old)URL.revokeObjectURL(old);
- if(file){const url=URL.createObjectURL(file);$('preview').dataset.url=url;$('preview').src=url;$('preview').style.display='block';$('photo-icon').style.display='none';$('photo-label').textContent=file.name||'Photo selected';}
- else{$('preview').style.display='none';$('photo-icon').style.display='block';$('photo-label').textContent='Add a product photo';}
+$('product-photo').onchange=async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ try{
+  const framed=await (await photoFramerPromise).open(file);
+  if(!framed){if(!framedNewPhoto)$('product-photo').value='';return;}
+  framedNewPhoto=framed;
+  const old=$('preview').dataset.url;if(old)URL.revokeObjectURL(old);
+  const url=URL.createObjectURL(framed);$('preview').dataset.url=url;$('preview').src=url;
+  $('preview').style.display='block';$('photo-icon').style.display='none';$('photo-label').textContent='Adjusted photo ready';
+ }catch(error){$('product-photo').value='';framedNewPhoto=null;say(error.message,true);}
 };
 $('add').onsubmit=async e=>{
  e.preventDefault();
@@ -1075,7 +1125,7 @@ $('add').onsubmit=async e=>{
  try{
   // Process the photo before creating the product, so an unreadable image
   // cannot create a duplicate or automatically publish a photo-less item.
-  const photo=await preparePhoto(data.photo);
+  const photo=await preparePhoto(framedNewPhoto||data.photo);
   const result=await post('products',{
    name:data.name,price:Number(data.price),description:data.description||'',
    category:data.category||'',trackStock:data.trackStock==='true',baseUnit:'piece',unitName:'piece',factor:1
@@ -1106,7 +1156,7 @@ $('add').onsubmit=async e=>{
     }catch(err){errors.push('Store could not go live: '+err.message);}
    }
   }
-  form.reset();$('extras').open=false;$('stock-count').hidden=true;$('preview').style.display='none';
+  form.reset();framedNewPhoto=null;const previewUrl=$('preview').dataset.url;if(previewUrl)URL.revokeObjectURL(previewUrl);delete $('preview').dataset.url;$('extras').open=false;$('stock-count').hidden=true;$('preview').style.display='none';
   $('photo-icon').style.display='block';$('photo-label').textContent='Choose a product photo';
   say(errors.length?'Product saved as a draft or with an issue. '+errors.join(' ')+' Use its photo button below to retry.':
    '🎉 Product and picture added! Share your storefront with customers.',errors.length>0);
