@@ -353,6 +353,9 @@ main{max-width:870px;padding-top:19px}
 .status-link-actions .btn{min-height:42px;font-size:.79rem;flex:1;min-width:165px}
 .status-link-tools .status-guide{margin-top:11px;font-size:.74rem}
 @media(max-width:500px){.status-grid{grid-template-columns:1fr}.status-actions .btn{min-width:100%}}
+.status-price-toggle{display:flex;align-items:center;gap:12px;background:#F6FBF7;border:1px solid #DCEBE0;border-radius:12px;padding:12px 14px;margin-bottom:14px;cursor:pointer}
+.status-price-toggle input{width:21px!important;min-width:21px;height:21px!important;min-height:21px!important;accent-color:#1C8220;margin:0!important}
+.status-price-toggle span{display:flex;flex-direction:column;gap:3px}.status-price-toggle strong{color:#244530;font-size:.87rem}.status-price-toggle small{color:#708575;font-size:.74rem}
 </style></head><body>
 <header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><button id="exit" class="head-btn" style="margin-left:auto" hidden>Sign out</button></header>
 <main><p id="notice" role="status" aria-live="polite">Opening your store…</p>
@@ -387,7 +390,8 @@ main{max-width:870px;padding-top:19px}
 </div>
 <section class="panel" id="status-section" aria-labelledby="status-heading" hidden>
  <div class="status-intro"><span class="pill">FREE MARKETING TOOL</span><h2 id="status-heading">Post products to WhatsApp Status</h2>
- <p>Choose products and create a separate portrait Status picture for each. Each image includes the product photo, name, price and the mySales logo — <strong>no stock or order quantity.</strong></p></div>
+ <p>Choose products and create a separate portrait Status picture for each. Each image includes the product photo, name, shop link and mySales logo. Choose whether to show the price — <strong>never stock or order quantity.</strong></p></div>
+ <label class="status-price-toggle" for="status-show-price"><input type="checkbox" id="status-show-price" checked><span><strong>Show prices</strong><small>Turn off to share photos without prices</small></span></label>
  <div class="status-toolbar"><span id="status-selection-count">0 selected</span><button id="status-select-all" type="button">Select first 10</button><button id="status-clear" type="button">Clear</button></div>
  <div id="status-products" class="status-grid" role="group" aria-label="Choose products for WhatsApp Status"></div>
  <div class="status-actions"><button type="button" class="btn" id="status-prepare" disabled>Prepare Status pictures</button><button type="button" class="btn btn-outline" id="status-share" disabled>Share to WhatsApp Status</button></div>
@@ -401,7 +405,7 @@ main{max-width:870px;padding-top:19px}
    <button class="btn" type="button" id="status-copy-link">Copy link for Status</button>
    <button class="btn btn-outline" type="button" id="status-share-link">Share shop link</button>
   </div>
-  <p class="status-guide">For a reliably <strong>clickable</strong> link, publish a second <strong>text Status</strong> containing the URL, immediately after your product photo Status. You can also paste the link onto a photo Status using WhatsApp's text tool, but tap-through behavior may vary by app version.</p>
+  
  </div>
  <p class="status-guide">Tap <strong>Share to WhatsApp Status</strong>, choose WhatsApp, then select <strong>My Status</strong>. Your shop link is included with the photos, but WhatsApp controls whether it appears clickable. If your device doesn't support multiple images, download them individually. Photos don't contain clickable hotspots, and WhatsApp requires you to confirm posting.</p>
 </section>
@@ -743,6 +747,7 @@ $('status-select-all').onclick=()=>{
  renderStatusPicker();setStatusFeedback('Products selected. Prepare your Status pictures.');
 };
 $('status-clear').onclick=()=>{statusChosen.clear();renderStatusPicker();};
+$('status-show-price').onchange=()=>{discardStatusFiles();refreshStatusButtons();setStatusFeedback('Price preference updated. Prepare fresh Status pictures.');};
 $('status-prepare').onclick=async()=>{
  if(statusBusy)return;
  const picked=pickedStatusProducts().slice(0,MAX_ENQUIRY_IMAGES);
@@ -750,7 +755,7 @@ $('status-prepare').onclick=async()=>{
  discardStatusFiles();statusBusy=true;refreshStatusButtons();
  setStatusFeedback('Preparing '+picked.length+' portrait Status picture'+(picked.length===1?'':'s')+'…');
  try{
-  const files=await prepareStatusPictures(currentStore.name,picked,statusShopUrl());
+  const files=await prepareStatusPictures(currentStore.name,picked,statusShopUrl(),{showPrice:$('status-show-price').checked});
   statusFiles=files;
   for(const [index,file] of files.entries()){
    const url=URL.createObjectURL(file);statusPreviewUrls.push(url);
