@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {SourceTextModule} from 'node:vm';
 const root=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
 
@@ -39,4 +40,14 @@ test('public product images have a safe contained square and fullscreen zoom vie
  assert.match(page,/viewerPinchDistance/);
  assert.match(page,/function openSheet\(p,source\)/);
  assert.match(page,/add\.onclick=\(\)=>openSheet\(p,add\)/);
+});
+
+test('inline storefront and manager scripts parse as JavaScript modules',async()=>{
+ for(const file of ['manage/index.html','s/index.html']){
+  const html=await read(file);
+  const source=html.match(/<script type="module">([\s\S]*?)<\/script>/)?.[1];
+  assert.ok(source,'Expected inline module in '+file);
+  if(typeof SourceTextModule==='function')
+   assert.doesNotThrow(()=>new SourceTextModule(source,{identifier:file}));
+ }
 });
