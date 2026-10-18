@@ -828,8 +828,7 @@ function shareProductText(){
   lines.push((i+1)+'. '+p.name+' — '+currency(p.units[0].price)+(p.units[0].name&&p.units[0].name!=='piece'?' / '+p.units[0].name:''));
   const details=String(p.description||'').trim().slice(0,350);
   if(details)lines.push(details);
-  const photo=safeProductImage(p);
-  if(photo)lines.push('Photo: '+photo);
+  // Share the merchant's public shop link below, never a raw storage URL.
   lines.push('');
  });
  if(currentStore.status==='published')lines.push('View more products: '+publicUrl());
