@@ -98,7 +98,7 @@ export async function signUpWithPassword(email,password){
   email:normalizeEmail(email),password:checkPassword(password)
  });
  if(!result?.session?.access_token||!result?.session?.refresh_token)
-  throw Error('Account created but email confirmation is still required. Ask the administrator to disable Confirm email in Supabase Auth before using password signup.');
+  return {emailConfirmationRequired:true,email:normalizeEmail(email)};
  saveSession(result.session);
  return result.session;
 }
