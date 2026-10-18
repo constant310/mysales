@@ -182,6 +182,24 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 .enquiry-save-list:empty{display:none}
 .enquiry-save-list a{display:grid;place-items:center;min-height:43px;border-radius:10px;background:#EFF7F0;color:#175F33;border:1px solid #CFE8D6;font-weight:800;padding:9px 12px;text-align:center}
 .enquiry-save-list a:hover{background:#E4F4E8}
+
+/* Product thumbnails must not stretch the CSS Grid track or crop the source photo. */
+.grid-media{position:relative;display:block;min-width:0;aspect-ratio:1;overflow:hidden;background:#f5f9f6}
+.grid-image{position:absolute;inset:0;display:block;width:100%;height:100%;min-width:0;min-height:0;padding:8px;object-fit:contain;object-position:50% 50%;background:transparent}
+.grid-fallback{position:absolute;inset:0;width:100%;height:100%}
+/* Fullscreen, zoomable customer photo preview. */
+.photo-viewer{border:0;border-radius:17px;padding:0;width:min(700px,calc(100vw - 12px));max-height:96dvh;background:white;color:#24402d;box-shadow:0 25px 65px #071d1166;overflow:hidden}
+.photo-viewer[open]{display:flex;flex-direction:column}
+.photo-viewer::backdrop{background:#08160fda}
+.viewer-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px}
+.viewer-head strong{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.94rem}
+.viewer-close{border:0;background:#eaf5ed;color:#2c5537;width:37px;height:37px;border-radius:50%;font-size:1.4rem;flex:none}
+.viewer-stage{height:min(69dvh,620px);background:#f5f9f6;display:grid;place-items:center;overflow:hidden;position:relative;touch-action:none}
+.viewer-image{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;transform-origin:center;user-select:none;-webkit-user-drag:none}
+.viewer-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px}
+.viewer-actions button{min-height:41px;border-radius:9px;font-weight:800;font-size:.83rem;padding:8px 12px}
+.viewer-zoom{display:flex;gap:6px}.viewer-zoom button{border:1px solid #d0e4d5;background:#f1f8f2;color:#25653a;min-width:40px}
+#viewer-details{border:0;background:#16853d;color:white;flex:1;max-width:180px}
 </style></head><body><div class="site">
 <header class="brandbar"><a class="brand" href="/" aria-label="mySales home"><span class="brand-mark" aria-hidden="true">mS</span><span>mySales</span></a><div class="brand-actions"><a id="owner-manage-link" class="owner-manage-link" href="/manage/" aria-label="Return to manage your store" hidden>Manage store <span aria-hidden="true">↗</span></a><a id="guest-create-link" href="/login/" class="brand-note" style="color:#167c3e;font-size:.78rem;font-weight:800;white-space:nowrap;text-decoration:none">Create your own store</a></div></header>
 <aside id="demo-promo" class="demo-promo" aria-label="Create your own store" hidden>
@@ -214,6 +232,11 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 <button type="button" id="send" class="checkout"><span id="send-label">Send WhatsApp enquiry</span></button>
 <p id="checkout-help" class="help">The seller confirms availability and final prices. No payment is collected here.</p><a id="demo-signup" href="/login/" hidden>Create your own free store →</a>
 </div></aside>
+<dialog id="photo-viewer" class="photo-viewer" aria-labelledby="viewer-title">
+ <div class="viewer-head"><strong id="viewer-title">Product photo</strong><button type="button" class="viewer-close" id="viewer-close" aria-label="Close photo">×</button></div>
+ <div id="viewer-stage" class="viewer-stage"><img class="viewer-image" id="viewer-image" alt="Full product photo" draggable="false"></div>
+ <div class="viewer-actions"><div class="viewer-zoom"><button type="button" id="viewer-minus" aria-label="Zoom out">−</button><button type="button" id="viewer-reset" aria-label="Reset zoom">Fit</button><button type="button" id="viewer-plus" aria-label="Zoom in">+</button></div><button type="button" id="viewer-details">View details</button></div>
+</dialog>
 <div id="sheet-backdrop" class="sheet-backdrop"></div>
 <section id="purchase-sheet" class="purchase-sheet" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="sheet-name">
 <div class="sheet-head"><img id="sheet-thumb" class="sheet-thumb" alt="Selected product photo"><div class="sheet-title"><small id="sheet-category">Product</small><h2 id="sheet-name">Product</h2><strong id="sheet-price">₦0</strong></div><button id="sheet-close" class="close-button" type="button" aria-label="Close product options">×</button></div>
@@ -388,6 +411,58 @@ function fillPhoto(host,p,click=null){
  if(click)host.addEventListener('click',click);
 }
 
+const photoViewer=$('photo-viewer'),viewerImage=$('viewer-image');
+let viewingProduct=null,viewingSource=null,viewerZoom=1,viewerX=0,viewerY=0;
+const viewerPointers=new Map();let viewerPinchDistance=0;
+function renderViewerZoom(){
+ viewerImage.style.transform='translate('+viewerX+'px,'+viewerY+'px) scale('+viewerZoom+')';
+ $('viewer-minus').disabled=viewerZoom<=1;
+ $('viewer-plus').disabled=viewerZoom>=4;
+}
+function zoomPhoto(next){
+ viewerZoom=Math.max(1,Math.min(4,next));
+ if(viewerZoom===1){viewerX=0;viewerY=0;}
+ renderViewerZoom();
+}
+function openPhotoViewer(product,source){
+ const url=productPhoto(product);
+ if(!url){openSheet(product,source);return;}
+ viewingProduct=product;viewingSource=source;viewerZoom=1;viewerX=0;viewerY=0;
+ $('viewer-title').textContent=product.name;
+ viewerImage.alt='Full photo of '+product.name;viewerImage.src=url;
+ viewerImage.onerror=()=>{viewerImage.removeAttribute('src');$('viewer-title').textContent='Photo could not load';};
+ renderViewerZoom();photoViewer.showModal();$('viewer-close').focus({preventScroll:true});
+}
+$('viewer-close').onclick=()=>photoViewer.close();
+photoViewer.addEventListener('close',()=>{const source=viewingSource;viewingProduct=null;viewingSource=null;viewerPointers.clear();viewerPinchDistance=0;if(source?.isConnected)source.focus({preventScroll:true});});
+$('viewer-minus').onclick=()=>zoomPhoto(viewerZoom-.5);
+$('viewer-plus').onclick=()=>zoomPhoto(viewerZoom+.5);
+$('viewer-reset').onclick=()=>zoomPhoto(1);
+$('viewer-details').onclick=()=>{
+ const p=viewingProduct,source=viewingSource;
+ photoViewer.close();if(p)openSheet(p,source);
+};
+$('viewer-stage').addEventListener('pointerdown',event=>{
+ if(!photoViewer.open)return;
+ viewerPointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+ event.currentTarget.setPointerCapture(event.pointerId);
+ if(viewerPointers.size===2){const [a,b]=[...viewerPointers.values()];viewerPinchDistance=Math.hypot(a.x-b.x,a.y-b.y);}
+});
+$('viewer-stage').addEventListener('pointermove',event=>{
+ const old=viewerPointers.get(event.pointerId);if(!old)return;
+ viewerPointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+ if(viewerPointers.size===2){
+  const [a,b]=[...viewerPointers.values()];const distance=Math.hypot(a.x-b.x,a.y-b.y);
+  if(viewerPinchDistance>0)zoomPhoto(viewerZoom*distance/viewerPinchDistance);
+  viewerPinchDistance=distance;
+ }else if(viewerZoom>1){
+  viewerX+=event.clientX-old.x;viewerY+=event.clientY-old.y;renderViewerZoom();
+ }
+});
+for(const type of ['pointerup','pointercancel','lostpointercapture'])$('viewer-stage').addEventListener(type,event=>{
+ viewerPointers.delete(event.pointerId);viewerPinchDistance=0;
+});
+
 function renderProducts(){
  const host=$('grid-products');host.replaceChildren();
  $('grid-count').textContent=visible.length+' product'+(visible.length===1?'':'s');
@@ -399,7 +474,7 @@ function renderProducts(){
  for(const p of visible){
   const card=node('article');card.className='grid-item';
   const media=node('button');media.className='grid-media';media.type='button';media.setAttribute('aria-label','View '+p.name);
-  fillPhoto(media,p,()=>openSheet(p,media));card.append(media);
+  fillPhoto(media,p,()=>openPhotoViewer(p,media));card.append(media);
   const details=node('div');details.className='grid-content';
   const title=node('button',p.name);title.className='grid-title';title.type='button';title.onclick=()=>openSheet(p,title);
   details.append(title);
