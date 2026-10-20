@@ -57,7 +57,7 @@ test('V5 merchant uses server-side authenticated account API and preserves store
  assert.match(manager,/requireAccount\(/);
  assert.match(manager,/\/api\/v5\/merchant\//);
  assert.match(create,/\/api\/v5\/merchant\/transfer/);
- assert.match(create,/mysales_legacy_claim_proof/);
+ assert.match(create,/readLegacyProof/);
  assert.match(auth,/authRequest\('token\?grant_type=password'/);
  assert.match(auth,/provider=google/);
  assert.doesNotMatch(auth,/SUPABASE_SERVICE_ROLE_KEY|sb_secret_/);
