@@ -70,6 +70,7 @@ label{margin-top:15px}input,textarea{min-height:49px;padding:12px;border-radius:
 <header><a class="logo" href="/"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span><span class="product-tag">Storefronts</span></a><a class="back" href="/">← Back to mySales</a></header>
 <main class="shell"><section class="intro"><span class="eyebrow">mySales Storefronts</span><h1>Create your store.</h1><p class="lead">Just your business name and WhatsApp number. Add your first product next.</p></section>
 <div class="panel">
+<p id="boot-error" class="message" role="status" aria-live="polite"></p>
 <div id="start">
 <div class="step">Your seller account</div><h2>Set up your shop</h2><p class="sub">Two details to get started.</p>
 <form id="create">
@@ -105,7 +106,26 @@ label{margin-top:15px}input,textarea{min-height:49px;padding:12px;border-radius:
 <script type="module">
 import {requireAccount,accessToken} from '/auth/client.mjs';
 import {fillCountryCodes,showOtherCountryCode,internationalWhatsApp} from '/auth/phone.mjs';
+import {readLegacyProof,parseLegacyProof,clearClaimIntent} from '/auth/merchant-flow.mjs';
 const $=id=>document.getElementById(id);
+const flow=new URLSearchParams(location.search).get('flow');
+if(!['new','claim'].includes(flow))location.replace('/account/start/');
+const claimPanel=$('transfer-form').closest('details');
+claimPanel.hidden=flow!=='claim';
+claimPanel.open=flow==='claim';
+$('create').hidden=flow!=='new';
+if(flow==='claim'){
+ $('start').querySelector('h2').textContent='Connect your existing store';
+ $('start').querySelector('.sub').textContent='Keep your original products and public shop link.';
+ const saved=readLegacyProof(sessionStorage,localStorage);
+ if(saved){
+  $('old-link').required=false;
+  $('transfer-msg').textContent='A private management link is saved on this device. You can connect it without re-entering it.';
+ }
+}else{
+ $('start').querySelector('h2').textContent='Create a new store';
+ if(readLegacyProof(sessionStorage,localStorage))$('message').textContent='We found a previous management link. To preserve that shop and its products, use “Connect existing store” instead.';
+}
 fillCountryCodes($('whatsapp-country'));
 $('whatsapp-country').addEventListener('change',()=>showOtherCountryCode($('whatsapp-country'),$('custom-country')));
 showOtherCountryCode($('whatsapp-country'),$('custom-country'));
@@ -119,12 +139,8 @@ $('start').hidden=true;
   if(response.status===403)throw Error('Store access is restricted. Contact mySales support.');
   if(response.status!==404)throw Error('Could not check your account. Try again.');
   $('start').hidden=false;
- }catch(error){$('message').textContent=error.message;}
+ }catch(error){$('boot-error').textContent=error.message+' Return to Find your store and retry.';}
 })();
-try{
- const legacy=sessionStorage.getItem('mysales_legacy_claim_proof')||localStorage.getItem('mysales_private_management_token')||'';
- if(/^[A-Za-z0-9_-]{43}$/.test(legacy)){$('old-link').value=legacy;$('transfer-msg').textContent='Your existing store can be linked to this account.';}
-}catch{}
 $('create').onsubmit=async e=>{
  e.preventDefault();
  const button=$('submit');button.disabled=true;button.textContent='Creating…';$('message').textContent='';
@@ -158,8 +174,8 @@ function oldProof(raw){
 $('transfer-form').onsubmit=async e=>{
  e.preventDefault();const button=$('transfer-btn');button.disabled=true;$('transfer-msg').textContent='';
  try{
-  const legacyToken=oldProof($('old-link').value);
-  if(!legacyToken)throw Error('Paste the complete old private management link.');
+  const legacyToken=parseLegacyProof($('old-link').value)||readLegacyProof(sessionStorage,localStorage);
+  if(!legacyToken)throw Error('Paste the original private management link to prove that you own this store.');
   const token=await requireAccount();
   const response=await fetch('/api/v5/merchant/transfer',{method:'POST',
    headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
@@ -168,7 +184,7 @@ $('transfer-form').onsubmit=async e=>{
   if(!response.ok)throw Error(data.error||'Could not transfer store');
   $('old-link').value='';
   try{
-   sessionStorage.removeItem('mysales_legacy_claim_proof');
+   clearClaimIntent(sessionStorage);
    localStorage.removeItem('mysales_private_management_token');
   }catch{}
   location.replace('/account/manage/');
