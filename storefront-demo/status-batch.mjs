@@ -128,8 +128,6 @@ export async function renderStatusImage(product,{storeName,shopUrl,showPrice,loa
   const blob=await new Promise((resolve,reject)=>{
    canvas.toBlob(value=>value?resolve(value):reject(Error('Image export failed.')),'image/jpeg',.8);
   });
-  // The canvas and decoded image can now be collected before the next item.
-  canvas.width=1;canvas.height=1;
   return blob;
  }finally{loaded?.dispose?.();}
 }
