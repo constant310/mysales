@@ -6,7 +6,7 @@ import vm from 'node:vm';
 const read=path=>readFile(new URL('../'+path,import.meta.url),'utf8');
 
 test('all changed storefront screens contain syntactically valid interactive scripts',async()=>{
- for(const file of ['manage/index.html','s/index.html','create/index.html','operator/index.html']){
+ for(const file of ['legacy/manage/index.html','test/fixtures/legacy-shop.html','test/fixtures/legacy-create.html','operator/index.html']){
   const html=await read(file);
   const moduleScript=html.match(/<script type="module">([\s\S]*?)<\/script>/)?.[1];
   assert.ok(moduleScript,file+' must have a module');
