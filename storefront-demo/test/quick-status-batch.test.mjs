@@ -63,9 +63,10 @@ test('template is 9:16, contains branding once and fits photos without cropping'
  assert.match(renderer,/Math\.min\(frame\.w\/naturalW,frame\.h\/naturalH\)/);
  assert.match(renderer,/canvas\.toBlob/);
  assert.match(renderer,/'image\/jpeg',\.82/);
- assert.equal((renderer.match(/textFit\(ctx,visibleUrl/g)||[]).length,1);
- assert.match(renderer,/const photoX=62,photoY=269,photoW=740,photoH=816/);
- assert.match(renderer,/ctx\.clip\(\)/);
+ assert.equal((renderer.match(/textFit\(ctx,readableLink/g)||[]).length,1);
+ assert.match(renderer,/const frame=\{x:73,y:279,w:718,h:792\}/);
+ assert.match(renderer,/pill\(62,268,740,816,27,/);
  assert.match(renderer,/ctx\.fillText\('AVAILABLE IN OUR STORE'/);
- assert.match(renderer,/rounded\(ctx,48,1281,768,116,30\)/);
+ assert.match(renderer,/pill\(48,1282,768,111,36,'#E3F1E9'\)/);
+
 });
