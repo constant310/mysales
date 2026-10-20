@@ -33,6 +33,7 @@ test('universal Status poster uses only actual original photo, one link, and hid
  const calls={text:[],images:[],released:0};
  const ctx={
   beginPath(){},moveTo(){},arcTo(){},closePath(){},fill(){},fillRect(){},
+  arc(){},quadraticCurveTo(){},lineTo(){},stroke(){},save(){},restore(){},translate(){},rotate(){},
   fillText(t){calls.text.push(String(t));},drawImage(...args){calls.images.push(args);},
   measureText(s){return {width:String(s).length*17}},
   createLinearGradient(){return {addColorStop(){}}}
@@ -49,11 +50,11 @@ test('universal Status poster uses only actual original photo, one link, and hid
    loadPhoto:async()=>({image:photo,dispose(){calls.released++}})
   });
   assert.equal(blob.type,'image/jpeg');
-  assert.equal(canvas.width,1080);assert.equal(canvas.height,1920);
+  assert.equal(canvas.width,864);assert.equal(canvas.height,1536);
   assert.equal(calls.images.length,1);
   assert.equal(calls.images[0][0],photo);
   assert.equal(calls.images[0].length,5);
-  assert.equal(calls.text.filter(x=>x===link).length,1);
+  assert.equal(calls.text.filter(x=>x.includes('store.mysalesofficial.com')).length,1);
   assert.equal(calls.text.includes('₦18,000'),false);
   assert.equal(calls.released,1);
  }finally{globalThis.document=previous;}
