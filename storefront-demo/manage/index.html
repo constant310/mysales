@@ -406,7 +406,7 @@ main{max-width:870px;padding-top:19px}
  <div class="status-intro"><span class="pill">FREE MARKETING TOOL</span><h2 id="status-heading">Post products to WhatsApp Status</h2>
  <p>Choose products and create a separate portrait Status picture for each. Each image includes the product photo, name, shop link and mySales logo. Choose whether to show the price — <strong>never stock or order quantity.</strong></p></div>
  <label class="status-price-toggle" for="status-show-price"><input type="checkbox" id="status-show-price" checked><span><strong>Show prices</strong><small>Turn off to share photos without prices</small></span></label>
- <div class="status-toolbar"><span id="status-selection-count">0 selected</span><button id="status-select-all" type="button">Select first 10</button><button id="status-clear" type="button">Clear</button></div>
+ <div class="status-toolbar"><span id="status-selection-count">0 selected</span><button id="status-select-all" type="button">Select first 12</button><button id="status-clear" type="button">Clear</button></div>
  <div id="status-products" class="status-grid" role="group" aria-label="Choose products for WhatsApp Status"></div>
  <div class="status-actions"><button type="button" class="btn" id="status-prepare" disabled>Prepare Status pictures</button><button type="button" class="btn btn-outline" id="status-share" disabled>Share to WhatsApp Status</button></div>
  <p id="status-feedback" role="status" aria-live="polite">Select products to create your Status pictures.</p>
@@ -421,7 +421,7 @@ main{max-width:870px;padding-top:19px}
   </div>
   
  </div>
- <p class="status-guide">Tap <strong>Share to WhatsApp Status</strong>, choose WhatsApp, then select <strong>My Status</strong>. Your shop link is included with the photos, but WhatsApp controls whether it appears clickable. If your device doesn't support multiple images, download them individually. Photos don't contain clickable hotspots, and WhatsApp requires you to confirm posting.</p>
+ <p class="status-guide">Tap <strong>Share to WhatsApp Status</strong>, choose WhatsApp, then select <strong>My Status</strong>. Each photo prints the shop link once, but printed text is not clickable. Use a WhatsApp Status link sticker to make it tappable. If your device doesn't support multiple images, download them individually. Photos don't contain clickable hotspots, and WhatsApp requires you to confirm posting.</p>
 </section>
 <section class="settings-hub" aria-labelledby="settings-heading">
   <div class="settings-intro"><span class="settings-overline">STORE MANAGEMENT</span><h2 id="settings-heading">Store settings</h2><p>Keep your shop details and customer messages in one place.</p></div>
@@ -567,7 +567,8 @@ main{max-width:870px;padding-top:19px}
 <script type="module">
 import {accessToken,requireAccount,logout} from '/auth/client.mjs';
 import {fillCountryCodes,showOtherCountryCode,internationalWhatsApp,splitInternationalWhatsApp} from '/auth/phone.mjs';
-import {photoProxyPath,prepareStatusPictures,canShareEnquiryFiles,MAX_ENQUIRY_IMAGES} from '/shop/whatsapp-enquiry.mjs';
+import {photoProxyPath,canShareEnquiryFiles,MAX_ENQUIRY_IMAGES} from '/shop/whatsapp-enquiry.mjs';
+import {renderStatusImage,MAX_STATUS_ITEMS} from '/status-batch.mjs';
 import {createPhotoFramer} from '/photo-framing.mjs';
 const $=id=>document.getElementById(id),notice=$('notice'),list=$('products');
 const photoFramer=createPhotoFramer($('photo-framer'));
@@ -614,7 +615,7 @@ function shareMerchantProductPhoto(p){
  const file=state.file;
  if(file&&canShareEnquiryFiles([file])){
   try{
-   void navigator.share({files:[file],title:p.name,text:singleProductWhatsappText(p)})
+   void navigator.share({files:[file]})
     .then(()=>reportMerchantActivity('product_share'))
     .catch(e=>{if(e?.name!=='AbortError')showPhotoShareFallback(p,file);});
    return;
@@ -765,14 +766,14 @@ function refreshStatusShopLink(){
 $('status-copy-link').onclick=async()=>{
  const url=statusShopUrl();if(!url)return;
  try{
-  await navigator.clipboard.writeText(statusLinkMessage());
+  await navigator.clipboard.writeText(url);
   setStatusFeedback('Shop link copied. Open WhatsApp → Updates → text Status and paste it for a tappable link.');
  }catch{window.prompt('Copy this shop link for your WhatsApp Status:',statusLinkMessage());}
 };
 $('status-share-link').onclick=()=>{
  const url=statusShopUrl();if(!url)return;
  if(typeof navigator.share==='function'){
-  try{void navigator.share({title:currentStore.name+' online shop',text:statusLinkMessage(),url})
+  try{void navigator.share({url})
    .catch(error=>{if(error?.name!=='AbortError')window.prompt('Copy the shop link into a WhatsApp text Status:',url);});}
   catch{window.prompt('Copy the shop link into a WhatsApp text Status:',url);}
  }else window.prompt('Copy the shop link into a WhatsApp text Status:',url);
@@ -788,7 +789,7 @@ function discardStatusFiles(){
  $('status-share').disabled=true;
 }
 function refreshStatusButtons(){
- $('status-selection-count').textContent=pickedStatusProducts().length+' of '+MAX_ENQUIRY_IMAGES+' selected';
+ $('status-selection-count').textContent=pickedStatusProducts().length+' of '+MAX_STATUS_ITEMS+' selected';
  $('status-prepare').disabled=!pickedStatusProducts().length||statusBusy;
  $('status-select-all').disabled=statusBusy;
  $('status-clear').disabled=statusBusy;
@@ -809,8 +810,8 @@ function renderStatusPicker(){
   checkbox.setAttribute('aria-label','Post '+p.name+' to WhatsApp Status');
   checkbox.onchange=()=>{
    if(statusBusy){checkbox.checked=statusChosen.has(p.id);return;}
-   if(checkbox.checked&&statusChosen.size>=MAX_ENQUIRY_IMAGES){
-    checkbox.checked=false;setStatusFeedback('Choose up to '+MAX_ENQUIRY_IMAGES+' Status pictures per batch.',true);return;
+   if(checkbox.checked&&statusChosen.size>=MAX_STATUS_ITEMS){
+    checkbox.checked=false;setStatusFeedback('Choose up to '+MAX_STATUS_ITEMS+' Status pictures per batch.',true);return;
    }
    if(checkbox.checked)statusChosen.add(p.id);else statusChosen.delete(p.id);
    discardStatusFiles();refreshStatusButtons();
@@ -829,7 +830,7 @@ $('status-open').onclick=()=>{
 };
 $('status-select-all').onclick=()=>{
  for(const p of availableStatusProducts()){
-  if(statusChosen.size>=MAX_ENQUIRY_IMAGES)break;
+  if(statusChosen.size>=MAX_STATUS_ITEMS)break;
   statusChosen.add(p.id);
  }
  renderStatusPicker();setStatusFeedback('Products selected. Prepare your Status pictures.');
@@ -838,12 +839,22 @@ $('status-clear').onclick=()=>{statusChosen.clear();renderStatusPicker();};
 $('status-show-price').onchange=()=>{discardStatusFiles();refreshStatusButtons();setStatusFeedback('Price preference updated. Prepare fresh Status pictures.');};
 $('status-prepare').onclick=async()=>{
  if(statusBusy)return;
- const picked=pickedStatusProducts().slice(0,MAX_ENQUIRY_IMAGES);
+ const picked=pickedStatusProducts().slice(0,MAX_STATUS_ITEMS);
  if(!picked.length){setStatusFeedback('Select a product first.',true);return;}
  discardStatusFiles();statusBusy=true;refreshStatusButtons();
  setStatusFeedback('Preparing '+picked.length+' portrait Status picture'+(picked.length===1?'':'s')+'…');
  try{
-  const files=await prepareStatusPictures(currentStore.name,picked,statusShopUrl(),{showPrice:$('status-show-price').checked});
+  const files=[];
+  for(const [index,p] of picked.entries()){
+   setStatusFeedback('Applying mySales template to '+(index+1)+' of '+picked.length+' products…');
+   const blob=await renderStatusImage(p,{
+    storeName:currentStore.name,shopUrl:statusShopUrl(),
+    showPrice:$('status-show-price').checked,
+    loadPhoto:loadShareImage,formatPrice:currency
+   });
+   const slug=String(p.name||'product').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,32)||'product';
+   files.push(new File([blob],'mysales-status-'+String(index+1).padStart(2,'0')+'-'+slug+'.jpg',{type:'image/jpeg'}));
+  }
   statusFiles=files;
   for(const [index,file] of files.entries()){
    const url=URL.createObjectURL(file);statusPreviewUrls.push(url);
@@ -868,7 +879,7 @@ $('status-share').onclick=()=>{
   return;
  }
  try{
-  void navigator.share({files:statusFiles,title:currentStore.name+' products for Status',text:'Shop here: '+statusShopUrl(),url:statusShopUrl()})
+  void navigator.share({files:statusFiles})
    .then(()=>{reportMerchantActivity('product_share');setStatusFeedback('Images shared to the chosen app. Finish posting in WhatsApp Status.');})
    .catch(error=>{if(error?.name!=='AbortError')setStatusFeedback('Sharing could not start. Download the pictures above and post through WhatsApp Status.',true);});
  }catch{setStatusFeedback('This browser cannot share photos. Download and post them in WhatsApp Status.',true);}
@@ -1114,7 +1125,7 @@ $('share-native').onclick=()=>{
   shareStatus('Image sharing is not supported here. Download the picture and attach it in WhatsApp.',true);return;
  }
  try{
-  Promise.resolve(navigator.share({files,title:currentStore.name+' products',text:shareProductText()}))
+  Promise.resolve(navigator.share({files}))
    .then(()=>shareStatus('Picture shared.'))
    .catch(err=>{if(err?.name!=='AbortError')shareStatus('Sharing was unavailable. Download the picture and send it in WhatsApp.',true);});
  }catch(err){shareStatus('Sharing failed. Download the picture and attach it in WhatsApp.',true);}
