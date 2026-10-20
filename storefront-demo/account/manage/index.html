@@ -1553,7 +1553,7 @@ async function openManager(){
   catch(error){say('Your store is open, but products could not load. '+error.message,true);}
  }catch(error){
   if(error.status===401)location.replace('/login/');
-  else if(error.status===404)location.replace('/account/create/');
+  else if(error.status===404)location.replace('/account/start/');
   else say('Could not load your store. '+error.message,true);
  }
 }
