@@ -974,6 +974,9 @@ setupQuickStatusBatch({
    await post('publish',{productId:item.savedId,published:true});
    item.published=true;
   }
+ },
+ onSaved:async()=>{
+  // Update store visibility once after both upload workers finish.
   if(currentStore?.status!=='published'){
    const updated=await post('store-settings',{
     name:currentStore.name,whatsapp:currentStore.whatsapp,
@@ -981,8 +984,8 @@ setupQuickStatusBatch({
    });
    currentStore=updated.store;updateHero();
   }
- },
- onSaved:async()=>{await refresh();say('Quick batch products saved to your shop.');}
+  await refresh();say('Quick batch products saved to your shop.');
+ }
 });
 
 /* Quick vendor catalogue: one actual image containing selected photos and prices.
