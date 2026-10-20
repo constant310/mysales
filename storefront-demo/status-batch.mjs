@@ -44,123 +44,170 @@ function wrapProductName(ctx,text,width,maxLines=2){
  return lines;
 }
 
+/**
+ * Original Safe Minds-inspired mySales Status template, 864x1536 (9:16).
+ * Draw each layer in a fixed order: background -> product card -> genuine
+ * product photo -> editable details -> shop CTA -> mySales footer.
+ * Product photos are always contained; never stretched or cropped.
+ */
 export async function renderStatusImage(product,{storeName,shopUrl,showPrice,loadPhoto,formatPrice}) {
  const loaded=await loadPhoto(product);
- const img=loaded?.image;
- const sourceWidth=img?.naturalWidth||img?.width||0;
- const sourceHeight=img?.naturalHeight||img?.height||0;
- if(!sourceWidth||!sourceHeight){
+ const photo=loaded?.image;
+ const naturalW=photo?.naturalWidth||photo?.width||0;
+ const naturalH=photo?.naturalHeight||photo?.height||0;
+ if(!naturalW||!naturalH){
   loaded?.dispose?.();
-  throw Error('Original product image unavailable for '+(product?.name||'product'));
+  throw Error('Product photo unavailable for '+(product?.name||'this item'));
  }
- try{
-  // The approved Safe Minds reference is exactly 864 x 1536 (9:16).
-  const W=864,H=1536,canvas=document.createElement('canvas');
+ try {
+  const W=864,H=1536;
+  const canvas=document.createElement('canvas');
   canvas.width=W;canvas.height=H;
   const ctx=canvas.getContext('2d',{alpha:false});
-  if(!ctx)throw Error('Your browser cannot create WhatsApp Status pictures.');
+  if(!ctx)throw Error('Your phone cannot prepare this Status design.');
+  const circle=(x,y,r,color)=>{
+   ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+   ctx.fillStyle=color;ctx.fill();
+  };
+  const pill=(x,y,w,h,r,color)=>{
+   rounded(ctx,x,y,w,h,r);
+   ctx.fillStyle=color;ctx.fill();
+  };
+  const titleLines=(value,maxWidth,maxLines=2)=>{
+   const parts=String(value||'Product').trim().split(/\s+/);
+   const lines=[];let current='';
+   for(const word of parts){
+    const candidate=current?current+' '+word:word;
+    if(current&&ctx.measureText(candidate).width>maxWidth){
+     lines.push(current);current=word;
+    }else current=candidate;
+   }
+   if(current)lines.push(current);
+   if(lines.length>maxLines){
+    lines.length=maxLines;
+    let last=lines[maxLines-1]||'';
+    while(last.length>1&&ctx.measureText(last+'…').width>maxWidth)last=last.slice(0,-1);
+    lines[maxLines-1]=last+'…';
+   }
+   return lines.map(line=>{
+    while(line.length>1&&ctx.measureText(line).width>maxWidth)line=line.slice(0,-2)+'…';
+    return line;
+   });
+  };
 
-  // Deep evergreen header and calm pale background, matching the supplied reference.
-  ctx.fillStyle='#EEF7F2';ctx.fillRect(0,0,W,H);
-  const backdrop=ctx.createLinearGradient(0,0,W,H);
-  backdrop.addColorStop(0,'#0A5B3B');
-  backdrop.addColorStop(.5,'#00683F');
-  backdrop.addColorStop(1,'#00472F');
-  ctx.fillStyle=backdrop;
-  ctx.beginPath();
-  ctx.moveTo(0,0);ctx.lineTo(W,0);ctx.lineTo(W,565);
-  ctx.bezierCurveTo(740,552,653,470,530,429);
-  ctx.bezierCurveTo(270,352,151,521,0,389);
-  ctx.closePath();ctx.fill();
+  // Soft green and white backdrop from the supplied Safe Minds poster.
+  ctx.fillStyle='#F0F7F2';ctx.fillRect(0,0,W,H);
+  const head=ctx.createLinearGradient(0,0,W,525);
+  head.addColorStop(0,'#125E3C');
+  head.addColorStop(.6,'#075534');
+  head.addColorStop(1,'#06502F');
+  ctx.fillStyle=head;ctx.fillRect(0,0,W,565);
+  ctx.strokeStyle='#287D4E';ctx.lineWidth=80;
+  ctx.beginPath();ctx.arc(938,-50,207,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle='#F0F7F2';
+  ctx.beginPath();ctx.moveTo(0,392);
+  ctx.bezierCurveTo(140,560,330,504,510,492);
+  ctx.bezierCurveTo(675,485,780,590,864,550);
+  ctx.lineTo(864,1412);ctx.lineTo(0,1412);ctx.closePath();ctx.fill();
 
-  // Background embellishments stay behind the photograph, never across it.
-  ctx.strokeStyle='rgba(90,190,130,.36)';
-  ctx.lineWidth=56;
-  ctx.beginPath();ctx.arc(934,-85,209,.25,Math.PI*1.05);ctx.stroke();
-  ctx.strokeStyle='rgba(90,190,130,.21)';
-  ctx.lineWidth=34;
-  ctx.beginPath();ctx.arc(915,-95,275,.25,Math.PI*.95);ctx.stroke();
-  ctx.fillStyle='rgba(209,234,219,.24)';
-  ctx.beginPath();ctx.ellipse(770,1112,338,185,-.35,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='rgba(255,255,255,.32)';
-  ctx.beginPath();ctx.ellipse(55,1173,330,205,.24,0,Math.PI*2);ctx.fill();
-
-  // Header typography and the small pill are deliberately placed as in the reference.
-  ctx.fillStyle='#0E7850';rounded(ctx,48,49,314,45,16);ctx.fill();
-  ctx.fillStyle='#FFFFFF';ctx.font='700 22px Arial, sans-serif';
-  ctx.fillText('AVAILABLE IN OUR STORE',68,79,277);
+  // Hero text. Keep product title and price out of this area.
+  pill(48,49,314,44,16,'#167047');
+  ctx.font='700 22px Arial, sans-serif';ctx.fillStyle='#FFFFFF';
+  ctx.fillText('AVAILABLE IN OUR STORE',69,80,285);
   ctx.fillStyle='#FFFFFF';
-  textFit(ctx,String(storeName||'Our Store'),59,170,724,79,35);
-  ctx.fillStyle='#D9F2E4';ctx.font='29px Arial, sans-serif';
-  ctx.fillText('Discover something you will love',62,221,740);
-  ctx.strokeStyle='#70BE91';ctx.lineWidth=13;ctx.lineCap='round';
-  ctx.beginPath();ctx.moveTo(718,175);ctx.lineTo(708,213);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(750,200);ctx.lineTo(722,226);ctx.stroke();
+  textFit(ctx,String(storeName||'Our Store'),60,172,748,78,37);
+  ctx.fillStyle='#E6F4EB';ctx.font='29px Arial, sans-serif';
+  ctx.fillText('Discover something you will love',61,220,724);
+  ctx.save();ctx.translate(710,204);ctx.rotate(.34);pill(0,0,14,49,7,'#70B68C');ctx.restore();
+  ctx.save();ctx.translate(748,222);ctx.rotate(.8);pill(0,0,14,48,7,'#70B68C');ctx.restore();
 
-  // Single large white product card.
-  ctx.save();
-  ctx.shadowColor='rgba(0,62,33,.10)';ctx.shadowBlur=21;ctx.shadowOffsetY=8;
-  ctx.fillStyle='#FFFFFF';rounded(ctx,48,254,768,1002,32);ctx.fill();
+  // Clean, floating white product card matching the reference layout.
+  ctx.save();ctx.shadowColor='rgba(7,60,35,0.13)';
+  ctx.shadowBlur=25;ctx.shadowOffsetY=10;
+  pill(47,253,770,1005,37,'#FFFFFF');
   ctx.restore();
+  // The photo area is gently tinted; no overlay ever covers the actual photo.
+  pill(62,268,740,816,27,'#F8FBF9');
+  const surface=ctx.createLinearGradient(62,268,802,1084);
+  surface.addColorStop(0,'#FFFFFF');
+  surface.addColorStop(.62,'#F7FAF8');
+  surface.addColorStop(1,'#EDF6F2');
+  pill(62,268,740,816,27,surface);
 
-  // Photo area is rectangular, with rounded corners and NO white wedges or overlays.
-  // A contain fit preserves the entire item, including landscape and portrait photos.
-  const photoX=62,photoY=269,photoW=740,photoH=816;
-  ctx.fillStyle='#F5F9F6';rounded(ctx,photoX,photoY,photoW,photoH,25);ctx.fill();
-  ctx.save();rounded(ctx,photoX,photoY,photoW,photoH,25);ctx.clip();
-  const maxW=724,maxH=798;
-  const scale=Math.min(maxW/sourceWidth,maxH/sourceHeight);
-  const drawW=sourceWidth*scale,drawH=sourceHeight*scale;
-  // A very subtle background gradient makes narrow photos intentional, not empty.
-  const photoBg=ctx.createLinearGradient(photoX,photoY,photoX+photoW,photoY+photoH);
-  photoBg.addColorStop(0,'#F9FBF9');photoBg.addColorStop(1,'#EEF5F0');
-  ctx.fillStyle=photoBg;ctx.fillRect(photoX,photoY,photoW,photoH);
+  // Contain-fit: every pixel of each real product photo remains visible.
+  // For horizontal items this intentionally allows breathing room above/below.
+  const frame={x:73,y:279,w:718,h:792};
+  const scale=Math.min(frame.w/naturalW,frame.h/naturalH);
+  const dw=naturalW*scale,dh=naturalH*scale;
+  const px=frame.x+(frame.w-dw)/2,py=frame.y+(frame.h-dh)/2;
   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-  ctx.drawImage(img,photoX+(photoW-drawW)/2,photoY+(photoH-drawH)/2,drawW,drawH);
-  ctx.restore();
+  ctx.drawImage(photo,px,py,dw,dh);
 
-  ctx.fillStyle='#E7ECE8';ctx.fillRect(81,1097,700,2);
-  ctx.fillStyle='#074D34';ctx.font='800 52px Arial, sans-serif';
-  const titleLines=wrapProductName(ctx,product?.name||'Product',704,2);
-  const titleY=titleLines.length>1?1142:1159;
-  titleLines.forEach((line,i)=>ctx.fillText(line,81,titleY+48*i,704));
+  // Product details: original reference uses dark green type, NOT a price pill.
+  ctx.fillStyle='#E4ECE6';ctx.fillRect(80,1097,704,2);
+  ctx.fillStyle='#0A4930';
+  const name=String(product?.name||'Product').trim();
+  const nameFont=name.length>40?42:name.length>28?46:56;
+  ctx.font='800 '+nameFont+'px Arial, sans-serif';
+  const names=titleLines(name,704,2);
+  const firstY=names.length>1?1147:1166;
+  names.forEach((line,i)=>ctx.fillText(line,81,firstY+i*47,704));
   if(showPrice!==false){
-   ctx.fillStyle='#007042';
-   const priceY=titleLines.length>1?1233:1220;
-   textFit(ctx,formatPrice(product.units[0].price),82,priceY,700,50,29);
+   const unitPrice=product?.units?.[0]?.price;
+   if(unitPrice!==undefined&&unitPrice!==null){
+    ctx.fillStyle='#08613D';
+    const priceText=formatPrice(unitPrice);
+    textFit(ctx,priceText,81,names.length>1?1236:1223,694,55,31);
+   }
   }
 
-  // Distinct detached CTA strip below the card. URL occurs once and is not clickable in a JPG.
-  ctx.fillStyle='#E3F0E8';rounded(ctx,48,1281,768,116,30);ctx.fill();
-  ctx.fillStyle='#00613B';ctx.beginPath();ctx.arc(125,1339,39,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle='#FFFFFF';ctx.lineWidth=4;ctx.lineCap='round';ctx.lineJoin='round';
-  ctx.beginPath();ctx.moveTo(106,1324);ctx.lineTo(112,1324);ctx.lineTo(117,1344);
-  ctx.lineTo(139,1344);ctx.lineTo(147,1330);ctx.lineTo(116,1330);ctx.stroke();
-  for(const x of [121,138]){ctx.beginPath();ctx.arc(x,1353,3,0,Math.PI*2);ctx.stroke();}
-  ctx.fillStyle='#154F37';ctx.font='26px Arial, sans-serif';ctx.fillText('Shop here:',189,1330);
-  const visibleUrl=String(shopUrl||'').replace(/^https?:\/\//i,'').replace(/\/$/,'');
-  ctx.fillStyle='#064F34';
-  textFit(ctx,visibleUrl,188,1368,505,27,17);
-  ctx.fillStyle='#006A3C';ctx.beginPath();ctx.arc(751,1339,39,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle='#FFFFFF';ctx.lineWidth=5;ctx.beginPath();
-  ctx.moveTo(743,1323);ctx.lineTo(758,1339);ctx.lineTo(743,1355);ctx.stroke();
+  // Soft mint, full-width shop bar with one shop link, no duplicate captions.
+  pill(48,1282,768,111,36,'#E3F1E9');
+  circle(121,1339,37,'#075C3A');
+  ctx.strokeStyle='#FFFFFF';ctx.lineWidth=3.4;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(104,1325);ctx.lineTo(110,1325);
+  ctx.lineTo(115,1347);ctx.lineTo(139,1347);
+  ctx.lineTo(147,1330);ctx.lineTo(113,1330);ctx.stroke();
+  for(const cx of [118,139]){
+   ctx.beginPath();ctx.arc(cx,1354,2.7,0,Math.PI*2);ctx.fillStyle='#FFFFFF';ctx.fill();
+  }
+  ctx.fillStyle='#17583A';ctx.font='26px Arial, sans-serif';
+  ctx.fillText('Shop here:',190,1327);
+  const readableLink=String(shopUrl||'').replace(/^https?:\/\//i,'').replace(/\/$/,'');
+  ctx.fillStyle='#0B4F34';
+  // Display the complete canonical URL whenever possible.
+  textFit(ctx,readableLink,189,1364,523,25,15);
+  circle(755,1339,37,'#087546');
+  ctx.lineWidth=4;ctx.strokeStyle='#FFFFFF';
+  ctx.beginPath();ctx.moveTo(744,1322);ctx.lineTo(761,1339);
+  ctx.lineTo(744,1356);ctx.stroke();
 
-  // Curved mySales branded footer, matching the reference's proportions.
-  const footer=ctx.createLinearGradient(0,1402,864,1536);
-  footer.addColorStop(0,'#006F43');footer.addColorStop(1,'#004D33');
-  ctx.fillStyle=footer;
-  ctx.beginPath();ctx.moveTo(0,1398);
-  ctx.bezierCurveTo(188,1468,345,1398,518,1406);
-  ctx.bezierCurveTo(677,1407,786,1413,864,1445);
-  ctx.lineTo(864,H);ctx.lineTo(0,H);ctx.closePath();ctx.fill();
-  ctx.fillStyle='#0DB353';rounded(ctx,309,1434,70,67,9);ctx.fill();
-  ctx.fillStyle='#FFFFFF';ctx.font='800 35px Arial, sans-serif';ctx.fillText('mS',321,1482);
-  ctx.font='800 46px Arial, sans-serif';ctx.fillText('mySales',393,1486);
+  // White-to-green bottom sweep and centred mySales wordmark.
+  ctx.fillStyle='#FFFFFF';ctx.beginPath();
+  ctx.moveTo(0,1400);
+  ctx.quadraticCurveTo(180,1433,439,1405);
+  ctx.quadraticCurveTo(690,1395,864,1413);
+  ctx.lineTo(864,1536);ctx.lineTo(0,1536);
+  ctx.closePath();ctx.fill();
+  const foot=ctx.createLinearGradient(0,1436,864,1536);
+  foot.addColorStop(0,'#005633');foot.addColorStop(1,'#08462E');
+  ctx.fillStyle=foot;ctx.beginPath();
+  ctx.moveTo(0,1450);
+  ctx.quadraticCurveTo(353,1379,864,1445);
+  ctx.lineTo(864,1536);ctx.lineTo(0,1536);ctx.closePath();ctx.fill();
+  pill(312,1435,68,69,8,'#14A354');
+  ctx.fillStyle='#FFFFFF';ctx.font='800 32px Arial, sans-serif';
+  ctx.fillText('mS',321,1481);
+  ctx.fillStyle='#FFFFFF';ctx.font='800 45px Arial, sans-serif';
+  ctx.fillText('mySales',396,1487);
 
-  return await new Promise((resolve,reject)=>{
-   canvas.toBlob(result=>result?resolve(result):reject(Error('Could not export Status picture.')),'image/jpeg',.8);
+  const blob=await new Promise((resolve,reject)=>{
+   canvas.toBlob(value=>value?resolve(value):reject(Error('Unable to export Status picture.')),'image/jpeg',.82);
   });
- }finally{loaded?.dispose?.();}
+  return blob;
+ }finally{
+  loaded?.dispose?.();
+ }
 }
 
 export function setupStatusBatch({getProducts,getStore,getPublicUrl,loadPhoto,formatPrice,onShare}) {
