@@ -11,7 +11,7 @@ header{border-bottom:1px solid #e9f0eb;background:#fff}.nav{min-height:76px;disp
 .logo{display:inline-flex;align-items:center;gap:9px;font-size:1.3rem;font-weight:950;letter-spacing:-.065em;white-space:nowrap}
 .logo-mark{height:38px;width:38px;display:grid;place-items:center;border-radius:11px;background:#16a34a;color:#fff;font-size:1.06rem;letter-spacing:-.14em;padding-right:3px}
 .logo small{background:#ebf8ee;color:#157b3b;font-size:.63rem;font-weight:850;letter-spacing:0;padding:6px 8px;border-radius:999px;margin-left:2px}
-.nav-links{display:flex;align-items:center;gap:22px}.nav-links>a:first-child{font-size:.85rem;color:#597764;font-weight:750}
+.nav-links{display:flex;align-items:center;gap:22px}.nav-links>.manager-shortcut{font-size:.86rem;color:#16713B;font-weight:850;white-space:nowrap}
 .primary{display:inline-flex;align-items:center;justify-content:center;text-align:center;border-radius:12px;padding:13px 21px;min-height:50px;background:#15803d;color:white;font-size:.91rem;font-weight:900;line-height:1.2;transition:background .15s}
 .primary:hover{background:#0e6930}.nav .primary{font-size:.82rem;min-height:43px;padding:11px 15px}
 .hero-shell{background:linear-gradient(118deg,#f7fcf8 0%,#f1faf4 100%);border-bottom:1px solid #e4f0e7}
@@ -62,7 +62,7 @@ h1 span{color:#15803d}
 footer{padding:26px 0;color:#758777;font-size:.8rem}
 .foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.foot a{font-weight:800;color:#16713b}
 @media(max-width:850px){.hero{grid-template-columns:1fr;gap:33px;padding:53px 0 59px}.preview{max-width:400px}.step-grid{gap:13px}.step{padding:22px 17px}}
-@media(max-width:600px){.wrap{width:min(100% - 34px,1090px)}.nav{min-height:66px}.logo{font-size:1.1rem;gap:7px}.logo-mark{width:33px;height:33px;font-size:.99rem}.logo small{font-size:.58rem}.nav-links>a:first-child{display:none}.nav .primary{font-size:.75rem;min-height:40px;padding:10px 12px}.hero{padding:42px 0 58px;gap:29px}h1{font-size:clamp(2.6rem,10.6vw,3.8rem)}.lead{margin-bottom:21px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.actions a{font-size:.82rem;padding:12px 8px;min-height:49px}.reassurance{gap:9px 13px;font-size:.74rem}.preview{max-width:360px}.preview-tag{margin-bottom:11px}.steps{padding:59px 0}.section-title{text-align:left;margin-bottom:23px}.step-grid{grid-template-columns:1fr;gap:10px}.step{padding:19px 20px}.step h3{margin-top:12px}.convince-content{padding:34px 0;display:grid;gap:22px}.convince .primary{width:100%}}
+@media(max-width:600px){.wrap{width:min(100% - 34px,1090px)}.nav{min-height:66px}.logo{font-size:1.1rem;gap:7px}.logo-mark{width:33px;height:33px;font-size:.99rem}.logo small{font-size:.58rem}.nav-links>.manager-shortcut{display:inline;font-size:.76rem}.nav .primary{font-size:.75rem;min-height:40px;padding:10px 12px}.hero{padding:42px 0 58px;gap:29px}h1{font-size:clamp(2.6rem,10.6vw,3.8rem)}.lead{margin-bottom:21px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.actions a{font-size:.82rem;padding:12px 8px;min-height:49px}.reassurance{gap:9px 13px;font-size:.74rem}.preview{max-width:360px}.preview-tag{margin-bottom:11px}.steps{padding:59px 0}.section-title{text-align:left;margin-bottom:23px}.step-grid{grid-template-columns:1fr;gap:10px}.step{padding:19px 20px}.step h3{margin-top:12px}.convince-content{padding:34px 0;display:grid;gap:22px}.convince .primary{width:100%}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.primary{transition:none}}
 
 /* Conversion-first illustration: it is an invitation, not a competing sample. */
@@ -77,7 +77,7 @@ footer{padding:26px 0;color:#758777;font-size:.8rem}
 </style></head><body>
 <header><div class="wrap nav">
 <a class="logo" href="/" aria-label="mySales Storefronts"><span class="logo-mark" aria-hidden="true">mS</span>mySales<small>Storefronts</small></a>
-<nav class="nav-links" aria-label="Main navigation"><a href="#how-it-works">How it works</a><a class="primary" href="/login/">Create free store</a></nav>
+<nav class="nav-links" aria-label="Main navigation"><a class="manager-shortcut" href="/account/manage/">Manage Store</a><a class="primary" href="/login/">Create free store</a></nav>
 </div></header>
 <main>
 <div class="hero-shell"><section class="hero wrap" aria-labelledby="main-title">
@@ -107,4 +107,11 @@ footer{padding:26px 0;color:#758777;font-size:.8rem}
 <section class="convince"><div class="wrap convince-content"><div><h2>Ready to put your business online?</h2><p>Create your storefront free during our pilot. Customers can browse your products and enquire through WhatsApp. No online payment setup required.</p></div><a class="primary" href="/login/">Create my free store</a></div></section>
 </main>
 <footer><div class="wrap foot"><span>© 2026 mySales · Storefronts is made by mySales.</span><a href="/login/">Create a free storefront</a></div></footer>
-</body></html>
+<script type="module">
+import {signedIn,ownerDestination} from '/auth/client.mjs';
+const manage=document.querySelector('.manager-shortcut');
+if(manage && signedIn()) {
+  manage.textContent='Open my Store Manager';
+  manage.href='/account/manage/';
+}
+</script></body></html>
