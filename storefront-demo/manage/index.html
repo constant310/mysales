@@ -306,6 +306,21 @@ main{max-width:870px;padding-top:19px}
 .frame-buttons{display:grid;grid-template-columns:1fr 1.3fr;gap:8px}.frame-buttons button{min-height:46px;padding:10px;font-size:.82rem}
 #framer-fit{background:#f0f8f1;color:#1a773b;border:1px solid #cde4d2;margin:0 0 13px;border-radius:10px;padding:9px;font-size:.78rem;font-weight:850}
 #preview,.product-open img,.product img,.modal-photo img{object-fit:contain;background:#f4f9f5}
+
+/* Reusable original-photo 9:16 WhatsApp Status batch editor. */
+#status-products{background:#155e36;color:#fff;border-color:#155e36;min-height:42px}
+#status-products:hover{background:#0e4f2c}
+.status-batch-dialog{width:min(610px,calc(100vw - 18px))}
+.status-controls{display:flex;align-items:center;gap:13px;margin:14px 0}
+.status-controls label{display:flex;align-items:center;gap:9px;font-size:.84rem;color:#254c32;font-weight:750}
+.status-controls input{width:20px;height:20px;accent-color:#1c8220}
+.status-batch-dialog .share-picture-preview{max-height:320px;min-height:85px}
+.status-batch-dialog #status-batch-preview:not([hidden]) + span{display:none}
+.status-batch-dialog .share-picture-preview img{width:auto;max-width:100%;max-height:300px;object-fit:contain}
+.status-batch-dialog .share-select-head{flex-wrap:wrap}
+.status-instructions{font-size:.74rem;line-height:1.6;color:#627b68;margin-top:13px}
+.status-instructions strong{color:#245638}
+@media(max-width:500px){.status-batch-dialog .share-file-actions{grid-template-columns:1fr 1fr}.product-actions{flex-wrap:wrap}#status-products{flex:1 1 100%}}
 </style></head><body>
 <header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Storefront Manager</span>
 <button id="exit" class="head-btn" hidden>Close private access</button></header>
@@ -347,7 +362,7 @@ main{max-width:870px;padding-top:19px}
 <p id="add-note" class="hint">Your product picture, name and price appear together on your storefront.</p>
 </form></section>
 <section class="panel" id="product-section"><div class="inline" style="justify-content:space-between;align-items:center">
-<div><h2>Your products <span id="total" style="font-size:.84rem;color:#789589"></span></h2><p class="share-hint">Pick items to send prices and pictures to customers.</p></div><div class="product-actions"><button class="btn btn-outline btn-small" id="share-products" type="button">Share products</button><button class="btn btn-outline btn-small" id="add-more" type="button">Add product</button></div></div>
+<div><h2>Your products <span id="total" style="font-size:.84rem;color:#789589"></span></h2><p class="share-hint">Pick items to send prices and pictures to customers.</p></div><div class="product-actions"><button class="btn btn-outline btn-small" id="status-products" type="button">Post WhatsApp Status</button><button class="btn btn-outline btn-small" id="share-products" type="button">Share products</button><button class="btn btn-outline btn-small" id="add-more" type="button">Add product</button></div></div>
 <div id="products" class="product-list"></div></section>
 </div>
 <section class="settings-hub" aria-labelledby="settings-heading">
@@ -482,6 +497,35 @@ main{max-width:870px;padding-top:19px}
     <a id="share-whatsapp" class="share-secondary" target="_blank" rel="noopener noreferrer" aria-disabled="true" tabindex="-1">Send details on WhatsApp</a>
    </div>
    <p class="share-explainer"><strong>Two ways to send:</strong> “Send details on WhatsApp” sends names, prices and clickable photo links immediately. For actual photo attachments, prepare the picture above and tap “Share picture” to choose WhatsApp. If your phone does not support this, download the picture and attach it to the chat.</p>
+  </div>
+ </div>
+</dialog>
+<dialog id="status-batch-dialog" class="product-share-dialog status-batch-dialog" aria-modal="true" aria-labelledby="status-batch-heading">
+ <div class="product-share-header"><div><span class="share-eyebrow">WHATSAPP STATUS MANAGER</span>
+  <h2 id="status-batch-heading">Post many products to Status</h2>
+  <p>Choose up to 12 products. Each gets its own vertical poster, using the original photo without cropping.</p></div>
+  <button id="status-batch-close" type="button" class="share-close" aria-label="Close Status editor">×</button></div>
+ <div class="share-body">
+  <div class="share-search-row"><label for="status-batch-search">Find your products</label>
+   <input id="status-batch-search" type="search" autocomplete="off" placeholder="Search products…"></div>
+  <div class="share-select-head"><span id="status-batch-count">0 of 12 selected</span>
+   <button type="button" id="status-batch-all">Select first 12</button>
+   <button type="button" id="status-batch-clear">Clear</button></div>
+  <div id="status-batch-items" class="share-product-list" role="group" aria-label="Products for WhatsApp Status"></div>
+  <div class="share-composer">
+   <h3>Apply mySales Status template</h3>
+   <p>Same green design, one item per status, no invented product images. Your own shop link appears once on each picture.</p>
+   <div class="status-controls"><label for="status-show-price"><input id="status-show-price" type="checkbox" checked> Show product prices</label></div>
+   <button id="status-prepare" class="share-primary" type="button" disabled style="width:100%">Prepare selected Status pictures</button>
+   <div class="share-picture-preview"><img id="status-batch-preview" alt="Preview of the first WhatsApp Status picture" hidden>
+    <span>Preview appears here once pictures are prepared.</span></div>
+   <p id="status-batch-feedback" class="share-note" role="status" aria-live="polite">Select products to create Status images.</p>
+   <div class="share-file-actions">
+    <button id="status-share" class="share-primary" type="button" disabled>Share to WhatsApp</button>
+    <button id="status-download" class="share-secondary" type="button" disabled>Download all images</button>
+   </div>
+   <button id="status-copy-link" class="share-secondary" type="button" style="width:100%;margin-top:9px">Copy shop link for Status sticker</button>
+   <p class="status-instructions"><strong>Posting:</strong> After Share, choose WhatsApp and then My Status if your phone offers it. WhatsApp requires you to review and publish statuses yourself. A URL inside an image cannot be tapped, so use WhatsApp’s Link sticker with the copied link for clickable shopping.</p>
   </div>
  </div>
 </dialog>
@@ -861,8 +905,8 @@ $('share-native').onclick=()=>{
   shareStatus('Image sharing is not supported here. Download the picture and attach it in WhatsApp.',true);return;
  }
  try{
-  Promise.resolve(navigator.share({files,title:currentStore.name+' products',text:shareProductText()}))
-   .then(()=>shareStatus('Picture shared.'))
+  Promise.resolve(navigator.share({files}))
+   .then(()=>shareStatus('Picture handed to your phone. Choose WhatsApp and confirm before sending.'))
    .catch(err=>{if(err?.name!=='AbortError')shareStatus('Sharing was unavailable. Download the picture and send it in WhatsApp.',true);});
  }catch(err){shareStatus('Sharing failed. Download the picture and attach it in WhatsApp.',true);}
 };
@@ -883,6 +927,19 @@ $('share-whatsapp').onclick=event=>{
  shareStatus('Opening WhatsApp with the selected names, prices and photo links. To send picture attachments, use Share picture.');
 };
 
+// Status images deliberately share files only, without repeated URL captions.
+void import('/status-batch.mjs').then(({setupStatusBatch})=>setupStatusBatch({
+ getProducts:()=>products,
+ getStore:()=>currentStore,
+ getPublicUrl:()=>publicUrl(),
+ loadPhoto:loadShareImage,
+ formatPrice:currency,
+ onShare:()=>reportMerchantActivity('product_share'),
+})).catch(error=>{
+ console.error('Status editor could not load',error);
+ $('status-products').disabled=true;
+ $('status-products').title='Status editor temporarily unavailable';
+});
 const productDialog=$('product-dialog'),dialogForm=$('dialog-form'),dialogSave=$('dialog-save');
 let dialogProduct=null,dialogBaseline=null,dialogPhotoFile=null,dialogPhotoUrl=null,dialogEditing=false,dialogBusy=false;
 let saleRequestKey=null;
