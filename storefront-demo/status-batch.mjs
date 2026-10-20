@@ -16,10 +16,21 @@ export function statusSharePayload(files) {
 }
 
 function rounded(ctx,x,y,w,h,r){
- const d=Math.min(r,w/2,h/2);
- ctx.beginPath();ctx.moveTo(x+d,y);ctx.arcTo(x+w,y,x+w,y+h,d);
- ctx.arcTo(x+w,y+h,x,y+h,d);ctx.arcTo(x,y,x+w,y,d);
- ctx.arcTo(x,y,x+w,y,d);ctx.closePath();
+ // Use a closed, clockwise rounded rectangle. The previous arcTo path
+ // skipped the bottom-left corner and doubled the top-left segment,
+ // creating giant diagonal white wedges over the product photograph.
+ const d=Math.min(Math.max(0,r),w/2,h/2);
+ ctx.beginPath();
+ ctx.moveTo(x+d,y);
+ ctx.lineTo(x+w-d,y);
+ ctx.quadraticCurveTo(x+w,y,x+w,y+d);
+ ctx.lineTo(x+w,y+h-d);
+ ctx.quadraticCurveTo(x+w,y+h,x+w-d,y+h);
+ ctx.lineTo(x+d,y+h);
+ ctx.quadraticCurveTo(x,y+h,x,y+h-d);
+ ctx.lineTo(x,y+d);
+ ctx.quadraticCurveTo(x,y,x+d,y);
+ ctx.closePath();
 }
 function textFit(ctx,text,x,y,width,size=60,min=26) {
  let fontSize=size;
