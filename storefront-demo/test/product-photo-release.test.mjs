@@ -39,7 +39,7 @@ test('public storefront contains rather than crops image and enables fullscreen 
 });
 
 test('modified storefront and manager scripts are syntactically valid',async()=>{
- for(const path of ['legacy/manage/index.html','s/index.html']){
+ for(const path of ['legacy/manage/index.html','test/fixtures/legacy-shop.html']){
   const page=await read(path);
   const script=page.match(/<script\b[^>]*>([\s\S]*?)<\/script>/)?.[1];
   assert.ok(script,'Expected classic script in '+path);
