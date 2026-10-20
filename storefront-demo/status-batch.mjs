@@ -15,7 +15,7 @@ export function statusSharePayload(files) {
  return {files};
 }
 
-function rounded(ctx,x,y,w,h,r){
+export function rounded(ctx,x,y,w,h,r){
  // Use a closed, clockwise rounded rectangle. The previous arcTo path
  // skipped the bottom-left corner and doubled the top-left segment,
  // creating giant diagonal white wedges over the product photograph.
