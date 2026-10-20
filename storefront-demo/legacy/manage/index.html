@@ -1304,12 +1304,12 @@ $('share').onclick=()=>{
    .catch(err=>{if(err?.name!=='AbortError')copy(url);});
  }else{copy(url);reportMerchantActivity('shop_share');dismissRetainTip();}
 };
-$('copy-manager').onclick=()=>copy(location.origin+'/manage/claim#token='+encodeURIComponent(token));
+$('copy-manager').onclick=()=>copy(location.origin+'/legacy/manage/claim#token='+encodeURIComponent(token));
 $('export').onclick=async()=>{const b=$('export');b.disabled=true;try{const data=await api('export');const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='mysales-store-backup.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);say('Backup downloaded.');}catch(err){say(err.message,true);}finally{b.disabled=false;}};
 $('exit').onclick=()=>{
  forgetManagerToken();
  history.replaceState(null,'',location.pathname);
- location.replace('/manage/');
+ location.replace('/legacy/manage/');
 };
 function showAccessRecovery(message,{retry=false}={}){
  $('app').hidden=true;$('exit').hidden=true;
