@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
+import {spawnSync} from 'node:child_process';
 const base=new URL('../',import.meta.url);
 const read=p=>readFile(new URL(p,base),'utf8');
 
@@ -43,7 +44,10 @@ test('modified storefront and manager scripts are syntactically valid',async()=>
   const page=await read(path);
   const script=page.match(/<script\b[^>]*>([\s\S]*?)<\/script>/)?.[1];
   assert.ok(script,'Expected classic script in '+path);
-  assert.doesNotThrow(()=>typeof vm.SourceTextModule==='function'?new vm.SourceTextModule(script,{identifier:path}):new vm.Script(script,{filename:path}),path);
+  if(/^\s*import\s/m.test(script)){
+   const checked=spawnSync(process.execPath,['--check','--input-type=module'],{input:script,encoding:'utf8'});
+   assert.equal(checked.status,0,path+' must parse: '+checked.stderr);
+  }else assert.doesNotThrow(()=>typeof vm.SourceTextModule==='function'?new vm.SourceTextModule(script,{identifier:path}):new vm.Script(script,{filename:path}),path);
  }
  const framer=await read('photo-framing.mjs');
  if(typeof vm.SourceTextModule==='function') assert.doesNotThrow(()=>new vm.SourceTextModule(framer,{identifier:'photo-framing.mjs'}));
