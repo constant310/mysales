@@ -56,7 +56,7 @@ test('original product image is fitted, never cropped or synthesized, and URL is
 });
 
 test('manager exposes one-click multi-product Status editing and respects optional pricing',async()=>{
- const manager=await read('manage/index.html');
+ const manager=await read('legacy/manage/index.html');
  const js=await read('status-batch.mjs');
  const server=await read('render-server.mjs');
  assert.match(manager,/id="status-products"/);
