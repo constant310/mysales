@@ -46,56 +46,92 @@ function wrapProductName(ctx,text,width,maxLines=2){
 
 export async function renderStatusImage(product,{storeName,shopUrl,showPrice,loadPhoto,formatPrice}) {
  const loaded=await loadPhoto(product);
- if(!loaded?.image?.naturalWidth||!loaded?.image?.naturalHeight){
+ const img=loaded?.image;
+ const sourceWidth=img?.naturalWidth||img?.width||0;
+ const sourceHeight=img?.naturalHeight||img?.height||0;
+ if(!sourceWidth||!sourceHeight){
   loaded?.dispose?.();
   throw Error('Original product image unavailable for '+product.name);
  }
  try{
-  const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1920;
+  // 864 × 1536 matches the supplied Safe Minds-style portrait layout.
+  // It is 36% fewer pixels to process than the old 1080 × 1920 export.
+  const W=864,H=1536,canvas=document.createElement('canvas');
+  canvas.width=W;canvas.height=H;
   const ctx=canvas.getContext('2d',{alpha:false});
-  if(!ctx)throw Error('Your phone cannot prepare WhatsApp Status pictures.');
-  const width=1080;
-  ctx.fillStyle='#F1F7F1';ctx.fillRect(0,0,width,1920);
-  const gradient=ctx.createLinearGradient(0,0,1080,400);
-  gradient.addColorStop(0,'#104A30');gradient.addColorStop(1,'#14663F');
-  ctx.fillStyle=gradient;ctx.fillRect(0,0,width,350);
-  ctx.fillStyle='#DCF4E3';ctx.font='700 29px Arial, sans-serif';ctx.fillText('AVAILABLE IN OUR STORE',60,76);
-  ctx.fillStyle='#FFFFFF';
-  textFit(ctx,storeName||'Our store',59,177,965,77,34);
-  ctx.font='32px Arial, sans-serif';ctx.fillStyle='#DDF4E4';ctx.fillText('Discover something you will love',60,248);
+  if(!ctx)throw Error('Your browser cannot make Status pictures.');
+  ctx.fillStyle='#F0F7F3';ctx.fillRect(0,0,W,H);
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#07512F');bg.addColorStop(.63,'#00643B');bg.addColorStop(1,'#004E32');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,530);
+  ctx.fillStyle='#0E7B4B';
+  ctx.beginPath();ctx.arc(850,-65,182,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#358D62';ctx.lineWidth=68;
+  ctx.beginPath();ctx.arc(883,-60,179,1.15,3.55);ctx.stroke();
+  ctx.fillStyle='#EAF6EF';ctx.beginPath();ctx.moveTo(0,386);
+  ctx.quadraticCurveTo(150,480,376,433);ctx.quadraticCurveTo(670,510,864,440);
+  ctx.lineTo(864,1536);ctx.lineTo(0,1536);ctx.closePath();ctx.fill();
 
-  // Light product card, with an image-fit region. Never crop, invent or retouch photos.
-  ctx.fillStyle='#FFFFFF';rounded(ctx,36,322,1008,1262,38);ctx.fill();
-  ctx.fillStyle='#F5F9F5';rounded(ctx,58,349,964,1010,24);ctx.fill();
-  const img=loaded.image;
-  const maxW=922,maxH=980,scale=Math.min(maxW/img.naturalWidth,maxH/img.naturalHeight);
-  const drawW=img.naturalWidth*scale,drawH=img.naturalHeight*scale;
+  // Header and brand hierarchy.
+  ctx.fillStyle='#13744A';rounded(ctx,48,50,320,45,15);ctx.fill();
+  ctx.fillStyle='#FFFFFF';ctx.font='700 22px Arial, sans-serif';
+  ctx.fillText('AVAILABLE IN OUR STORE',67,80);
+  ctx.fillStyle='#FFFFFF';
+  textFit(ctx,storeName||'Our Store',59,174,750,71,34);
+  ctx.font='30px Arial, sans-serif';ctx.fillStyle='#DBF5E5';
+  ctx.fillText('Discover something you will love',61,224,740);
+  ctx.fillStyle='#62BE86';ctx.save();ctx.translate(734,175);ctx.rotate(.35);
+  rounded(ctx,0,0,17,56,10);ctx.fill();ctx.restore();
+  ctx.save();ctx.translate(780,193);ctx.rotate(.8);rounded(ctx,0,0,16,52,10);ctx.fill();ctx.restore();
+
+  // Main white product card: no cropping or zooming of the merchant's real photo.
+  ctx.save();ctx.shadowColor='rgba(14,64,43,.13)';ctx.shadowBlur=23;ctx.shadowOffsetY=9;
+  ctx.fillStyle='#FFFFFF';rounded(ctx,48,254,768,997,33);ctx.fill();ctx.restore();
+  ctx.fillStyle='#F7FAF8';rounded(ctx,62,269,740,812,26);ctx.fill();
+  const maxW=720,maxH=792;
+  const scale=Math.min(maxW/sourceWidth,maxH/sourceHeight);
+  const drawW=sourceWidth*scale,drawH=sourceHeight*scale;
   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-  ctx.drawImage(img,(width-drawW)/2,364+(976-drawH)/2,drawW,drawH);
-  ctx.fillStyle='#E4EEE6';ctx.fillRect(68,1381,944,2);
-  ctx.fillStyle='#203E2B';ctx.font='800 57px Arial, sans-serif';
-  const lines=wrapProductName(ctx,product.name,936,2);
-  lines.forEach((line,index)=>ctx.fillText(line,74,1450+index*61,936));
+  ctx.drawImage(img,432-drawW/2,276+(792-drawH)/2,drawW,drawH);
+
+  ctx.fillStyle='#E4EBE6';ctx.fillRect(81,1098,700,2);
+  ctx.fillStyle='#084A30';ctx.font='800 48px Arial, sans-serif';
+  const titleLines=wrapProductName(ctx,product.name||'Product',704,2);
+  titleLines.forEach((line,index)=>ctx.fillText(line,81,1152+index*48,704));
   if(showPrice){
-   ctx.fillStyle='#148044';textFit(ctx,formatPrice(product.units[0].price),74,1555,923,53,35);
+   const y=titleLines.length===2?1240:1219;
+   ctx.fillStyle='#006C3C';
+   textFit(ctx,formatPrice(product.units[0].price),82,Math.min(y,1234),700,48,31);
   }
 
-  ctx.fillStyle='#E1F0E7';rounded(ctx,46,1610,988,166,27);ctx.fill();
-  ctx.fillStyle='#0B5733';ctx.font='800 36px Arial, sans-serif';ctx.fillText('SHOP HERE',78,1669);
-  ctx.font='32px Arial, sans-serif';
-  // Exactly ONE link occurrence, in the picture footer, never in native share text.
-  textFit(ctx,shopUrl,78,1733,920,34,20);
+  // Green-tinted link strip. Printed text isn't clickable; show it once only.
+  ctx.fillStyle='#E4F2E9';rounded(ctx,48,1274,768,123,31);ctx.fill();
+  ctx.fillStyle='#055735';ctx.beginPath();ctx.arc(125,1336,38,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#FFFFFF';ctx.lineWidth=4;ctx.lineJoin='round';
+  ctx.beginPath();ctx.moveTo(105,1319);ctx.lineTo(111,1319);ctx.lineTo(116,1342);
+  ctx.lineTo(140,1342);ctx.lineTo(148,1324);ctx.lineTo(115,1324);ctx.stroke();
+  for(const x of [120,139]){ctx.beginPath();ctx.arc(x,1351,3,0,Math.PI*2);ctx.stroke();}
+  ctx.fillStyle='#104D35';ctx.font='26px Arial, sans-serif';ctx.fillText('Shop here:',189,1326);
+  ctx.font='700 26px Arial, sans-serif';
+  textFit(ctx,shopUrl||'',188,1362,590,26,18);
+  ctx.fillStyle='#046A3E';ctx.beginPath();ctx.arc(750,1336,37,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#FFFFFF';ctx.lineWidth=5;ctx.beginPath();
+  ctx.moveTo(740,1319);ctx.lineTo(756,1336);ctx.lineTo(740,1353);ctx.stroke();
 
-  ctx.fillStyle='#0C5734';ctx.fillRect(0,1800,width,120);
-  ctx.fillStyle='#1CA34B';rounded(ctx,360,1826,75,68,8);ctx.fill();
-  ctx.fillStyle='#FFFFFF';ctx.font='800 34px Arial, sans-serif';ctx.fillText('mS',377,1874);
-  ctx.fillStyle='#FFFFFF';ctx.font='800 47px Arial, sans-serif';ctx.fillText('mySales',450,1874);
+  // Matching green footer and mySales identity.
+  ctx.fillStyle='#00633B';ctx.beginPath();ctx.moveTo(0,1430);
+  ctx.quadraticCurveTo(330,1375,864,1450);ctx.lineTo(864,1536);ctx.lineTo(0,1536);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#14A750';rounded(ctx,311,1441,65,59,9);ctx.fill();
+  ctx.fillStyle='#FFFFFF';ctx.font='800 31px Arial, sans-serif';ctx.fillText('mS',322,1483);
+  ctx.font='800 44px Arial, sans-serif';ctx.fillText('mySales',394,1486);
 
-  const blob=await new Promise((resolve,reject)=>canvas.toBlob(
-   image=>image?resolve(image):reject(Error('Unable to export this status picture.')),
-   'image/jpeg',.86));
+  const blob=await new Promise((resolve,reject)=>{
+   canvas.toBlob(value=>value?resolve(value):reject(Error('Image export failed.')),'image/jpeg',.8);
+  });
+  // The canvas and decoded image can now be collected before the next item.
+  canvas.width=1;canvas.height=1;
   return blob;
- }finally{loaded.dispose();}
+ }finally{loaded?.dispose?.();}
 }
 
 export function setupStatusBatch({getProducts,getStore,getPublicUrl,loadPhoto,formatPrice,onShare}) {
