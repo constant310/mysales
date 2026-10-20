@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {renderStatusImage,statusSharePayload,MAX_STATUS_ITEMS} from '../status-batch.mjs';
+import {renderStatusImage,statusSharePayload,MAX_STATUS_ITEMS,rounded} from '../status-batch.mjs';
 
 const base=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,base),'utf8');
@@ -58,4 +58,27 @@ test('universal Status poster uses only actual original photo, one link, and hid
   assert.equal(calls.text.includes('₦18,000'),false);
   assert.equal(calls.released,1);
  }finally{globalThis.document=previous;}
+});
+
+
+test('Status poster rounded cards use four valid corners without diagonal wedges',()=>{
+ const operations=[];
+ const ctx=Object.fromEntries(['beginPath','moveTo','lineTo','quadraticCurveTo','closePath'].map(name=>[
+  name,(...args)=>operations.push([name,...args])
+ ]));
+ rounded(ctx,48,1282,768,111,36);
+ assert.deepEqual(operations,[
+  ['beginPath'],
+  ['moveTo',84,1282],
+  ['lineTo',780,1282],
+  ['quadraticCurveTo',816,1282,816,1318],
+  ['lineTo',816,1357],
+  ['quadraticCurveTo',816,1393,780,1393],
+  ['lineTo',84,1393],
+  ['quadraticCurveTo',48,1393,48,1357],
+  ['lineTo',48,1318],
+  ['quadraticCurveTo',48,1282,84,1282],
+  ['closePath']
+ ]);
+ assert.equal(operations.filter(entry=>entry[0]==='quadraticCurveTo').length,4);
 });
