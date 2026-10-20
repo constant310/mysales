@@ -200,12 +200,13 @@ http.createServer(async(req,res)=>{
   let staticPath=path;
   if(path==='/')staticPath='/index.html';
   if(path==='/discover'||path==='/discover/')staticPath='/discover/index.html';
-  if(path==='/create'||path==='/create/')staticPath='/create/index.html';
+  if(path==='/create'||path==='/create/')staticPath='/account/create/index.html';
   if(path==='/login'||path==='/login/')staticPath='/login/index.html';
   if(path==='/account/manage'||path==='/account/manage/')staticPath='/account/manage/index.html';
   if(path==='/account/create'||path==='/account/create/')staticPath='/account/create/index.html';
   if(path==='/manage'||path==='/manage/')staticPath='/manage/index.html';
-  if(path==='/manage/claim')staticPath='/manage/claim.html';
+  if(path==='/manage/claim'||path==='/manage/claim/'||path==='/legacy/manage/claim'||path==='/legacy/manage/claim/')staticPath='/legacy/manage/claim.html';
+  if(path==='/legacy/manage'||path==='/legacy/manage/')staticPath='/legacy/manage/index.html';
   if(path==='/operator'||path==='/operator/')staticPath='/operator/index.html';
   if(path==='/operator/claim')staticPath='/operator/claim.html';
   if(path==='/operator/setup')staticPath='/operator/setup.html';
@@ -224,7 +225,7 @@ http.createServer(async(req,res)=>{
    throw error;
   }
   res.setHeader('Content-Type',mime[extname(file)]);
-  if(path.startsWith('/manage')||path.startsWith('/account/')||path.startsWith('/login')||path.startsWith('/operator'))res.setHeader('Cache-Control','no-store');
+  if(path.startsWith('/manage')||path.startsWith('/account/')||path.startsWith('/legacy/manage')||path.startsWith('/create')||path.startsWith('/login')||path.startsWith('/operator'))res.setHeader('Cache-Control','no-store');
   return res.end(bytes);
  }catch(error){
   console.error('Request failed',error?.message);
