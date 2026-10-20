@@ -607,7 +607,8 @@ test('image catalogue uses actual product photos, correct prices and a real shar
  assert.match(manager,/loadShareImage\(p\)/);
  assert.match(manager,/fetch\('\/api\/merchant\/share-image\?productId=/);
  assert.match(manager,/new File\(\[result\.blob\]/);
- assert.match(manager,/navigator\.share\(\{files,title:currentStore\.name/);
+ assert.match(manager,/navigator\.share\(\{files\}\)/);
+ assert.doesNotMatch(manager,/navigator\.share\(\{files,title:currentStore\.name/);
  assert.match(manager,/navigator\.canShare/);
  assert.match(manager,/URL\.createObjectURL\(result\.blob\)/);
  assert.match(manager,/URL\.revokeObjectURL/);
