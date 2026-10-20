@@ -33,7 +33,7 @@ test('universal Status poster uses only actual original photo, one link, and hid
  const calls={text:[],images:[],released:0};
  const ctx={
   beginPath(){},moveTo(){},arcTo(){},closePath(){},fill(){},fillRect(){},
-  arc(){},quadraticCurveTo(){},lineTo(){},stroke(){},save(){},restore(){},translate(){},rotate(){},
+  arc(){},ellipse(){},bezierCurveTo(){},clip(){},quadraticCurveTo(){},lineTo(){},stroke(){},save(){},restore(){},translate(){},rotate(){},
   fillText(t){calls.text.push(String(t));},drawImage(...args){calls.images.push(args);},
   measureText(s){return {width:String(s).length*17}},
   createLinearGradient(){return {addColorStop(){}}}
