@@ -700,8 +700,8 @@ function showManagerView(){
  const adding=isAdding||!hasProducts;
  $('add-section').hidden=!adding;
  $('product-section').hidden=adding;
- $('status-section').hidden=adding;
- $('status-open').hidden=!hasProducts;
+ $('status-section').hidden=false;
+ $('status-open').hidden=false;
  $('cancel-add').hidden=!hasProducts;
  $('add-more').hidden=!hasProducts;
  let alreadyShown=false;
