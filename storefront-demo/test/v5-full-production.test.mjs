@@ -35,7 +35,7 @@ test('legacy links still reach old manager while all new accounts have a V5 dash
  assert.match(router,/staticPath='\/legacy\/manage\/index.html'/);
  assert.match(router,/staticPath='\/legacy\/manage\/claim.html'/);
  assert.match(redirect,/location\.hash/);
- assert.match(redirect,/mysales_private_management_token/);
+ assert.match(redirect,/readLegacyProof/);
  assert.match(redirect,/\/legacy\/manage\//);
  assert.match(redirect,/\/account\/manage\//);
  assert.match(legacy,/id="products"/);
