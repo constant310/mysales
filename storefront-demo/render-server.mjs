@@ -204,6 +204,7 @@ http.createServer(async(req,res)=>{
   if(path==='/login'||path==='/login/')staticPath='/login/index.html';
   if(path==='/account/manage'||path==='/account/manage/')staticPath='/account/manage/index.html';
   if(path==='/account/create'||path==='/account/create/')staticPath='/account/create/index.html';
+  if(path==='/account/start'||path==='/account/start/')staticPath='/account/start/index.html';
   if(path==='/manage'||path==='/manage/')staticPath='/manage/index.html';
   if(path==='/manage/claim'||path==='/manage/claim/'||path==='/legacy/manage/claim'||path==='/legacy/manage/claim/')staticPath='/legacy/manage/claim.html';
   if(path==='/legacy/manage'||path==='/legacy/manage/')staticPath='/legacy/manage/index.html';
