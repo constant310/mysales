@@ -7,7 +7,7 @@ const read=p=>readFile(new URL(p,root),'utf8');
 
 test('old private-link merchant dashboard and its backend are preserved',async()=>{
  const server=await read('render-server.mjs');
- const oldManager=await read('manage/index.html');
+ const oldManager=await read('legacy/manage/index.html');
  assert.match(server,/if\(allowed\.has\(path\)\)/);
  assert.match(server,/staticPath='\/manage\/index.html'/);
  assert.match(server,/early-storefront-backend'/);
