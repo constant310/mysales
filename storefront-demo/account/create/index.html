@@ -84,7 +84,7 @@ label{margin-top:15px}input,textarea{min-height:49px;padding:12px;border-radius:
 <div class="hp" aria-hidden="true"><label>Leave blank<input name="website" tabindex="-1" autocomplete="off"></label></div>
 <button class="primary" id="submit" type="submit">Create my store →</button>
 <div id="message" class="message" role="status" aria-live="polite"></div>
-</form><p class="fine">Free pilot · Secure account access across your devices</p>
+</form><p class="fine">Free pilot · Secure account access across your devices</p><p class="fine"><a href="/account/start/">← Choose another option</a></p>
 <details class="optional-details" style="margin-top:25px">
  <summary>Already have a store from the old private-link system?</summary>
  <p class="hint">Sign in first, then paste your existing management link once to attach the store and its products to your account. The old link will be revoked.</p>
@@ -92,7 +92,7 @@ label{margin-top:15px}input,textarea{min-height:49px;padding:12px;border-radius:
   <label for="old-link">Old management link</label>
   <input id="old-link" autocomplete="off" spellcheck="false" placeholder="Paste the saved link" required>
   <button class="ghost" style="margin-top:12px" type="submit" id="transfer-btn">Claim my existing store</button>
-  <div id="transfer-msg" class="message" role="status"></div>
+  <div id="transfer-msg" class="message" role="status"></div><p class="hint"><a href="/account/start/">← Choose another option</a> · <a href="/legacy/manage/">Original Store Manager</a></p>
  </form>
 </details>
 </div>
@@ -161,16 +161,6 @@ $('create').onsubmit=async e=>{
  finally{button.disabled=false;button.textContent='Create my store →';}
 };
 $('continue').onclick=()=>location.assign('/account/manage/?welcome=1');
-function oldProof(raw){
- const str=String(raw||'').trim();
- if(/^[A-Za-z0-9_-]{43}$/.test(str))return str;
- try{
-  const url=new URL(str);
-  if(!['store.mysalesofficial.com','mysales-early-storefront-branch.onrender.com'].includes(url.hostname)||url.protocol!=='https:')return '';
-  const token=new URLSearchParams(url.hash.slice(1)).get('token')||'';
-  return /^[A-Za-z0-9_-]{43}$/.test(token)?token:'';
- }catch{return '';}
-}
 $('transfer-form').onsubmit=async e=>{
  e.preventDefault();const button=$('transfer-btn');button.disabled=true;$('transfer-msg').textContent='';
  try{
@@ -181,7 +171,12 @@ $('transfer-form').onsubmit=async e=>{
    headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
    body:JSON.stringify({legacyToken}),cache:'no-store'});
   const data=await response.json().catch(()=>({}));
-  if(!response.ok)throw Error(data.error||'Could not transfer store');
+  if(!response.ok){
+   if(response.status===409)throw Error('This account or store is already linked. Sign in using the original owner account, or contact mySales support.');
+   if(response.status===404)throw Error('This original management link is invalid or has already been converted. Sign in using the account that owns the store, or contact mySales support.');
+   if(response.status===401)throw Error('Your sign-in session expired. Please sign in again before connecting the store.');
+   throw Error(data.error||'Could not verify the original store. Nothing has been changed.');
+  }
   $('old-link').value='';
   try{
    clearClaimIntent(sessionStorage);
