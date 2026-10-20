@@ -336,7 +336,7 @@ main{max-width:870px;padding-top:19px}
  </form>
  <button class="btn btn-outline" id="retry-access" type="button" hidden>Try connecting again</button>
  <p class="recovery-note">Your private link is the key to your store. Do not share it publicly. On a shared phone, use “Close private access” when finished.</p>
- <p class="recovery-secondary"><a href="/">Back to mySales</a></p>
+ <p class="recovery-secondary"><a href="/login/">Already switched to sign-in? Open your account</a> · <a href="/">Back to mySales</a></p>
 </section>
 <div id="app" hidden>
 <section class="hero"><div class="eyebrow" id="state">Your online store</div>
@@ -344,6 +344,7 @@ main{max-width:870px;padding-top:19px}
 <div class="actions">
 <button id="share" class="btn btn-light" type="button">Share my shop</button>
 <a id="public-link" class="btn btn-light" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;align-items:center">View my shop</a>
+<button id="migrate-account" type="button" class="btn btn-outline">Switch to email / Google sign-in</button>
 </div><p class="share-link" id="public-url" hidden></p></section>
 <section id="retain-tip" class="retain-tip" hidden><strong>✓ Your products are ready. Share one with a customer.</strong><p>Tap “Share on WhatsApp” below a product to send its name, price, picture link and shop link.</p><button type="button" id="dismiss-retain-tip" class="btn btn-outline btn-small" style="margin-top:10px">Got it</button></section>
 <div class="columns">
@@ -531,6 +532,7 @@ main{max-width:870px;padding-top:19px}
 </dialog>
 <div id="manager-toast" class="manager-toast" role="status" aria-live="polite"><span aria-hidden="true">✓</span> <strong id="manager-toast-message">Product added</strong></div>
 <script type="module">
+import {saveClaimIntent} from '/auth/merchant-flow.mjs';
 const managerTokenKey='mysales_private_management_token';
 const validManagerToken=value=>/^[A-Za-z0-9_-]{43}$/.test(value||'');
 const readManagerToken=()=>{
@@ -1305,6 +1307,15 @@ $('share').onclick=()=>{
  }else{copy(url);reportMerchantActivity('shop_share');dismissRetainTip();}
 };
 $('copy-manager').onclick=()=>copy(location.origin+'/legacy/manage/claim#token='+encodeURIComponent(token));
+$('migrate-account').onclick=()=>{
+ if(!validManagerToken(token)){
+  say('Open your existing private management link before linking a sign-in account.',true);return;
+ }
+ if(!saveClaimIntent(sessionStorage,token)){
+  say('Your browser cannot hold the old link during sign-in. Copy your private management link first, then enter it after signing in.',true);return;
+ }
+ location.assign('/login/?migration=1');
+};
 $('export').onclick=async()=>{const b=$('export');b.disabled=true;try{const data=await api('export');const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='mysales-store-backup.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);say('Backup downloaded.');}catch(err){say(err.message,true);}finally{b.disabled=false;}};
 $('exit').onclick=()=>{
  forgetManagerToken();
@@ -1344,7 +1355,7 @@ async function openManager(){
  }catch(error){
   if(error.status===401||error.status===403){
    forgetManagerToken();token='';
-   showAccessRecovery('This private link is invalid or no longer active. If you have another saved management link, paste it below.');
+   showAccessRecovery('This private link is no longer active. If you have already linked this store to an account, sign in instead. Otherwise, try another valid private management link or contact mySales support.');
   }else{
    showAccessRecovery('We could not connect to your store right now. Your access is still saved; please retry. '+error.message,{retry:true});
   }
