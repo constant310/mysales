@@ -58,12 +58,14 @@ input:focus{outline:3px solid #BBECC8;border-color:#16A34A}
 <button class="primary" id="submit-password" type="submit">Sign in</button>
 </form>
 <p id="status" role="status" aria-live="polite"></p>
+<p id="migration-hint" class="hint" hidden>Already have a mySales store? After sign-in, choose “Connect existing store” to keep your products and original shop link. You’ll need your original private management link.</p>
 <p class="note">By continuing, you agree to use your account only to manage stores you own. Keep your password private. Password recovery by email will require an email sender to be configured later.</p>
 </section></main>
 <script type="module">
 import {signInWithPassword,signUpWithPassword,beginGoogleSignIn,consumeEmailLink,ownerDestination,signedIn} from '/auth/client.mjs';
 const $=id=>document.getElementById(id);
 let mode='signin',busy=false;
+if(new URLSearchParams(location.search).has('migration'))$('migration-hint').hidden=false;
 function say(message,error=false){$('status').textContent=message;$('status').dataset.error=String(error);}
 function setMode(next){
  if(busy)return;

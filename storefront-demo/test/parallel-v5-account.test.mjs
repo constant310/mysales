@@ -29,7 +29,7 @@ test('production domain has separate account V5 login, merchant signup and dashb
  assert.match(server,/early-storefront-backend-v5-test/);
  assert.match(server,/early-storefront-signup-v5-test/);
  assert.match(client,/return '\/account\/manage\/'/);
- assert.match(client,/return '\/account\/create\/'/);
+ assert.match(client,/return '\/account\/start\/'/);
  assert.match(client,/\/api\/v5\/merchant\/me/);
  assert.match(create,/\/api\/v5\/signup/);
  assert.match(manager,/\/api\/v5\/merchant\//);

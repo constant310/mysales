@@ -1,0 +1,38 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>Find your store | mySales</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#26382e;background:#f5faf6}*{box-sizing:border-box}body{margin:0;min-height:100svh}
+header{max-width:750px;margin:auto;padding:23px 16px;display:flex;justify-content:space-between;align-items:center}
+.brand{color:#1c8220;font-size:1.4rem;font-weight:900;text-decoration:none}a{color:#15803d}
+main{margin:20px auto;max-width:610px;padding:0 15px}.panel{background:#fff;border:1px solid #dcece1;border-radius:21px;padding:26px;box-shadow:0 12px 30px #184b2410}
+.eyebrow{font-weight:900;font-size:.73rem;letter-spacing:.09em;color:#15803d}h1{font-size:clamp(1.8rem,5vw,2.35rem);line-height:1.16;letter-spacing:-.045em;margin:15px 0 12px}p{color:#677f6d;font-size:.91rem;line-height:1.6}
+.choice{display:block;border:1px solid #cfe5d5;border-radius:15px;padding:18px;text-decoration:none;margin:14px 0;color:#183c28}
+.choice:hover,.choice:focus-visible{background:#effaf1;border-color:#16a34a}.choice strong{font-size:1rem;display:block}.choice small{display:block;line-height:1.5;margin-top:6px;color:#657d69;font-size:.84rem}
+#existing{border-color:#16a34a;background:#f5fcf6}#notice{min-height:25px;color:#a13c32}#choices[hidden]{display:none}
+footer{margin:19px auto;text-align:center;font-size:.8rem;color:#7b8d80}
+</style></head><body><header><a class="brand" href="/">mS mySales</a><a href="/login/">Sign in</a></header>
+<main><section class="panel"><div class="eyebrow">STORE ACCESS</div><h1>Do you already have a mySales store?</h1>
+<p>We will help you open the right store without losing your products or creating duplicates.</p>
+<p id="notice" role="status" aria-live="polite">Checking your signed-in account…</p>
+<div id="choices" hidden>
+<a class="choice" id="existing" href="/account/create/?flow=claim"><strong>Yes, I already have a store →</strong><small>Connect your existing shop using its private manager link. Your products and customer URL stay the same.</small></a>
+<a class="choice" id="new" href="/account/create/?flow=new"><strong>No, create a new store →</strong><small>Start from scratch with a new business name and WhatsApp contact.</small></a>
+<p>Lost the old private link? <a href="/legacy/manage/">Try the old Store Manager</a>. For security, we cannot transfer a shop from its business name or phone number alone.</p>
+</div></section><footer>mySales protects each merchant's products and store access.</footer></main>
+<script type="module">
+import {requireAccount} from '/auth/client.mjs';
+import {readLegacyProof} from '/auth/merchant-flow.mjs';
+(async()=>{
+ const notice=document.querySelector('#notice');
+ try{
+  const token=await requireAccount();
+  const response=await fetch('/api/v5/merchant/me',{headers:{Authorization:'Bearer '+token},cache:'no-store'});
+  if(response.ok)return location.replace('/account/manage/');
+  if(response.status===401)return location.replace('/login/');
+  if(response.status===403)throw Error('Your existing store is restricted. Please contact mySales support.');
+  if(response.status!==404)throw Error('Could not check your store. Retry before creating or connecting another store.');
+  document.querySelector('#choices').hidden=false;
+  if(readLegacyProof(sessionStorage,localStorage))notice.textContent='We found a saved private management link on this device. Choose “Yes, I already have a store” to connect it securely.';
+  else notice.textContent='Choose an option below. Existing sellers should connect their original store rather than create a duplicate.';
+ }catch(error){notice.textContent=error.message;}
+})();
+</script></body></html>

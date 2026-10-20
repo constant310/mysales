@@ -70,6 +70,7 @@ label{margin-top:15px}input,textarea{min-height:49px;padding:12px;border-radius:
 <header><a class="logo" href="/"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span><span class="product-tag">Storefronts</span></a><a class="back" href="/">← Back to mySales</a></header>
 <main class="shell"><section class="intro"><span class="eyebrow">mySales Storefronts</span><h1>Create your store.</h1><p class="lead">Just your business name and WhatsApp number. Add your first product next.</p></section>
 <div class="panel">
+<p id="boot-error" class="message" role="status" aria-live="polite"></p>
 <div id="start">
 <div class="step">Your seller account</div><h2>Set up your shop</h2><p class="sub">Two details to get started.</p>
 <form id="create">
@@ -83,7 +84,7 @@ label{margin-top:15px}input,textarea{min-height:49px;padding:12px;border-radius:
 <div class="hp" aria-hidden="true"><label>Leave blank<input name="website" tabindex="-1" autocomplete="off"></label></div>
 <button class="primary" id="submit" type="submit">Create my store →</button>
 <div id="message" class="message" role="status" aria-live="polite"></div>
-</form><p class="fine">Free pilot · Secure account access across your devices</p>
+</form><p class="fine">Free pilot · Secure account access across your devices</p><p class="fine"><a href="/account/start/">← Choose another option</a></p>
 <details class="optional-details" style="margin-top:25px">
  <summary>Already have a store from the old private-link system?</summary>
  <p class="hint">Sign in first, then paste your existing management link once to attach the store and its products to your account. The old link will be revoked.</p>
@@ -91,7 +92,7 @@ label{margin-top:15px}input,textarea{min-height:49px;padding:12px;border-radius:
   <label for="old-link">Old management link</label>
   <input id="old-link" autocomplete="off" spellcheck="false" placeholder="Paste the saved link" required>
   <button class="ghost" style="margin-top:12px" type="submit" id="transfer-btn">Claim my existing store</button>
-  <div id="transfer-msg" class="message" role="status"></div>
+  <div id="transfer-msg" class="message" role="status"></div><p class="hint"><a href="/account/start/">← Choose another option</a> · <a href="/legacy/manage/">Original Store Manager</a></p>
  </form>
 </details>
 </div>
@@ -105,7 +106,26 @@ label{margin-top:15px}input,textarea{min-height:49px;padding:12px;border-radius:
 <script type="module">
 import {requireAccount,accessToken} from '/auth/client.mjs';
 import {fillCountryCodes,showOtherCountryCode,internationalWhatsApp} from '/auth/phone.mjs';
+import {readLegacyProof,parseLegacyProof,clearClaimIntent} from '/auth/merchant-flow.mjs';
 const $=id=>document.getElementById(id);
+const flow=new URLSearchParams(location.search).get('flow');
+if(!['new','claim'].includes(flow))location.replace('/account/start/');
+const claimPanel=$('transfer-form').closest('details');
+claimPanel.hidden=flow!=='claim';
+claimPanel.open=flow==='claim';
+$('create').hidden=flow!=='new';
+if(flow==='claim'){
+ $('start').querySelector('h2').textContent='Connect your existing store';
+ $('start').querySelector('.sub').textContent='Keep your original products and public shop link.';
+ const saved=readLegacyProof(sessionStorage,localStorage);
+ if(saved){
+  $('old-link').required=false;
+  $('transfer-msg').textContent='A private management link is saved on this device. You can connect it without re-entering it.';
+ }
+}else{
+ $('start').querySelector('h2').textContent='Create a new store';
+ if(readLegacyProof(sessionStorage,localStorage))$('message').textContent='We found a previous management link. To preserve that shop and its products, use “Connect existing store” instead.';
+}
 fillCountryCodes($('whatsapp-country'));
 $('whatsapp-country').addEventListener('change',()=>showOtherCountryCode($('whatsapp-country'),$('custom-country')));
 showOtherCountryCode($('whatsapp-country'),$('custom-country'));
@@ -119,12 +139,8 @@ $('start').hidden=true;
   if(response.status===403)throw Error('Store access is restricted. Contact mySales support.');
   if(response.status!==404)throw Error('Could not check your account. Try again.');
   $('start').hidden=false;
- }catch(error){$('message').textContent=error.message;}
+ }catch(error){$('boot-error').textContent=error.message+' Return to Find your store and retry.';}
 })();
-try{
- const legacy=sessionStorage.getItem('mysales_legacy_claim_proof')||localStorage.getItem('mysales_private_management_token')||'';
- if(/^[A-Za-z0-9_-]{43}$/.test(legacy)){$('old-link').value=legacy;$('transfer-msg').textContent='Your existing store can be linked to this account.';}
-}catch{}
 $('create').onsubmit=async e=>{
  e.preventDefault();
  const button=$('submit');button.disabled=true;button.textContent='Creating…';$('message').textContent='';
@@ -145,30 +161,25 @@ $('create').onsubmit=async e=>{
  finally{button.disabled=false;button.textContent='Create my store →';}
 };
 $('continue').onclick=()=>location.assign('/account/manage/?welcome=1');
-function oldProof(raw){
- const str=String(raw||'').trim();
- if(/^[A-Za-z0-9_-]{43}$/.test(str))return str;
- try{
-  const url=new URL(str);
-  if(!['store.mysalesofficial.com','mysales-early-storefront-branch.onrender.com'].includes(url.hostname)||url.protocol!=='https:')return '';
-  const token=new URLSearchParams(url.hash.slice(1)).get('token')||'';
-  return /^[A-Za-z0-9_-]{43}$/.test(token)?token:'';
- }catch{return '';}
-}
 $('transfer-form').onsubmit=async e=>{
  e.preventDefault();const button=$('transfer-btn');button.disabled=true;$('transfer-msg').textContent='';
  try{
-  const legacyToken=oldProof($('old-link').value);
-  if(!legacyToken)throw Error('Paste the complete old private management link.');
+  const legacyToken=parseLegacyProof($('old-link').value)||readLegacyProof(sessionStorage,localStorage);
+  if(!legacyToken)throw Error('Paste the original private management link to prove that you own this store.');
   const token=await requireAccount();
   const response=await fetch('/api/v5/merchant/transfer',{method:'POST',
    headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
    body:JSON.stringify({legacyToken}),cache:'no-store'});
   const data=await response.json().catch(()=>({}));
-  if(!response.ok)throw Error(data.error||'Could not transfer store');
+  if(!response.ok){
+   if(response.status===409)throw Error('This account or store is already linked. Sign in using the original owner account, or contact mySales support.');
+   if(response.status===404)throw Error('This original management link is invalid or has already been converted. Sign in using the account that owns the store, or contact mySales support.');
+   if(response.status===401)throw Error('Your sign-in session expired. Please sign in again before connecting the store.');
+   throw Error(data.error||'Could not verify the original store. Nothing has been changed.');
+  }
   $('old-link').value='';
   try{
-   sessionStorage.removeItem('mysales_legacy_claim_proof');
+   clearClaimIntent(sessionStorage);
    localStorage.removeItem('mysales_private_management_token');
   }catch{}
   location.replace('/account/manage/');

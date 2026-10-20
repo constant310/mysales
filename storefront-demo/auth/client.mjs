@@ -188,7 +188,7 @@ export async function ownerDestination(){
   result=await fetch('/api/v5/merchant/me',{headers:{Authorization:'Bearer '+token},cache:'no-store'});
  }catch{throw Error('Could not connect to your store. Check your internet connection.');}
  if(result.ok)return '/account/manage/';
- if(result.status===404)return '/account/create/';
+ if(result.status===404)return '/account/start/';
  if(result.status===401){
   try{localStorage.removeItem(SESSION_KEY);}catch{}
   return '/login/';

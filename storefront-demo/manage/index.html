@@ -1,10 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>Opening mySales Store Manager</title><style>body{font-family:system-ui,sans-serif;background:#f5faf6;color:#183e28;display:grid;min-height:100dvh;place-items:center;margin:0}main{padding:22px;text-align:center}a{color:#167c3e;font-weight:bold}</style></head><body><main><h1>Opening Store Manager…</h1><p>Please wait, or <a href="/account/manage/">open your dashboard</a>.</p></main><script>
-(function(){
- const hash=location.hash;
- let old=false;
- if(/^#token=[A-Za-z0-9_-]{43}$/.test(hash))old=true;
- try{if(/^[A-Za-z0-9_-]{43}$/.test(localStorage.getItem('mysales_private_management_token')||''))old=true;}catch{}
- const target=old?'/legacy/manage/'+(hash||''):'/account/manage/'+location.search;
- location.replace(target);
-})();
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>Opening mySales Store Manager</title><style>body{font-family:system-ui,sans-serif;background:#f5faf6;color:#183e28;display:grid;min-height:100dvh;place-items:center;margin:0}main{padding:22px;text-align:center}a{color:#167c3e;font-weight:bold}</style></head><body><main><h1>Opening Store Manager…</h1><p>Please wait, or <a href="/account/manage/">open your dashboard</a>.</p></main><script type="module">
+import {readLegacyProof,managerEntry} from '/auth/merchant-flow.mjs';
+import {signedIn} from '/auth/client.mjs';
+const hash=location.hash;
+const mode=managerEntry({hash,accountSignedIn:signedIn(),legacyToken:readLegacyProof(sessionStorage,localStorage)});
+const target=mode==='legacy'?'/legacy/manage/'+hash:'/account/manage/'+location.search;
+location.replace(target);
 </script></body></html>
