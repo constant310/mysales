@@ -64,7 +64,7 @@ test('claim intent survives login in session storage, and only clears after succ
  assert.equal(readLegacyProof(ss,storage()),'');
  assert.equal(saveClaimIntent(ss,'bad'),false);
  const create=await read('account/create/index.html');
- const prior=create.indexOf('if(!response.ok)throw Error',create.indexOf("$('transfer-form').onsubmit"));
+ const prior=create.indexOf('if(!response.ok){',create.indexOf("$('transfer-form').onsubmit"));
  const clear=create.indexOf('clearClaimIntent(sessionStorage)',create.indexOf("$('transfer-form').onsubmit"));
  assert.ok(prior>=0&&clear>prior,'failed transfers never clear the recovery proof');
  assert.doesNotMatch(create,/\$\('old-link'\)\.value=legacy/,'do not reveal private token in a form field');
