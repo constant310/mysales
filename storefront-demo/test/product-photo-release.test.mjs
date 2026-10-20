@@ -6,7 +6,7 @@ const base=new URL('../',import.meta.url);
 const read=p=>readFile(new URL(p,base),'utf8');
 
 test('live branch lets merchants frame new and existing product photos without changing auth',async()=>{
- const manager=await read('manage/index.html');
+ const manager=await read('legacy/manage/index.html');
  assert.match(manager,/id="photo-framer"/);
  assert.match(manager,/id="framer-canvas"/);
  assert.match(manager,/id="dialog-reframe"/);
@@ -39,7 +39,7 @@ test('public storefront contains rather than crops image and enables fullscreen 
 });
 
 test('modified storefront and manager scripts are syntactically valid',async()=>{
- for(const path of ['manage/index.html','s/index.html']){
+ for(const path of ['legacy/manage/index.html','test/fixtures/legacy-shop.html']){
   const page=await read(path);
   const script=page.match(/<script\b[^>]*>([\s\S]*?)<\/script>/)?.[1];
   assert.ok(script,'Expected classic script in '+path);

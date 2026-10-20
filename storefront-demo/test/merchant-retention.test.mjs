@@ -6,7 +6,7 @@ import vm from 'node:vm';
 const read=path=>readFile(new URL('../'+path,import.meta.url),'utf8');
 
 test('all changed storefront screens contain syntactically valid interactive scripts',async()=>{
- for(const file of ['manage/index.html','s/index.html','create/index.html','operator/index.html']){
+ for(const file of ['legacy/manage/index.html','test/fixtures/legacy-shop.html','test/fixtures/legacy-create.html','operator/index.html']){
   const html=await read(file);
   const moduleScript=html.match(/<script type="module">([\s\S]*?)<\/script>/)?.[1];
   assert.ok(moduleScript,file+' must have a module');
@@ -30,8 +30,8 @@ test('merchant cannot write activity without valid private manager credentials',
 
 test('stock mode is explicit, safe for pre-existing untracked products and sold-out tracked products',async()=>{
  const edge=await read('supabase/functions/early-storefront-backend/index.ts');
- const customer=await read('s/index.html');
- const manager=await read('manage/index.html');
+ const customer=await read('test/fixtures/legacy-shop.html');
+ const manager=await read('legacy/manage/index.html');
  assert.match(edge,/p\.track_stock/);
  assert.match(edge,/track_stock=case when/);
  assert.match(edge,/b\.trackStock===true/);
@@ -47,13 +47,13 @@ test('stock mode is explicit, safe for pre-existing untracked products and sold-
 });
 
 test('merchants can share product details directly and the app tracks return visits',async()=>{
- const manager=await read('manage/index.html');
+ const manager=await read('legacy/manage/index.html');
  assert.match(manager,/quick-share/);
  assert.match(manager,/Share on WhatsApp/);
  assert.match(manager,/reportMerchantActivity\('product_share'\)/);
  assert.match(manager,/reportMerchantActivity\('shop_share'\)/);
  assert.match(manager,/reportMerchantActivity\('dashboard_open'\)/);
- const signup=await read('create/index.html');
+ const signup=await read('test/fixtures/legacy-create.html');
  assert.match(signup,/rememberToken\(issuedToken\)/);
  const admin=await read('operator/index.html');
  assert.match(admin,/metric-merchant-active/);

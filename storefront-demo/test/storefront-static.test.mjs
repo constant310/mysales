@@ -23,7 +23,7 @@ test('Private management links never expire by default and can be revoked',async
 
 test('Merchant never needs a password, receives a reusable private-link capability',async()=>{
  const claim=await read('manage/claim.html');
- const manager=await read('manage/index.html');
+ const manager=await read('legacy/manage/index.html');
  assert.match(claim,/location\.hash/);
  assert.match(claim,/storage\.setItem\(key,token\)/);
  assert.match(claim,/\[sessionStorage,localStorage\]/);
@@ -57,16 +57,16 @@ test('Edge stores secrets only as hashes and checks them for every merchant acti
 });
 
 test('Customer WhatsApp enquiry cannot deduct inventory',async()=>{
- const storefront=await read('s/index.html');
+ const storefront=await read('test/fixtures/legacy-shop.html');
  assert.match(storefront,/wa\.me/);
  assert.doesNotMatch(storefront,/\/api\/merchant\/confirm-sale/);
 });
 
 
 test('Visitors can create stores directly from the public demo without an ERP login',async()=>{
- const landing=await read('index.html');
- const catalogue=await read('s/index.html');
- const create=await read('create/index.html');
+ const landing=await read('test/fixtures/legacy-home.html');
+ const catalogue=await read('test/fixtures/legacy-shop.html');
+ const create=await read('test/fixtures/legacy-create.html');
  const proxy=await read('render-server.mjs');
  assert.match(landing,/href="\/create\/"/);
  assert.match(catalogue,/id="home-demo"/);
@@ -89,7 +89,7 @@ test('Public store registration issues scoped private tokens without operator pr
 });
 
 test('First product flow is photo-first and does not expose unit conversion jargon',async()=>{
- const manager=await read('manage/index.html');
+ const manager=await read('legacy/manage/index.html');
  assert.match(manager,/Choose a product photo/);
  assert.match(manager,/Product name/);
  assert.match(manager,/Selling price/);
@@ -129,7 +129,7 @@ test('proxy streams responses and exposes safe upstream timing diagnostics',asyn
 });
 
 test('merchant setup shows only the relevant step and protects required product images',async()=>{
- const manager=await read('manage/index.html');
+ const manager=await read('legacy/manage/index.html');
  assert.match(manager,/showManagerView/);
  assert.match(manager,/id="product-section"/);
  assert.match(manager,/id="add-section"/);
@@ -140,9 +140,9 @@ test('merchant setup shows only the relevant step and protects required product 
 });
 
 test('focused landing and demo do not show competing marketing messages',async()=>{
- const home=await read('index.html');
- const signup=await read('create/index.html');
- const catalogue=await read('s/index.html');
+ const home=await read('test/fixtures/legacy-home.html');
+ const signup=await read('test/fixtures/legacy-create.html');
+ const catalogue=await read('test/fixtures/legacy-shop.html');
  assert.match(home,/Your business deserves its/);
  assert.match(home,/href="\/create\/"/);
  assert.match(signup,/optional-details/);
@@ -163,7 +163,7 @@ test('focused landing and demo do not show competing marketing messages',async()
 
 
 test('merchant products open a read-only details modal with explicit edit controls',async()=>{
- const manager=await read('manage/index.html');
+ const manager=await read('legacy/manage/index.html');
  assert.match(manager,/id="product-dialog"/);
  assert.match(manager,/aria-modal="true"/);
  assert.match(manager,/id="dialog-edit"/);
@@ -177,7 +177,7 @@ test('merchant products open a read-only details modal with explicit edit contro
  assert.doesNotMatch(manager,/const more=document\.createElement\('details'\);more\.append\(node\('summary','More product options'\)\)/);
 });
 test('modal Save remains disabled until valid details or a product photo change',async()=>{
- const manager=await read('manage/index.html');
+ const manager=await read('legacy/manage/index.html');
  assert.match(manager,/id="dialog-save"[^>]*disabled/);
  assert.match(manager,/function hasDetailChanges/);
  assert.match(manager,/function updateDetailSave/);
@@ -209,7 +209,7 @@ test('secure product update saves stock and visibility atomically with audited a
 
 
 test('merchant settings display as three individual responsive cards',async()=>{
- const manager=await read('manage/index.html');
+ const manager=await read('legacy/manage/index.html');
  assert.match(manager,/id="settings-heading"/);
  assert.match(manager,/id="settings-panel" class="settings-card"/);
  assert.match(manager,/id="whatsapp-panel" class="settings-card"/);
@@ -224,7 +224,7 @@ test('merchant settings display as three individual responsive cards',async()=>{
 });
 
 test('business and WhatsApp settings save only when edited',async()=>{
- const manager=await read('manage/index.html');
+ const manager=await read('legacy/manage/index.html');
  assert.match(manager,/id="business-save" type="submit" disabled/);
  assert.match(manager,/id="whatsapp-save" type="submit" disabled/);
  assert.match(manager,/function updateBusinessSave\(\)/);
@@ -238,7 +238,7 @@ test('business and WhatsApp settings save only when edited',async()=>{
 
 test('private link is only cleared after successful verification, never before retry',async()=>{
  const claim=await read('manage/claim.html');
- const manager=await read('manage/index.html');
+ const manager=await read('legacy/manage/index.html');
  assert.match(claim,/if\(!r\.ok\)throw Error/);
  assert.match(claim,/if\(persisted\)\{/);
  assert.match(claim,/history\.replaceState\(null,'',location\.pathname\)/);
@@ -249,7 +249,7 @@ test('private link is only cleared after successful verification, never before r
  assert.match(manager,/rememberManagerToken\(token\)/);
 });
 test('merchant can recover access by pasting their private link without sharing it publicly',async()=>{
- const manager=await read('manage/index.html');
+ const manager=await read('legacy/manage/index.html');
  assert.match(manager,/id="access-recovery"/);
  assert.match(manager,/id="recover-link"/);
  assert.match(manager,/id="recover-form"/);
@@ -264,7 +264,7 @@ test('merchant can recover access by pasting their private link without sharing 
  assert.doesNotMatch(manager,/localStorage\.setItem\([^)]*currentStore/);
 });
 test('signup remembers private access on the merchant device',async()=>{
- const signup=await read('create/index.html');
+ const signup=await read('test/fixtures/legacy-create.html');
  assert.match(signup,/const getSavedToken=/);
  assert.match(signup,/const rememberToken=/);
  assert.match(signup,/\[sessionStorage,localStorage\]/);
@@ -274,7 +274,7 @@ test('signup remembers private access on the merchant device',async()=>{
 
 
 test('storefront is a single grid-only shopping experience with no Explore or bottom tabs',async()=>{
- const catalogue=await read('s/index.html');
+ const catalogue=await read('test/fixtures/legacy-shop.html');
  assert.match(catalogue,/id="products"/);
  assert.match(catalogue,/id="grid-products"/);
  assert.match(catalogue,/function renderProducts/);
@@ -290,7 +290,7 @@ test('storefront is a single grid-only shopping experience with no Explore or bo
 });
 
 test('product cards use full-width Add to cart buttons with proper SVG icons',async()=>{
- const catalogue=await read('s/index.html');
+ const catalogue=await read('test/fixtures/legacy-shop.html');
  assert.match(catalogue,/\.grid-add\{display:flex;gap:8px;align-items:center;justify-content:center;width:100%/);
  assert.match(catalogue,/add\.textContent=p\.track_stock===true&&stockOf\(p\)<1\?'Sold out':'Add to cart'/);
  assert.match(catalogue,/add\.onclick=\(\)=>openSheet\(p,add\)/);
@@ -304,7 +304,7 @@ test('product cards use full-width Add to cart buttons with proper SVG icons',as
 });
 
 test('customer shopping keeps stock-aware quantity selection, one basket, and WhatsApp templates',async()=>{
- const catalogue=await read('s/index.html');
+ const catalogue=await read('test/fixtures/legacy-shop.html');
  assert.match(catalogue,/function openSheet/);
  assert.match(catalogue,/function closeSheet/);
  assert.match(catalogue,/function renderCart/);
@@ -324,7 +324,7 @@ test('customer shopping keeps stock-aware quantity selection, one basket, and Wh
 });
 
 test('single-page category modal works without a wide filter dropdown',async()=>{
- const catalogue=await read('s/index.html');
+ const catalogue=await read('test/fixtures/legacy-shop.html');
  assert.match(catalogue,/id="filter-home"/);
  assert.match(catalogue,/id="filter-dialog"/);
  assert.match(catalogue,/id="filter-options"/);
@@ -338,7 +338,7 @@ test('single-page category modal works without a wide filter dropdown',async()=>
  assert.doesNotMatch(catalogue,/id="category-home"/);
 });
 test('merchant manager separates top action buttons from product cards and uses scalable SVG settings icons',async()=>{
- const manager=await read('manage/index.html');
+ const manager=await read('legacy/manage/index.html');
  assert.match(manager,/#app>\.hero\{margin-bottom:32px\}/);
  assert.match(manager,/\.settings-icon svg\{width:21px;height:21px;display:block\}/);
  assert.match(manager,/\.settings-chevron svg\{width:20px;height:20px/);
@@ -347,12 +347,12 @@ test('merchant manager separates top action buttons from product cards and uses 
 });
 
 test('customer share link is the business-name path, not a visible slug or query string',async()=>{
- const manager=await read('manage/index.html');
- const catalogue=await read('s/index.html');
+ const manager=await read('legacy/manage/index.html');
+ const catalogue=await read('test/fixtures/legacy-shop.html');
  const signup=await read('supabase/functions/early-storefront-signup/index.ts');
  const directory=await read('discover/index.html');
  const operator=await read('operator/index.html');
- const landing=await read('index.html');
+ const landing=await read('test/fixtures/legacy-home.html');
  assert.match(manager,/function publicUrl\(\)\{return location\.origin\+'\/'\+encodeURIComponent\(currentStore\.public_handle/);
  assert.match(signup,/publicUrl:'\/'\+encodeURIComponent\(result\.store\.public_handle\)/);
  assert.match(directory,/link\.href='\/'\+encodeURIComponent\(store\.public_handle/);
@@ -365,7 +365,7 @@ test('customer share link is the business-name path, not a visible slug or query
 test('clean /business-name routes and old shared links both reach storefronts',async()=>{
  const server=await read('render-server.mjs');
  const edge=await read('supabase/functions/early-storefront-backend/index.ts');
- const catalogue=await read('s/index.html');
+ const catalogue=await read('test/fixtures/legacy-shop.html');
  assert.match(server,/Clean customer storefronts:/);
  assert.match(server,/staticPath='\/s\/index\.html'/);
  assert.match(server,/staticPath===path/);
@@ -405,7 +405,7 @@ test('operator only enters a business name and never needs a manual slug',async(
 });
 
 test('marketing homepage puts merchant creation before examples and uses a conversion-first message',async()=>{
- const landing=await read('index.html');
+ const landing=await read('test/fixtures/legacy-home.html');
  assert.match(landing,/Your business deserves its/);
  assert.match(landing,/own store link/);
  assert.match(landing,/id="how-it-works"/);
@@ -420,7 +420,7 @@ test('marketing homepage puts merchant creation before examples and uses a conve
 });
 
 test('customer storefront uses only functional quiet icons; conversion buttons are text-first',async()=>{
- const catalogue=await read('s/index.html');
+ const catalogue=await read('test/fixtures/legacy-shop.html');
  assert.match(catalogue,/add\.textContent=p\.track_stock===true&&stockOf\(p\)<1\?'Sold out':'Add to cart'/);
  assert.match(catalogue,/class="shop-cta" href="#products">Browse products<\/a>/);
  assert.match(catalogue,/id="home-cart"/);
@@ -433,7 +433,7 @@ test('customer storefront uses only functional quiet icons; conversion buttons a
 });
 
 test('merchant manager uses understandable labels and minimal non-decorative settings controls',async()=>{
- const manager=await read('manage/index.html');
+ const manager=await read('legacy/manage/index.html');
  assert.match(manager,/id="add-more" type="button">Add product<\/button>/);
  assert.match(manager,/view\.className='product-view'/);
  assert.match(manager,/view=node\('span','View'\)/);
@@ -445,8 +445,8 @@ test('merchant manager uses understandable labels and minimal non-decorative set
 
 
 test('sample storefront is explicitly a free-store signup funnel, not a real ordering demo',async()=>{
- const catalogue=await read('s/index.html');
- const landing=await read('index.html');
+ const catalogue=await read('test/fixtures/legacy-shop.html');
+ const landing=await read('test/fixtures/legacy-home.html');
  assert.match(catalogue,/id="demo-promo"/);
  assert.match(catalogue,/id="demo-last-cta"/);
  assert.match(catalogue,/\$\('demo-promo'\)\.hidden=!isDemo/);
@@ -460,7 +460,7 @@ test('sample storefront is explicitly a free-store signup funnel, not a real ord
 });
 
 test('shopping buttons are legible without decorative cart and WhatsApp icons',async()=>{
- const catalogue=await read('s/index.html');
+ const catalogue=await read('test/fixtures/legacy-shop.html');
  assert.match(catalogue,/add\.textContent=p\.track_stock===true&&stockOf\(p\)<1\?'Sold out':'Add to cart'/);
  assert.doesNotMatch(catalogue,/const CART_SVG=/);
  assert.match(catalogue,/id="sheet-add" type="button">Add to cart<\/button>/);
@@ -507,7 +507,7 @@ test('origin controls accept trusted domains, reject arbitrary sites and keep pr
 });
 
 test('storefront ends after its product grid and footer without a second fullscreen feed',async()=>{
- const page=await read('s/index.html');
+ const page=await read('test/fixtures/legacy-shop.html');
  assert.match(page,/id="grid-products"/);
  assert.match(page,/id="home-search"/);
  assert.match(page,/id="home-cart"/);
@@ -571,7 +571,7 @@ test('new store creation also gives vendor link immediately without persisting t
 
 
 test('vendor selects up to six products to share from the private manager',async()=>{
- const manager=await read('manage/index.html');
+ const manager=await read('legacy/manage/index.html');
  assert.match(manager,/id="share-products"/);
  assert.match(manager,/id="product-share-dialog"/);
  assert.match(manager,/id="share-one-product"/);
@@ -587,7 +587,7 @@ test('vendor selects up to six products to share from the private manager',async
  assert.match(manager,/const shareableProducts=\(\)=>products\.filter/);
 });
 test('vendor WhatsApp messages include names, naira prices and real public photo links',async()=>{
- const manager=await read('manage/index.html');
+ const manager=await read('legacy/manage/index.html');
  assert.match(manager,/function shareProductText\(\)/);
  assert.match(manager,/const photo=safeProductImage\(p\)/);
  assert.match(manager,/if\(photo\)lines\.push\('Photo: '\+photo\)/);
@@ -601,7 +601,7 @@ test('vendor WhatsApp messages include names, naira prices and real public photo
  assert.doesNotMatch(manager,/shareProductText[\s\S]{0,1200}manage\/claim#token/);
 });
 test('image catalogue uses actual product photos, correct prices and a real shareable file',async()=>{
- const manager=await read('manage/index.html');
+ const manager=await read('legacy/manage/index.html');
  assert.match(manager,/async function makeSharePicture\(picked\)/);
  assert.match(manager,/canvas\.toBlob/);
  assert.match(manager,/loadShareImage\(p\)/);

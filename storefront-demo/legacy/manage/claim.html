@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow"><meta http-equiv="Cache-Control" content="no-store">
+<title>Opening your mySales store…</title>
+<style>:root{font-family:Inter,system-ui,-apple-system,sans-serif;color:#374151;background:#f4f9f5}
+*{box-sizing:border-box}body{min-height:100vh;display:grid;place-items:center;margin:0;padding:20px}
+main{width:min(100%,440px);background:white;border:1px solid #dfebe2;border-radius:22px;padding:34px;text-align:center;box-shadow:0 15px 55px #194f3414}
+.logo{font-size:1.65rem;font-weight:900;color:#16582a;letter-spacing:-.06em;margin-bottom:16px}.logo span{color:#1c8220}
+h1{font-size:1.55rem;letter-spacing:-.04em;margin:10px 0}p{color:#657d70;line-height:1.55;font-size:.9rem}
+.spinner{display:inline-block;border:4px solid #d5f2e2;border-top-color:#16582a;width:42px;height:42px;border-radius:50%;animation:spin .75s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+button{font:inherit;font-weight:850;background:#16582a;color:white;border:0;border-radius:12px;padding:13px 17px;cursor:pointer;width:100%}
+a{color:#16582a}#retry[hidden]{display:none}
+
+.logo{display:inline-flex;align-items:center;gap:10px;color:#18201b}
+.logo .mark{width:37px;height:37px;border-radius:9px;background:#16A34A;color:#fff;display:inline-grid;place-items:center;font-size:1.16rem;letter-spacing:-.13em;padding-right:3px}
+.logo .wordmark{color:#18201b}
+.spinner{border-color:#DCF5E5;border-top-color:#16A34A}
+button{background:#1C8220}button:hover{background:#15803D}a{color:#15803D}
+</style></head><body><main>
+<a class="logo" href="/" style="text-decoration:none"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><div id="spinner" class="spinner" aria-hidden="true"></div>
+<h1>Opening your store</h1><p id="status" role="status">Checking your private link securely…</p>
+<button id="retry" type="button" hidden>Try again</button>
+<p style="font-size:.75rem">Your private manager link gives editing access to your storefront. Keep it safe and do not share it publicly.</p>
+<p><a href="/">Back to mySales</a></p></main>
+<script type="module">
+const status=document.querySelector('#status'),button=document.querySelector('#retry'),spinner=document.querySelector('#spinner');
+const key='mysales_private_management_token';
+const valid=value=>/^[A-Za-z0-9_-]{43}$/.test(value||'');
+const fromLink=new URLSearchParams(location.hash.slice(1)).get('token')||'';
+let token=valid(fromLink)?fromLink:'';
+if(!token){
+ for(const storage of [sessionStorage,localStorage]){
+  try{const saved=storage.getItem(key);if(valid(saved)){token=saved;break;}}catch{}
+ }
+}
+async function enter(){
+ if(!valid(token)){
+  status.textContent='Your private link is missing. Open your saved management link, or paste it on the store recovery page.';
+  spinner.hidden=true;button.hidden=false;button.textContent='Recover private access';
+
+  return;
+ }
+ button.hidden=true;button.disabled=true;spinner.hidden=false;
+ status.textContent='Verifying your private store link…';
+ try{
+  const r=await fetch('/api/merchant/me',{headers:{Authorization:'Bearer '+token},cache:'no-store'});
+  if(!r.ok)throw Error((r.status===401||r.status===403)?'This private link has been revoked or is invalid.':'Temporary connection issue. Your link is still available.');
+  let persisted=false;
+  for(const storage of [sessionStorage,localStorage]){
+   try{storage.setItem(key,token);persisted=true;}catch{}
+  }
+  // Scrub the capability only after verification succeeds.
+  // If storage is unavailable, deliver it to the manager via URL fragment,
+  // which is never sent in the HTTP request.
+  if(persisted){
+   history.replaceState(null,'',location.pathname);
+   location.replace('/legacy/manage/');
+  }else location.replace('/legacy/manage/#token='+encodeURIComponent(token));
+ }catch(e){
+  spinner.hidden=true;
+  status.textContent=e.message+' You can retry without losing your private link.';
+  button.hidden=false;button.disabled=false;button.textContent='Try again';
+ }
+}
+button.addEventListener('click',()=>{if(!valid(token))location.assign('/legacy/manage/');else enter();});
+enter();
+</script></body></html>

@@ -1,0 +1,1375 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer"><meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#1C8220"><title>Manage your store | mySales</title>
+<style>
+:root{font-family:Inter,system-ui,-apple-system,sans-serif;background:#f6f8f6;color:#374151}
+*{box-sizing:border-box}body{margin:0}button,input,textarea,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.54;cursor:wait}
+a{color:#16582a}header{background:#133d25;color:#fff;padding:16px max(18px,calc((100vw - 1080px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-size:1.35rem;font-weight:900;letter-spacing:-.06em}.brand span{color:#16a34a}.head-btn{color:#e7f8ed;background:transparent;border:1px solid #4c7771;border-radius:11px;padding:9px 12px;font-size:.82rem;font-weight:800}
+main{max-width:1050px;margin:0 auto;padding:25px 18px 75px}
+#notice{min-height:28px;margin:0 0 12px;font-size:.9rem;color:#15803d;line-height:1.5}
+.hero{background:linear-gradient(130deg,#133d25,#1c8220);color:#fff;border-radius:24px;padding:27px 31px;box-shadow:0 15px 33px #133d2517;margin-bottom:18px}
+.hero h1{font-size:clamp(1.7rem,4vw,2.45rem);margin:6px 0 7px;letter-spacing:-.045em}.hero p{color:#e7f8ed;margin:4px 0 17px;line-height:1.5}
+.eyebrow{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;font-weight:900;color:#baf0ca}
+.actions{display:flex;flex-wrap:wrap;gap:10px}.btn{border:0;border-radius:12px;background:#1c8220;color:white;font-weight:800;padding:12px 16px;min-height:45px}
+.btn:hover{background:#15803d}.btn-light{background:#fff;color:#15803d}.btn-light:hover{background:#f0fdf4}.btn-outline{background:transparent;border:1px solid #e5e7eb;color:#15803d}
+.btn-outline:hover{background:#f0faf5}.btn-small{font-size:.8rem;padding:8px 12px;min-height:37px}.btn-danger{color:#a34139;border:1px solid #e5c9c2;background:#fff}
+.columns{display:grid;grid-template-columns:420px 1fr;gap:18px;align-items:start}.panel{background:#fff;border:1px solid #e0eae4;border-radius:20px;padding:25px;box-shadow:0 6px 30px #164f3610}
+h2{font-size:1.3rem;margin:0 0 8px;letter-spacing:-.035em}.muted{color:#748b83;line-height:1.45;font-size:.86rem;margin:0 0 19px}
+label{display:block;font-size:.87rem;font-weight:750;color:#374151;margin:14px 0 7px}
+input,textarea,select{width:100%;padding:12px 13px;border-radius:11px;border:1px solid #d3e0d8;color:#374151;background:#ffffff;min-height:45px;outline:0}
+input:focus,textarea:focus,select:focus{border-color:#16a34a;box-shadow:0 0 0 3px #d8f5e8}
+textarea{resize:vertical;min-height:72px}.hint{color:#71887f;font-size:.76rem;margin:7px 0}
+.photo-drop{display:flex;gap:13px;align-items:center;border:1.5px dashed #e7f8ed;background:#f4fbf7;border-radius:13px;padding:12px;margin:12px 0;cursor:pointer}
+.photo-drop input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.photo-drop b{color:#15803d;font-size:.88rem}.photo-drop small{color:#71877c;font-size:.75rem;display:block;margin-top:3px}
+.photo-icon{background:#f0fdf4;font-size:1.55rem;padding:15px;border-radius:12px}
+#preview{width:70px;height:70px;object-fit:cover;border-radius:12px;display:none}
+.optional{border-top:1px solid #eceff0;margin-top:15px;padding-top:7px}
+summary{cursor:pointer;list-style:none;color:#15803d;font-size:.87rem;font-weight:800;padding:12px 0}summary::after{content:'⌄';float:right}
+.product-list{display:grid;gap:11px;max-height:none}.product{display:flex;gap:14px;border:1px solid #e0eae4;border-radius:14px;padding:13px;background:#fff;align-items:start}
+.product img{width:74px;height:74px;border-radius:11px;object-fit:cover;flex:none;background:#f0fdf4}.ph{width:74px;height:74px;border-radius:11px;background:#f0fdf4;display:grid;place-items:center;font-size:1.6rem;flex:none}
+.product-body{min-width:0;flex:1}.product h3{margin:0 0 3px;font-size:.99rem;word-break:break-word}
+.price{font-weight:900;color:#15803d;font-size:1.01rem}.meta{color:#7b8c83;font-size:.75rem;line-height:1.5;margin:4px 0 10px}
+.p-actions{display:flex;flex-wrap:wrap;gap:6px}.product details{border-top:1px solid #eef1ee;margin-top:8px}
+.product details summary{font-size:.77rem;padding:9px 0}
+.product form{margin:9px 0 12px}.product form label{font-size:.75rem}.inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.inline input{width:115px}.inline select{max-width:175px}.inline .btn{flex:none}
+.blank{text-align:center;border:1px dashed #d5e4da;background:#fbfdfa;border-radius:15px;padding:27px 14px;color:#6b7280}
+.blank strong{display:block;color:#16582a;margin:6px 0}.pill{display:inline-block;background:#f0fdf4;color:#1c8220;font-size:.73rem;font-weight:800;border-radius:25px;padding:6px 9px}
+#app[hidden]{display:none}
+.footer-panel{margin-top:20px}.share-link{color:#d1f4d7;word-break:break-all;font-size:.83rem}
+@media(max-width:830px){.columns{grid-template-columns:1fr}.hero{padding:23px}.panel{padding:22px}}
+@media(max-width:460px){header{padding:12px 16px}.head-btn{padding:8px;font-size:.75rem}.hero{border-radius:17px;padding:21px}.hero h1{font-size:1.75rem}.panel{padding:18px;border-radius:16px}main{padding:15px 12px 70px}.actions .btn{flex:1}.product{padding:10px;gap:10px}.product img,.ph{width:61px;height:61px}.btn-small{padding:8px}}
+
+header{background:#133D25;justify-content:flex-start}
+.brand{display:inline-flex;align-items:center;gap:8px;color:white;text-decoration:none}
+.brand .mark{display:inline-grid;place-items:center;width:33px;height:33px;border-radius:9px;background:#16A34A;color:white;letter-spacing:-.13em;padding-right:3px;font-size:1.08rem}
+.brand .wordmark{color:#fff;font-size:1.21rem;letter-spacing:-.06em;font-weight:900}
+.manager-tag{font-size:.72rem;color:#DCF5E5;font-weight:800;letter-spacing:.02em;margin-right:auto}
+.head-btn{color:#E7F8ED;border-color:#507653}
+.hero{background:linear-gradient(130deg,#133D25,#1C8220)}
+.btn{background:#1C8220}.btn:hover{background:#15803D}.btn-light{background:#fff;color:#15803D}.btn-light:hover{background:#F0FDF4}
+.btn-outline{color:#15803D;border-color:#D6E8DA;background:#fff}.btn-outline:hover{background:#F0FDF4}
+.pill,.photo-icon{background:#F0FDF4;color:#15803D}
+input:focus,textarea:focus,select:focus{border-color:#16A34A;box-shadow:0 0 0 3px #16A34A20}
+@media(max-width:460px){.brand .mark{width:29px;height:29px}.brand .wordmark{font-size:1.08rem}.manager-tag{font-size:.62rem}}
+
+/* Focused manager: one task at a time, never two competing columns. */
+main{max-width:870px;padding-top:19px}
+.hero{padding:21px 25px;border-radius:15px;margin-bottom:16px;box-shadow:none}
+.hero h1{font-size:1.55rem;margin:5px 0}.hero p{font-size:.86rem;margin:4px 0 12px}
+.hero .actions{gap:8px}.hero .btn{min-height:40px;padding:9px 13px;font-size:.83rem}
+.columns{display:block}.panel{padding:22px;border-radius:15px;box-shadow:none}
+#product-section[hidden],#add-section[hidden]{display:none}
+.panel-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#add-section,#product-section{max-width:760px;margin:0 auto}
+#notice{margin:0;min-height:0;font-size:.85rem}
+#notice:empty{display:none}
+.footer-panel{max-width:760px;margin:16px auto 0}
+#add-section form{max-width:570px}
+.photo-drop{min-height:83px;border-color:#AEDABB;background:#F7FCF8}
+#add-section .muted{margin-bottom:12px}
+#product-section .product-list{gap:9px}
+.product{border-radius:11px;box-shadow:none}
+@media(max-width:600px){main{padding:10px 12px 50px}.hero{padding:17px;border-radius:12px;margin-bottom:12px}.hero h1{font-size:1.4rem}.hero .actions .btn{flex:1}.panel{padding:16px;border-radius:12px}.photo-drop{min-height:75px}}
+
+#whatsapp-panel{margin-bottom:10px;border-bottom:1px solid #EDF1EE;padding-bottom:10px}
+#whatsapp-panel code{background:#F0FDF4;padding:2px 5px;border-radius:4px;color:#15803D;font-size:.8rem}
+.message-preview{white-space:pre-wrap;word-break:break-word;line-height:1.55;background:#F6FAF7;border:1px solid #DEEADE;padding:15px;border-radius:10px;font:inherit;font-size:.82rem}
+.message-preview[hidden]{display:none}
+
+.manager-toast{position:fixed;z-index:50;left:50%;bottom:24px;transform:translate(-50%,12px);background:#183C23;color:white;box-shadow:0 12px 38px #152F2540;border-radius:13px;padding:13px 17px;display:flex;gap:11px;align-items:center;max-width:calc(100vw - 28px);font-size:.85rem;visibility:hidden;opacity:0;transition:opacity .2s ease,transform .2s ease,visibility .2s}
+.manager-toast span{display:grid;place-items:center;width:23px;height:23px;border-radius:50%;background:#16A34A;color:white;font-weight:900}
+.manager-toast.visible{opacity:1;transform:translate(-50%,0);visibility:visible}
+@media(prefers-reduced-motion:reduce){.manager-toast{transition:none}}
+
+/* Product cards are simple launchers; details and edits live in one modal. */
+.product-list{gap:10px}
+.product{padding:0;border:1px solid #e3ebe4;overflow:hidden;background:white;transition:border-color .15s ease,box-shadow .15s ease}
+.product:hover{border-color:#b9d6c1;box-shadow:0 6px 20px #1d583014}
+.product-open{display:flex;align-items:center;gap:13px;width:100%;padding:13px;border:0;background:transparent;text-align:left;color:inherit;cursor:pointer}
+.product-open:focus-visible{outline:3px solid #16a34a;outline-offset:-3px}
+.product-open img,.product-open .ph{width:83px;height:83px;flex:none;border-radius:10px;object-fit:cover}
+.product-body{flex:1;min-width:0}
+.product-body h3{font-size:.97rem;margin:0 0 5px;color:#26392d}
+.product-body .price{font-size:1.02rem;margin:0 0 2px}
+.product-body .meta{margin:3px 0 0;color:#78897e;font-size:.75rem}
+.product-chevron{font-size:1.45rem;color:#6f957b;padding:0 2px;font-weight:300}
+.product-dialog{border:0;padding:0;width:min(560px,calc(100vw - 28px));max-height:min(92dvh,870px);margin:auto;border-radius:20px;background:#fff;color:#374151;box-shadow:0 24px 80px #07191060;overflow:hidden}
+.product-dialog[open]{display:flex;flex-direction:column}
+.product-dialog::backdrop{background:rgba(5,20,11,.65);backdrop-filter:blur(3px)}
+.modal-header{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px 20px 15px;border-bottom:1px solid #e7eee8}
+.modal-header-text{min-width:0;flex:1}
+.modal-header h2{font-size:1.13rem;margin:4px 0 0;letter-spacing:-.035em;line-height:1.25;overflow-wrap:anywhere;color:#20372b}
+.modal-overline{font-size:.68rem;color:#15803d;font-weight:850;letter-spacing:.08em;text-transform:uppercase}
+.modal-controls{display:flex;align-items:center;gap:8px;flex:none}
+.modal-edit-button{border:1px solid #d2e7d8;border-radius:10px;background:#eef9f0;color:#18743a;padding:9px 12px;min-height:39px;font-size:.82rem;font-weight:900}
+.modal-close{border:0;border-radius:50%;background:#f2f6f2;color:#34483b;font-size:1.4rem;width:37px;height:37px}
+.modal-scroll{padding:18px 20px;overflow-y:auto;min-height:0;overscroll-behavior:contain}
+.modal-photo{height:205px;position:relative;overflow:hidden;background:#f0f7f1;border:1px solid #e3ece5;border-radius:14px;display:grid;place-items:center}
+.modal-photo img{width:100%;height:100%;object-fit:contain;background:#f2f7f2}
+.modal-photo-empty{display:grid;place-items:center;gap:5px;color:#6a8370}
+.modal-photo-empty span{font-size:2.5rem}
+.modal-photo-empty small{font-size:.79rem}
+.modal-photo-picker{position:absolute;right:10px;bottom:10px;display:inline-flex;align-items:center;gap:8px;width:auto;margin:0;cursor:pointer;background:#fff;color:#166c35;border-radius:10px;padding:10px 12px;box-shadow:0 4px 16px #0929153f;font-size:.83rem;font-weight:900}
+.modal-photo-picker[hidden]{display:none}
+.modal-photo-picker input{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden;opacity:0;padding:0}
+.modal-price{font-size:1.5rem;font-weight:950;letter-spacing:-.045em;color:#167839;margin:19px 0}
+.modal-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;background:#f7faf7;padding:16px;border:1px solid #e9f0e9;border-radius:12px}
+.modal-detail-grid small{display:block;color:#758a7a;font-size:.72rem;margin-bottom:5px}
+.modal-detail-grid strong{font-size:.88rem;color:#263e2d;line-height:1.35;overflow-wrap:anywhere}
+.modal-description{padding:18px 0 4px}
+.modal-description h3{font-size:.87rem;margin:0 0 8px;color:#27392d}
+.modal-description p{font-size:.88rem;line-height:1.62;color:#63786a;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.modal-advanced{border-top:1px solid #e9efe9;margin-top:14px}
+.modal-advanced summary{font-size:.8rem;padding:12px 0}
+.modal-sale-form{margin:0 0 10px}.modal-sale-form label{font-size:.77rem}
+.modal-sale-row{display:flex;gap:9px;align-items:center}.modal-sale-row input{max-width:125px}
+.modal-form label{display:block;margin:14px 0 6px;font-size:.79rem;color:#354a39;font-weight:850}
+.modal-form input,.modal-form textarea,.modal-form select{font-size:.91rem;min-height:44px}
+.modal-form textarea{min-height:102px}
+.modal-field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-field-grid>div{min-width:0}
+.modal-error{background:#fff4f1;border:1px solid #eac4bc;color:#9a3528;border-radius:10px;padding:10px;font-size:.82rem;line-height:1.5}
+.modal-remove{margin:15px 0 0;border:0;background:transparent;color:#a54337;font-size:.8rem;font-weight:850;padding:9px 0;text-decoration:underline;text-underline-offset:3px}
+.modal-footer{flex:none;display:flex;justify-content:space-between;gap:10px;padding:14px 20px calc(14px + env(safe-area-inset-bottom));border-top:1px solid #e8eee8;background:#fff}
+.modal-footer .btn{flex:1;min-height:47px}
+.modal-footer #dialog-save:disabled{background:#cedbd1;color:#6c8471;opacity:1;cursor:not-allowed}
+@media(max-width:500px){.product-dialog{max-height:95dvh;width:calc(100vw - 18px);border-radius:17px}.modal-header,.modal-scroll{padding-left:15px;padding-right:15px}.modal-header{padding-top:14px}.modal-photo{height:185px}.modal-footer{padding-left:15px;padding-right:15px}.product-open img,.product-open .ph{width:69px;height:69px}.modal-field-grid{gap:9px}}
+@media(prefers-reduced-motion:reduce){.product{transition:none}}
+
+/* mySales settings: separate, calm cards rather than a crowded form stack. */
+.settings-hub{max-width:760px;margin:27px auto 0;display:grid;gap:13px}
+.settings-intro{padding:5px 3px 8px}
+.settings-overline{font-size:.66rem;letter-spacing:.13em;font-weight:900;color:#15803D}
+.settings-intro h2{font-size:1.55rem;letter-spacing:-.05em;color:#243b2b;margin:7px 0}
+.settings-intro p{color:#718274;font-size:.84rem;line-height:1.55;margin:0;max-width:520px}
+.settings-card{background:#fff;border:1px solid #E2EAE4;border-radius:17px;box-shadow:0 2px 12px #183e2209;overflow:hidden;min-width:0}
+.settings-card[open]{border-color:#D7E6DA;box-shadow:0 6px 22px #1E532610}
+.settings-summary{display:flex;align-items:center;gap:14px;padding:19px 19px;cursor:pointer;list-style:none;color:#263E2E}
+.settings-summary::-webkit-details-marker{display:none}
+.settings-summary::marker{display:none}
+.settings-summary::after{content:none!important;display:none!important}
+.settings-summary:hover{background:#FBFDFB}
+.settings-icon{width:45px;height:45px;border-radius:13px;background:#EAF8EF;color:#16823F;display:grid;place-items:center;flex:none}
+.settings-icon svg{width:23px;height:23px}
+.settings-title{flex:1;min-width:0;display:block}
+.settings-title strong{font-size:.93rem;letter-spacing:-.014em;display:block;color:#283C2D}
+.settings-title small{display:block;color:#829084;font-size:.76rem;font-weight:500;line-height:1.45;margin-top:4px}
+.settings-chevron{font-size:1.5rem;line-height:1;color:#78907B;transition:transform .2s ease;flex:none;align-self:center;margin:0 2px}
+.settings-card[open] .settings-chevron{transform:rotate(180deg)}
+.settings-content{border-top:1px solid #EDF0ED;margin:0 19px;padding:19px 0 21px}
+.settings-field{min-width:0;margin-bottom:17px}
+.settings-field label{display:block!important;font-size:.81rem;line-height:1.4;color:#334b39;font-weight:850;margin:0 0 8px}
+.settings-field input,.settings-field textarea,.settings-field select{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;border:1px solid #D8E4DB;border-radius:11px;background:#fff;color:#2D4031;box-shadow:none;box-sizing:border-box;padding:12px 14px;min-height:48px;font-size:.91rem;line-height:1.48}
+.settings-field textarea{resize:vertical;min-height:110px}
+.settings-field input:focus,.settings-field textarea:focus,.settings-field select:focus{border-color:#16A34A;box-shadow:0 0 0 3px #16A34A1B;outline:0}
+.settings-field input::placeholder,.settings-field textarea::placeholder{color:#A1AEA3}
+.settings-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.field-hint{font-size:.73rem;line-height:1.45;color:#829385;margin:7px 0 0}
+.settings-action-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px}
+.settings-primary{background:#1C8220;border:0;border-radius:11px;color:#fff;padding:12px 20px;min-height:46px;font-size:.86rem;font-weight:900}
+.settings-primary:hover:not(:disabled){background:#166B1B}
+.settings-primary:disabled{background:#D9E8DD!important;color:#70947B!important;cursor:not-allowed;opacity:1}
+.save-feedback{font-size:.74rem;color:#829183;line-height:1.35;margin:5px 0}
+.settings-secondary{border:1px solid #D6E7D9!important;background:#fff!important;color:#18743B!important;border-radius:11px;font-size:.83rem;min-height:44px;font-weight:850}
+.settings-secondary:hover{background:#F4FBF5!important}
+.settings-text-button{border:0;background:transparent;color:#637E68;font-size:.82rem;font-weight:800;padding:9px 0;text-decoration:underline;text-underline-offset:3px}
+.message-tips{background:#F5FAF6;border:1px solid #E6F0E8;border-radius:12px;padding:14px 14px 12px}
+.message-tips strong{display:block;font-size:.75rem;color:#56725E;margin-bottom:10px}
+.message-tips small{display:block;font-size:.72rem;color:#708575;line-height:1.5;margin-top:10px}
+.placeholder-chips{display:flex;flex-wrap:wrap;gap:7px}
+.placeholder-chips code{display:inline-flex;background:#fff;color:#187B41;border:1px solid #D7EBDB;border-radius:8px;padding:7px 9px;font-size:.74rem;font-weight:750}
+.message-tips small code{background:transparent;color:#137940;font-weight:850;padding:0}
+#whatsapp-template{min-height:175px;line-height:1.65}
+.whatsapp-actions{gap:9px;margin-top:16px}
+#whatsapp-preview{white-space:pre-wrap;overflow-wrap:anywhere;background:#F7FAF8;border:1px solid #DEEDE2;border-radius:12px;color:#324A38;font-size:.79rem;line-height:1.6;font-family:inherit;padding:15px;margin:14px 0 0;max-width:100%}
+#whatsapp-preview[hidden]{display:none}
+#whatsapp-feedback{margin-top:12px}
+.settings-security-note{display:flex;align-items:start;gap:12px;background:#F4F8F5;border:1px solid #E4EFE7;border-radius:12px;padding:14px}
+.settings-security-note>span{font-size:1.1rem;flex:none}
+.settings-security-note p{margin:0;font-size:.79rem;line-height:1.65;color:#5D7461}
+.settings-security-note strong{color:#2B4531}
+.settings-access-actions{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:16px}
+.settings-access-actions button{display:flex;align-items:center;justify-content:center;gap:8px;white-space:normal;line-height:1.35;min-height:49px;padding:11px 12px}
+.settings-access-actions svg{width:17px;height:17px;flex:none}
+@media(max-width:700px){.settings-form-grid{grid-template-columns:1fr;gap:0}.settings-field input,.settings-field select,.settings-field textarea{font-size:16px}}
+@media(max-width:500px){.settings-hub{margin-top:22px;gap:11px}.settings-intro{padding:1px 3px 5px}.settings-intro h2{font-size:1.41rem}.settings-summary{padding:15px 14px;gap:11px}.settings-icon{width:41px;height:41px;border-radius:11px}.settings-title strong{font-size:.89rem}.settings-title small{font-size:.73rem}.settings-content{margin:0 14px;padding:17px 0 18px}.settings-access-actions{grid-template-columns:1fr;gap:9px}.settings-action-row .settings-primary{min-width:150px}.whatsapp-actions{display:grid;grid-template-columns:1fr 1fr}.whatsapp-actions #whatsapp-save{grid-column:1/-1}.whatsapp-actions #reset-whatsapp{grid-column:auto;justify-self:center}.whatsapp-actions #preview-whatsapp{grid-column:1}.settings-card{border-radius:14px}}
+@media(prefers-reduced-motion:reduce){.settings-chevron{transition:none}}
+
+.access-recovery{max-width:490px;margin:38px auto 25px;background:#fff;border:1px solid #deeadf;border-radius:21px;padding:30px;box-shadow:0 12px 33px #173d2010;text-align:left}
+.access-recovery[hidden],#exit[hidden]{display:none!important}
+.recovery-symbol{display:grid;place-items:center;background:#eaf8ed;border-radius:13px;height:51px;width:51px;font-size:1.35rem}
+.access-recovery h1{font-size:1.55rem;letter-spacing:-.048em;line-height:1.2;color:#233e2b;margin:19px 0 10px}
+.access-recovery>p{font-size:.87rem;line-height:1.65;color:#6c8171}
+.access-recovery label{font-size:.8rem;font-weight:850;margin:20px 0 7px}
+#recover-link{font-size:16px;width:100%;min-height:50px}
+#recover-button{display:block;width:100%;margin-top:13px;min-height:49px}
+#retry-access{display:block;width:100%;margin-top:12px}
+#retry-access[hidden]{display:none}
+.recovery-note{font-size:.74rem!important;background:#f4faf5;border:1px solid #e2efe4;border-radius:12px;padding:12px;margin-top:22px}
+.recovery-secondary{text-align:center;margin:17px 0 0}
+@media(max-width:500px){.access-recovery{margin:20px auto;padding:23px 19px;border-radius:16px}.access-recovery h1{font-size:1.42rem}}
+
+/* Clear breathing room between the store actions and merchant products. */
+#app>.hero{margin-bottom:32px}
+#product-section,#add-section{scroll-margin-top:22px}
+#product-section{margin-top:0}
+.settings-summary{gap:12px;min-height:76px;padding:16px 18px}
+.settings-icon{background:#edf8f1;color:#198048;width:37px;height:37px;border-radius:10px}
+.settings-icon svg{width:21px;height:21px;display:block}
+.settings-chevron{display:grid;place-items:center;font-size:0;width:22px;height:22px;margin-left:4px;transition:transform .18s}
+.settings-chevron svg{width:20px;height:20px;color:#658472}
+.settings-card[open] .settings-chevron{transform:rotate(180deg)}
+.settings-title strong{font-size:.93rem}
+.settings-title small{font-size:.74rem;line-height:1.55}
+.product-chevron{display:grid;place-items:center;color:#6c9078}
+.product-chevron svg{height:20px;width:20px}
+@media(max-width:600px){#app>.hero{margin-bottom:27px}.settings-summary{padding:15px 14px;gap:12px}.settings-icon{width:35px;height:35px;border-radius:10px}.settings-chevron{width:20px;height:20px}}
+
+/* Reduce visual noise: meaningful labels replace decorative arrows and icon tiles. */
+.product-view{display:inline-flex;align-items:center;justify-content:center;flex:none;background:#f0f8f2;color:#187640;border-radius:9px;padding:8px 11px;font-size:.75rem;font-weight:850}
+#add-more{min-height:42px;padding:9px 14px;font-weight:900;border:1px solid #cde5d4}
+#product-section .inline{align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:17px}
+#product-section .product-list{gap:12px}
+.settings-summary{min-height:75px;gap:11px;padding:18px 20px}
+.settings-title{padding:0;flex:1}
+.settings-action-hint{display:inline-flex;flex:none;min-height:30px;align-items:center;padding:5px 11px;background:#eef8f0;color:#187340;border-radius:999px;font-size:.75rem;font-weight:900}
+.settings-card[open] .settings-action-hint{background:#e8f0e9}
+.settings-card[open] .settings-action-hint{font-size:0}
+.settings-card[open] .settings-action-hint::after{content:"Close";font-size:.75rem}
+.settings-summary::after{display:none!important}
+.photo-icon{display:grid;place-items:center;width:53px;height:53px;padding:0;border-radius:12px;color:#187440}
+.photo-icon svg,.ph svg{width:25px;height:25px}
+.ph{color:#4c8b62}
+@media(max-width:600px){#product-section .inline{margin-bottom:18px}.settings-summary{min-height:78px;padding:15px 16px;gap:10px}.settings-action-hint{font-size:.7rem}}
+
+/* Vendor product-sharing workspace */
+.product-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+#share-products{background:#eaf8ed;color:#146d36;border-color:#b6dbc1;min-height:42px}
+#share-products:hover{background:#daf2df}
+.share-hint{font-size:.74rem;color:#7c9483;line-height:1.4;margin:3px 0 0}
+.share-single-product{width:100%;border:1px solid #c2e6ce;background:#eef9f1;color:#167638;border-radius:11px;padding:12px;font-size:.83rem;font-weight:900;margin:12px 0 2px}
+.product-share-dialog{border:0;padding:0;border-radius:19px;background:#fff;color:#243d2d;width:min(610px,calc(100vw - 18px));max-height:94dvh;overflow:hidden;margin:auto;box-shadow:0 28px 75px #071b0c75}
+.product-share-dialog[open]{display:flex;flex-direction:column}
+.product-share-dialog::backdrop{background:#06170bb5;backdrop-filter:blur(3px)}
+.product-share-header{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:20px 21px 17px;border-bottom:1px solid #e8eee8}
+.product-share-header h2{font-size:1.23rem;letter-spacing:-.035em;line-height:1.26;margin:4px 0 7px;color:#203c28}
+.product-share-header p{font-size:.78rem;color:#6b8271;line-height:1.45;margin:0}
+.share-eyebrow{font-size:.66rem;font-weight:900;color:#16803b;letter-spacing:.08em}
+.share-close{width:37px;height:37px;border:0;border-radius:50%;background:#f1f6f1;color:#3e5b45;font-size:1.4rem;flex:none}
+.share-body{padding:17px 21px 25px;overflow:auto;min-height:0;overscroll-behavior:contain}
+.share-search-row label{font-size:.77rem;display:block;font-weight:850;color:#45634c;margin-bottom:7px}
+#share-search{border:1px solid #dae7dd;border-radius:10px;width:100%;min-height:44px;padding:10px 12px;font-size:16px;color:#274331}
+.share-select-head{display:flex;gap:13px;align-items:center;margin:12px 0 9px;font-size:.74rem;color:#638069}
+.share-select-head span{flex:1;font-weight:850}
+.share-select-head button{background:transparent;color:#16783d;border:0;font-size:.75rem;font-weight:850;padding:7px 0}
+.share-product-list{border:1px solid #e1eae2;border-radius:12px;max-height:220px;overflow:auto;overscroll-behavior:contain}
+.share-product-option{display:flex;align-items:center;gap:11px;border-bottom:1px solid #edf1ed;min-height:72px;padding:9px 12px;cursor:pointer}
+.share-product-option:last-child{border-bottom:0}
+.share-product-option:has(input:checked){background:#f2faf4}
+.share-product-option input{accent-color:#16823d;width:19px;height:19px;min-width:19px;cursor:pointer}
+.share-product-option img,.share-option-fallback{width:48px;height:48px;object-fit:contain;border-radius:9px;background:#eef6ef;flex:none}
+.share-option-fallback{display:grid;place-items:center;color:#7a9683;font-size:.62rem}
+.share-option-text{flex:1;min-width:0}
+.share-option-text strong{font-size:.85rem;line-height:1.35;color:#294333;display:block;overflow-wrap:anywhere}
+.share-option-text small{display:block;margin-top:3px;font-size:.78rem;font-weight:850;color:#16813e}
+.share-composer{border-top:1px solid #e6eee6;margin-top:18px;padding-top:16px}
+.share-composer h3{margin:0 0 5px;font-size:.96rem;letter-spacing:-.02em}
+.share-composer>p{font-size:.75rem;line-height:1.57;color:#687f70;margin:0 0 13px}
+.share-picture-preview{max-height:250px;min-height:100px;overflow:auto;display:grid;place-items:center;background:#f4f8f4;border:1px dashed #cddfd0;border-radius:12px;padding:10px}
+.share-picture-preview img{width:100%;height:auto;max-height:none;object-fit:contain;border-radius:7px}
+#share-picture-placeholder{font-size:.78rem;color:#819686;padding:20px 12px;text-align:center;line-height:1.6}
+.share-composer .share-note{font-size:.73rem;margin:10px 0 12px;color:#65846d}
+.share-primary,.share-secondary{min-height:45px;padding:11px 9px;border-radius:10px;border:0;font-size:.8rem;font-weight:900;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;line-height:1.35}
+.share-primary{background:#1c8220;color:#fff}
+.share-secondary{border:1px solid #cde5d2;background:#fff;color:#167139}
+.share-primary:disabled,.share-secondary:disabled,.share-secondary[aria-disabled="true"]{opacity:.48;pointer-events:none}
+#share-prepare{width:100%;margin-bottom:8px}
+.share-file-actions,.share-text-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:8px}
+.share-composer .share-explainer{font-size:.72rem;line-height:1.6;margin:17px 0 0;color:#7c8d80}
+@media(max-width:500px){.product-share-dialog{max-height:96dvh;border-radius:15px}.product-share-header{padding:16px 15px 14px}.share-body{padding:14px 15px 19px}.product-share-header h2{font-size:1.08rem}.product-actions{width:100%}.product-actions .btn{flex:1;min-width:100px}.share-select-head{gap:9px}.share-file-actions,.share-text-actions{gap:7px}.share-primary,.share-secondary{font-size:.76rem}}
+.quick-share{display:flex;align-items:center;justify-content:center;width:calc(100% - 24px);margin:0 12px 12px;min-height:42px;border:1px solid #c8e6d1;border-radius:10px;background:#f1faf3;color:#146c37;text-decoration:none;font-weight:850;font-size:.82rem}
+.retain-tip{background:#f1faf3;border:1px solid #cbe9d2;border-radius:14px;padding:15px 17px;margin:0 0 19px;color:#1a6439;line-height:1.45}.retain-tip strong{display:block;margin-bottom:4px;font-size:.93rem}.retain-tip p{margin:0;font-size:.8rem}
+#stock-count[hidden],#edit-stock-count[hidden]{display:none}
+/* Product photo framing, with a centered square live preview. */
+.frame-dialog{border:0;border-radius:19px;padding:0;width:min(470px,calc(100vw - 18px));max-height:96dvh;background:#fff;color:#254130;box-shadow:0 25px 70px #07180966;overflow:auto}
+.frame-dialog::backdrop{background:#091c13b7}
+.frame-header{padding:17px 18px 9px}.frame-header h2{font-size:1.22rem;color:#183f27;margin:0 0 6px}.frame-header p{font-size:.78rem;color:#698373;margin:0;line-height:1.5}
+.frame-stage{padding:12px 20px 8px;display:grid;place-items:center}
+#framer-canvas{display:block;width:min(100%,360px);height:auto;aspect-ratio:1;border:1px solid #dee9df;border-radius:12px;cursor:grab;touch-action:none;user-select:none}
+#framer-canvas:active{cursor:grabbing}
+.frame-tools{padding:9px 20px 20px}.frame-tools label{margin:4px 0 7px;font-size:.82rem;color:#315a3c}
+#framer-zoom{accent-color:#1c8220;min-height:23px;padding:0;width:100%}
+.frame-hint{font-size:.74rem;line-height:1.5;color:#667d6b;min-height:35px;margin:8px 0}
+.frame-buttons{display:grid;grid-template-columns:1fr 1.3fr;gap:8px}.frame-buttons button{min-height:46px;padding:10px;font-size:.82rem}
+#framer-fit{background:#f0f8f1;color:#1a773b;border:1px solid #cde4d2;margin:0 0 13px;border-radius:10px;padding:9px;font-size:.78rem;font-weight:850}
+#preview,.product-open img,.product img,.modal-photo img{object-fit:contain;background:#f4f9f5}
+
+/* Reusable original-photo 9:16 WhatsApp Status batch editor. */
+#status-products{background:#155e36;color:#fff;border-color:#155e36;min-height:42px}
+#status-products:hover{background:#0e4f2c}
+.status-batch-dialog{width:min(610px,calc(100vw - 18px))}
+.status-controls{display:flex;align-items:center;gap:13px;margin:14px 0}
+.status-controls label{display:flex;align-items:center;gap:9px;font-size:.84rem;color:#254c32;font-weight:750}
+.status-controls input{width:20px;height:20px;accent-color:#1c8220}
+.status-batch-dialog .share-picture-preview{max-height:320px;min-height:85px}
+.status-batch-dialog #status-batch-preview:not([hidden]) + span{display:none}
+.status-batch-dialog .share-picture-preview img{width:auto;max-width:100%;max-height:300px;object-fit:contain}
+.status-batch-dialog .share-select-head{flex-wrap:wrap}
+.status-instructions{font-size:.74rem;line-height:1.6;color:#627b68;margin-top:13px}
+.status-instructions strong{color:#245638}
+@media(max-width:500px){.status-batch-dialog .share-file-actions{grid-template-columns:1fr 1fr}.product-actions{flex-wrap:wrap}#status-products{flex:1 1 100%}}
+</style></head><body>
+<header><a href="/" class="brand" aria-label="mySales"><span class="mark" aria-hidden="true">mS</span><span class="wordmark">mySales</span></a><span class="manager-tag">Storefront Manager</span>
+<button id="exit" class="head-btn" hidden>Close private access</button></header>
+<main><p id="notice" role="status" aria-live="polite">Opening your store…</p>
+<section id="access-recovery" class="access-recovery" aria-labelledby="recovery-heading" hidden>
+ <div class="recovery-symbol" aria-hidden="true">🔐</div>
+ <h1 id="recovery-heading">Reconnect to your store</h1>
+ <p id="recovery-message">Open your saved private manager link to continue editing. Your products and store details are still saved.</p>
+ <form id="recover-form">
+  <label for="recover-link">Paste your private management link</label>
+  <input id="recover-link" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste the private link you saved" required>
+  <button class="btn" type="submit" id="recover-button">Open my store →</button>
+ </form>
+ <button class="btn btn-outline" id="retry-access" type="button" hidden>Try connecting again</button>
+ <p class="recovery-note">Your private link is the key to your store. Do not share it publicly. On a shared phone, use “Close private access” when finished.</p>
+ <p class="recovery-secondary"><a href="/">Back to mySales</a></p>
+</section>
+<div id="app" hidden>
+<section class="hero"><div class="eyebrow" id="state">Your online store</div>
+<h1 id="store-title">Welcome to your store</h1><p id="greeting">Let's get your first product online.</p>
+<div class="actions">
+<button id="share" class="btn btn-light" type="button">Share my shop</button>
+<a id="public-link" class="btn btn-light" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;align-items:center">View my shop</a>
+</div><p class="share-link" id="public-url" hidden></p></section>
+<section id="retain-tip" class="retain-tip" hidden><strong>✓ Your products are ready. Share one with a customer.</strong><p>Tap “Share on WhatsApp” below a product to send its name, price, picture link and shop link.</p><button type="button" id="dismiss-retain-tip" class="btn btn-outline btn-small" style="margin-top:10px">Got it</button></section>
+<div class="columns">
+<section class="panel" id="add-section"><div class="panel-top"><div><span class="pill">New product</span><h2 style="margin-top:12px">Add a product</h2></div><button class="btn btn-outline btn-small" type="button" id="cancel-add" hidden>My products</button></div>
+ <p class="muted">Choose a photo, name your product and enter the price.</p>
+<form id="add">
+<label class="photo-drop" for="product-photo"><span class="photo-icon" id="photo-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><circle cx="9" cy="9" r="1.6"/><path d="m5.5 18 5-5 3.3 2.7 3.2-4 3 3.5"/></svg></span><img id="preview" alt="Product preview"><span><b id="photo-label">Choose a product photo</b><small>Required · Camera or gallery · We resize large photos automatically</small></span><input id="product-photo" name="photo" type="file" accept="image/*" required></label>
+<label for="product-name">Product name</label><input id="product-name" name="name" required maxlength="150" placeholder="e.g. Rice 5kg, Wig, Bluetooth speaker">
+<label for="product-price">Selling price (₦)</label><input id="product-price" name="price" required type="number" min="0" max="10000000000" step="1" inputmode="numeric" placeholder="e.g. 8500">
+<details class="optional" id="extras"><summary>Optional details & stock</summary>
+<label for="product-description">Description</label><textarea id="product-description" name="description" maxlength="2000" placeholder="Size, colour, brand or other useful details"></textarea>
+<label for="product-category">Category</label><input id="product-category" name="category" maxlength="80" placeholder="e.g. Groceries">
+<label for="stock-mode">Do you want to track quantity?</label><select id="stock-mode" name="trackStock"><option value="false">No — customers ask about availability</option><option value="true">Yes — track exact stock</option></select>
+<div id="stock-count" hidden><label for="product-stock">Quantity available</label><input id="product-stock" name="stock" type="number" min="0" max="10000000" step="1" inputmode="numeric" value="0"><p class="hint">Enter 0 if sold out. Customers will see this item as sold out.</p></div></details>
+<button id="add-button" class="btn" type="submit" style="width:100%;margin-top:17px">Add product to my shop</button>
+<p id="add-note" class="hint">Your product picture, name and price appear together on your storefront.</p>
+</form></section>
+<section class="panel" id="product-section"><div class="inline" style="justify-content:space-between;align-items:center">
+<div><h2>Your products <span id="total" style="font-size:.84rem;color:#789589"></span></h2><p class="share-hint">Pick items to send prices and pictures to customers.</p></div><div class="product-actions"><button class="btn btn-outline btn-small" id="status-products" type="button">Post WhatsApp Status</button><button class="btn btn-outline btn-small" id="share-products" type="button">Share products</button><button class="btn btn-outline btn-small" id="add-more" type="button">Add product</button></div></div>
+<div id="products" class="product-list"></div></section>
+</div>
+<section class="settings-hub" aria-labelledby="settings-heading">
+  <div class="settings-intro"><span class="settings-overline">STORE MANAGEMENT</span><h2 id="settings-heading">Store settings</h2><p>Keep your shop details, customer messages and private access in one place.</p></div>
+
+  <details id="settings-panel" class="settings-card">
+    <summary class="settings-summary">
+      
+      <span class="settings-title"><strong>Business details</strong><small>Store name, WhatsApp, description and visibility</small></span>
+      <span class="settings-action-hint" aria-hidden="true">Open</span>
+    </summary>
+    <div class="settings-content">
+      <form id="settings">
+        <div class="settings-form-grid">
+          <div class="settings-field"><label for="business-name">Business name</label><input id="business-name" name="name" type="text" maxlength="150" autocomplete="organization" placeholder="Your business name" required></div>
+          <div class="settings-field"><label for="business-whatsapp">WhatsApp number</label><input id="business-whatsapp" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" maxlength="16" placeholder="+234 800 000 0000" required></div>
+        </div>
+        <div class="settings-field"><label for="business-description">About your business</label><textarea id="business-description" name="description" maxlength="2000" rows="3" placeholder="Tell customers what you sell and why they should shop with you."></textarea><p class="field-hint">This description appears on your storefront Home.</p></div>
+        <div class="settings-field"><label for="business-status">Store visibility</label><select id="business-status" name="status"><option value="published">Public — customers can view your store</option><option value="draft">Private — only you can manage it</option></select><p class="field-hint">Choose Private to temporarily hide the storefront from customers.</p></div>
+        <div class="settings-action-row"><button class="btn settings-primary" id="business-save" type="submit" disabled>Save changes</button><span id="business-feedback" class="save-feedback" role="status" aria-live="polite">No changes yet</span></div>
+      </form>
+    </div>
+  </details>
+
+  <details id="whatsapp-panel" class="settings-card">
+    <summary class="settings-summary">
+      
+      <span class="settings-title"><strong>WhatsApp enquiry message</strong><small>Personalise the message customers send you</small></span>
+      <span class="settings-action-hint" aria-hidden="true">Open</span>
+    </summary>
+    <div class="settings-content">
+      <form id="whatsapp-form">
+        <div class="settings-field"><label for="whatsapp-template">Your enquiry message</label><textarea id="whatsapp-template" name="whatsapp_template" rows="7" maxlength="1500" spellcheck="true" aria-describedby="template-help" placeholder="Write the message your customers will send…"></textarea></div>
+        <div class="message-tips" id="template-help"><strong>Personalise with these placeholders</strong><div class="placeholder-chips"><code>{store_name}</code><code>{items}</code><code>{subtotal}</code><code>{customer_note}</code></div><small>Keep <code>{items}</code> so the enquiry includes the products selected.</small></div>
+        <pre class="message-preview" id="whatsapp-preview" hidden></pre>
+        <div class="settings-action-row whatsapp-actions">
+          <button class="btn settings-primary" id="whatsapp-save" type="submit" disabled>Save message</button>
+          <button class="btn settings-secondary" id="preview-whatsapp" type="button">Preview</button>
+          <button class="settings-text-button" id="reset-whatsapp" type="button">Use default</button>
+        </div>
+        <p id="whatsapp-feedback" class="save-feedback" role="status" aria-live="polite">No changes yet</p>
+      </form>
+    </div>
+  </details>
+
+  <details id="access-panel" class="settings-card">
+    <summary class="settings-summary">
+      
+      <span class="settings-title"><strong>Private access &amp; backup</strong><small>Secure your editing link and save a copy</small></span>
+      <span class="settings-action-hint" aria-hidden="true">Open</span>
+    </summary>
+    <div class="settings-content">
+      <div class="settings-security-note"><span aria-hidden="true">🔒</span><p><strong>Keep your management link private.</strong> Anyone who has it can edit your products and store details. Only share it with someone you trust.</p></div>
+      <div class="settings-access-actions">
+        <button class="btn settings-secondary" id="copy-manager" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy private manager link</button>
+        <button class="btn settings-secondary" id="export" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4"/><path d="M5 17v3h14v-3"/></svg>Download store backup</button>
+      </div>
+    </div>
+  </details>
+</section>
+</div></main>
+<dialog id="photo-framer" class="frame-dialog" aria-modal="true" aria-labelledby="framer-title">
+ <div class="frame-header"><h2 id="framer-title">Adjust product photo</h2><p>Fit the whole product, or drag and zoom to choose what customers see.</p></div>
+ <div class="frame-stage"><canvas id="framer-canvas" width="960" height="960" aria-label="Square product photo preview. Drag to reposition."></canvas></div>
+ <div class="frame-tools"><button id="framer-fit" type="button">Fit entire photo</button>
+ <label for="framer-zoom">Zoom in</label><input type="range" id="framer-zoom" min="100" max="250" step="5" value="100">
+ <p id="framer-message" class="frame-hint" role="status">The entire photo will fit inside the square.</p>
+ <div class="frame-buttons"><button id="framer-cancel" class="btn btn-outline" type="button">Cancel</button><button id="framer-save" class="btn" type="button">Use this photo</button></div></div>
+</dialog>
+<dialog id="product-dialog" class="product-dialog" aria-modal="true" aria-labelledby="dialog-title">
+  <div class="modal-header">
+    <div class="modal-header-text"><span class="modal-overline" id="dialog-eyebrow">Product details</span><h2 id="dialog-title">Product details</h2></div>
+    <div class="modal-controls"><button id="dialog-edit" type="button" class="modal-edit-button" aria-label="Edit product details">✎ Edit</button><button id="dialog-close" class="modal-close" type="button" aria-label="Close product details">×</button></div>
+  </div>
+  <div class="modal-scroll">
+    <div class="modal-photo">
+      <img id="dialog-image" alt="Product photo" hidden>
+      <div id="dialog-image-fallback" class="modal-photo-empty" hidden><span aria-hidden="true">📷</span><small>No photo added yet</small></div>
+      <label id="dialog-photo-picker" class="modal-photo-picker" for="dialog-photo" hidden>📷 <span id="dialog-photo-label">Choose photo</span><input id="dialog-photo" type="file" accept="image/*"></label>
+    </div>
+    <div id="dialog-read" class="modal-read">
+      <div class="modal-price" id="dialog-price"></div>
+      <div class="modal-detail-grid">
+        <div><small>Category</small><strong id="dialog-category"></strong></div>
+        <div><small>Available quantity</small><strong id="dialog-stock"></strong></div>
+        <div><small>Visibility</small><strong id="dialog-visibility"></strong></div>
+        <div><small>Selling unit</small><strong id="dialog-unit"></strong></div>
+      </div>
+      <div class="modal-description"><h3>Description</h3><p id="dialog-description"></p></div>
+      <button id="share-one-product" type="button" class="share-single-product">Share picture &amp; price with a customer</button>
+
+    </div>
+    <form id="dialog-form" class="modal-form" hidden><button type="button" id="dialog-reframe" class="btn btn-outline btn-small" style="margin:1px 0 12px;width:100%" hidden>Adjust current product photo</button>
+      <label for="dialog-name">Product name</label><input id="dialog-name" name="name" maxlength="150" required>
+      <div class="modal-field-grid"><div><label for="dialog-edit-price">Selling price (₦)</label><input id="dialog-edit-price" name="price" type="number" min="0" max="10000000000" step="1" inputmode="numeric" required></div>
+      <div><label for="dialog-track-stock">Track exact stock?</label><select id="dialog-track-stock" name="trackStock"><option value="false">No — enquiry only</option><option value="true">Yes — track quantity</option></select><div id="edit-stock-count" hidden><label for="dialog-edit-stock">Quantity in stock</label><input id="dialog-edit-stock" name="stock" type="number" min="0" max="10000000" step="1" inputmode="numeric"></div></div></div>
+      <label for="dialog-edit-category">Category</label><input id="dialog-edit-category" name="category" maxlength="80" placeholder="e.g. Electronics">
+      <label for="dialog-edit-description">Description</label><textarea id="dialog-edit-description" name="description" maxlength="2000" rows="4" placeholder="Describe this product"></textarea>
+      <label for="dialog-edit-published">Product visibility</label><select id="dialog-edit-published" name="published"><option value="true">Visible to customers</option><option value="false">Hidden from customers</option></select>
+      <p class="hint">If you track stock, zero means sold out. If you do not, customers can ask you about availability.</p>
+      <p id="dialog-error" class="modal-error" role="alert" hidden></p>
+      <button id="dialog-remove" type="button" class="modal-remove">Remove this product</button>
+    </form>
+      <details class="modal-advanced" id="dialog-advanced" hidden><summary>Inventory actions</summary>
+        <p class="hint">Use this only for a completed sale. Saving a stock quantity edit is a different action.</p>
+        <form id="dialog-sale-form" class="modal-sale-form"><label for="dialog-sale-qty">Quantity sold</label><div class="modal-sale-row"><input id="dialog-sale-qty" type="number" min="1" max="100000" step="1" value="1" required><button type="submit" class="btn btn-outline btn-small" id="dialog-sale-button">Record sale</button></div></form>
+      </details>
+  </div>
+  <div id="dialog-footer" class="modal-footer" hidden><button type="button" id="dialog-cancel" class="btn btn-outline">Cancel</button><button type="submit" form="dialog-form" id="dialog-save" class="btn" disabled>Save changes</button></div>
+</dialog>
+
+<dialog id="product-share-dialog" class="product-share-dialog" aria-modal="true" aria-labelledby="share-heading">
+ <div class="product-share-header">
+  <div><span class="share-eyebrow">VENDOR TOOLS</span><h2 id="share-heading">Share products with a customer</h2><p>Select products to send their pictures, names and prices.</p></div>
+  <button id="share-close" type="button" class="share-close" aria-label="Close product sharing">×</button>
+ </div>
+ <div class="share-body">
+  <div class="share-search-row"><label for="share-search">Find a product</label><input id="share-search" type="search" autocomplete="off" placeholder="Search your products..."></div>
+  <div class="share-select-head"><span id="share-selection-count">0 of 6 selected</span><button type="button" id="share-select-all">Select first 6</button><button type="button" id="share-clear">Clear</button></div>
+  <div id="share-product-list" class="share-product-list" role="group" aria-label="Products to share"></div>
+  <div class="share-composer">
+   <h3>Your picture catalogue</h3><p>Prepare one image containing your selected product photos and prices. Then send it through your phone’s share menu or save it for WhatsApp.</p>
+   <div id="share-picture-preview" class="share-picture-preview"><span id="share-picture-placeholder">Select at least one product to make a picture catalogue.</span><img id="share-picture-image" alt="Preview of the product catalogue image" hidden></div>
+   <p class="share-note" id="share-status" role="status" aria-live="polite">Only selected products will be included.</p>
+   <button type="button" id="share-prepare" class="share-primary" disabled>Prepare picture</button>
+   <div class="share-file-actions">
+    <button type="button" id="share-native" class="share-primary" disabled>Share picture</button>
+    <button type="button" id="share-download" class="share-secondary" disabled>Download picture</button>
+   </div>
+   <div class="share-text-actions">
+    <button type="button" id="share-copy-text" class="share-secondary" disabled>Copy product details</button>
+    <a id="share-whatsapp" class="share-secondary" target="_blank" rel="noopener noreferrer" aria-disabled="true" tabindex="-1">Send details on WhatsApp</a>
+   </div>
+   <p class="share-explainer"><strong>Two ways to send:</strong> “Send details on WhatsApp” sends names, prices and clickable photo links immediately. For actual photo attachments, prepare the picture above and tap “Share picture” to choose WhatsApp. If your phone does not support this, download the picture and attach it to the chat.</p>
+  </div>
+ </div>
+</dialog>
+<dialog id="status-batch-dialog" class="product-share-dialog status-batch-dialog" aria-modal="true" aria-labelledby="status-batch-heading">
+ <div class="product-share-header"><div><span class="share-eyebrow">WHATSAPP STATUS MANAGER</span>
+  <h2 id="status-batch-heading">Post many products to Status</h2>
+  <p>Choose up to 12 products. Each gets its own vertical poster, using the original photo without cropping.</p></div>
+  <button id="status-batch-close" type="button" class="share-close" aria-label="Close Status editor">×</button></div>
+ <div class="share-body">
+  <div class="share-search-row"><label for="status-batch-search">Find your products</label>
+   <input id="status-batch-search" type="search" autocomplete="off" placeholder="Search products…"></div>
+  <div class="share-select-head"><span id="status-batch-count">0 of 12 selected</span>
+   <button type="button" id="status-batch-all">Select first 12</button>
+   <button type="button" id="status-batch-clear">Clear</button></div>
+  <div id="status-batch-items" class="share-product-list" role="group" aria-label="Products for WhatsApp Status"></div>
+  <div class="share-composer">
+   <h3>Apply mySales Status template</h3>
+   <p>Same green design, one item per status, no invented product images. Your own shop link appears once on each picture.</p>
+   <div class="status-controls"><label for="status-show-price"><input id="status-show-price" type="checkbox" checked> Show product prices</label></div>
+   <button id="status-prepare" class="share-primary" type="button" disabled style="width:100%">Prepare selected Status pictures</button>
+   <div class="share-picture-preview"><img id="status-batch-preview" alt="Preview of the first WhatsApp Status picture" hidden>
+    <span>Preview appears here once pictures are prepared.</span></div>
+   <p id="status-batch-feedback" class="share-note" role="status" aria-live="polite">Select products to create Status images.</p>
+   <div class="share-file-actions">
+    <button id="status-share" class="share-primary" type="button" disabled>Share to WhatsApp</button>
+    <button id="status-download" class="share-secondary" type="button" disabled>Download all images</button>
+   </div>
+   <button id="status-copy-link" class="share-secondary" type="button" style="width:100%;margin-top:9px">Copy shop link for Status sticker</button>
+   <p class="status-instructions"><strong>Posting:</strong> After Share, choose WhatsApp and then My Status if your phone offers it. WhatsApp requires you to review and publish statuses yourself. A URL inside an image cannot be tapped, so use WhatsApp’s Link sticker with the copied link for clickable shopping.</p>
+  </div>
+ </div>
+</dialog>
+<div id="manager-toast" class="manager-toast" role="status" aria-live="polite"><span aria-hidden="true">✓</span> <strong id="manager-toast-message">Product added</strong></div>
+<script type="module">
+const managerTokenKey='mysales_private_management_token';
+const validManagerToken=value=>/^[A-Za-z0-9_-]{43}$/.test(value||'');
+const readManagerToken=()=>{
+ const fragment=new URLSearchParams(location.hash.slice(1)).get('token')||'';
+ if(validManagerToken(fragment))return fragment;
+ for(const storage of [sessionStorage,localStorage]){
+  try{const candidate=storage.getItem(managerTokenKey);if(validManagerToken(candidate))return candidate;}catch{}
+ }
+ return '';
+};
+const rememberManagerToken=value=>{
+ for(const storage of [sessionStorage,localStorage]){
+  try{storage.setItem(managerTokenKey,value);}catch{}
+ }
+};
+const forgetManagerToken=()=>{
+ for(const storage of [sessionStorage,localStorage]){
+  try{storage.removeItem(managerTokenKey);}catch{}
+ }
+};
+const parsePrivateLink=input=>{
+ const raw=String(input||'').trim();
+ if(validManagerToken(raw))return raw;
+ try{
+  const link=new URL(raw,location.origin);
+  if(link.origin!==location.origin)return '';
+  const value=new URLSearchParams(link.hash.slice(1)).get('token')||'';
+  return validManagerToken(value)?value:'';
+ }catch{return '';}
+};
+let token=readManagerToken();
+const $=id=>document.getElementById(id),notice=$('notice'),list=$('products');
+const photoFramerPromise=import('/photo-framing.mjs').then(({createPhotoFramer})=>createPhotoFramer($('photo-framer')));
+let framedNewPhoto=null;
+let currentStore=null,products=[],isAdding=new URLSearchParams(location.search).has('welcome'),managerToastTimer=0;
+function showManagerToast(message){
+ $('manager-toast-message').textContent=message;
+ $('manager-toast').classList.add('visible');
+ clearTimeout(managerToastTimer);
+ managerToastTimer=setTimeout(()=>$('manager-toast').classList.remove('visible'),2600);
+}
+const defaultWhatsApp='Hello {store_name}, I would like to enquire about:\n\n{items}\n\nEstimated subtotal: {subtotal}\nPlease confirm availability and final price.\n{customer_note}';
+const tipKey=()=>('mysales_retain_tip_'+String(currentStore?.public_handle||''));
+function dismissRetainTip(){
+ try{localStorage.setItem(tipKey(),'1');}catch{}
+ $('retain-tip').hidden=true;
+}
+$('dismiss-retain-tip').onclick=dismissRetainTip;
+function showManagerView(){
+ const hasProducts=products.length>0;
+ const adding=isAdding||!hasProducts;
+ $('add-section').hidden=!adding;
+ $('product-section').hidden=adding;
+ $('cancel-add').hidden=!hasProducts;
+ $('add-more').hidden=!hasProducts;
+ let alreadyShown=false;
+ try{alreadyShown=localStorage.getItem(tipKey())==='1';}catch{}
+ $('retain-tip').hidden=!hasProducts||currentStore?.status!=='published'||alreadyShown;
+}
+
+const node=(tag,value)=>{const n=document.createElement(tag);n.textContent=String(value);return n;};
+function say(message,problem=false){notice.textContent=message;notice.style.color=problem?'#af3f32':'#15803d';}
+function currency(value){return '₦'+Number(value||0).toLocaleString('en-NG');}
+async function api(path,options={}){
+ if(!validManagerToken(token))throw Error('Your private access is not available in this tab.');
+ const h=new Headers(options.headers||{});h.set('Authorization','Bearer '+token);
+ const r=await fetch('/api/merchant/'+path,{...options,headers:h,cache:'no-store'});
+ const j=await r.json().catch(()=>({}));
+ if(!r.ok){const error=new Error(j.error||'Could not save. Try again.');error.status=r.status;throw error;}
+ return j;
+}
+const post=(path,data)=>api(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+const merchantSession=(()=>{
+ try{const old=sessionStorage.getItem('mysales_merchant_analytics_tab');if(/^[0-9a-f-]{36}$/i.test(old||''))return old;}catch{}
+ const created=crypto.randomUUID();try{sessionStorage.setItem('mysales_merchant_analytics_tab',created);}catch{}
+ return created;
+})();
+function reportMerchantActivity(eventType){
+ if(navigator.doNotTrack==='1'||navigator.globalPrivacyControl===true)return;
+ void post('activity',{eventType,sessionId:merchantSession}).catch(()=>{});
+}
+async function copy(value){
+ try{await navigator.clipboard.writeText(value);say('Link copied! Share it with your customers.');}
+ catch{window.prompt('Copy your link:',value);}
+}
+function publicUrl(){return location.origin+'/'+encodeURIComponent(currentStore.public_handle||currentStore.slug);}
+function updateHero(){
+ const live=currentStore.status==='published';
+ $('store-title').textContent=currentStore.name;
+ $('greeting').textContent=live?'Your storefront is live. Share the link to start receiving enquiries.': 'Add your first product and your shop will be ready to share.';
+ $('state').textContent=live?'● Your store is live':'○ Setting up your store';
+ $('public-link').href=publicUrl();$('public-url').textContent=live?publicUrl():'Your public link becomes active once you add a product';
+ $('share').disabled=!live;$('public-link').style.pointerEvents=live?'auto':'none';$('public-link').style.opacity=live?'1':'.55';
+}
+async function refresh(){
+ const data=await api('products');products=data.products||[];
+ $('total').textContent='('+products.length+')';list.replaceChildren();
+ showManagerView();
+ if(!products.length){
+  const empty=node('div','');empty.className='blank';empty.append(node('div','📦'),node('strong','No products yet'),node('p','Add your first item using the simple form.'));
+  list.append(empty);
+ }
+ for(const p of products)renderProduct(p);
+}
+function renderProduct(p){
+ const unit=p.units?.[0];
+ const card=node('article','');card.className='product';
+ const open=node('button','');open.className='product-open';open.type='button';
+ open.setAttribute('aria-label','View details of '+p.name);
+ if(p.image_path){
+  const img=document.createElement('img');img.src=p.image_path;img.alt=p.name;img.loading='lazy';
+  img.onerror=()=>{const fallback=node('div','');fallback.className='ph';fallback.innerHTML="<svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3.5\" y=\"3.5\" width=\"17\" height=\"17\" rx=\"2.5\"/><circle cx=\"9\" cy=\"9\" r=\"1.6\"/><path d=\"m5.5 18 5-5 3.3 2.7 3.2-4 3 3.5\"/></svg>";img.replaceWith(fallback);};
+  open.append(img);
+ }else{const fallback=node('div','');fallback.className='ph';fallback.innerHTML="<svg viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3.5\" y=\"3.5\" width=\"17\" height=\"17\" rx=\"2.5\"/><circle cx=\"9\" cy=\"9\" r=\"1.6\"/><path d=\"m5.5 18 5-5 3.3 2.7 3.2-4 3 3.5\"/></svg>";open.append(fallback);}
+ const content=node('div','');content.className='product-body';
+ content.append(node('h3',p.name));
+ const price=node('div',unit?currency(unit.price):'Contact for price');price.className='price';content.append(price);
+ const stockLabel=p.track_stock?(Number(p.stock)>0?Number(p.stock)+' in stock':'Sold out'):'Availability by enquiry';
+ const status=node('p',(p.published?'Visible':'Hidden')+' · '+stockLabel+(p.image_path?'':' · No photo'));
+ status.className='meta';content.append(status);
+ open.append(content);
+ const view=node('span','View');view.className='product-view';view.setAttribute('aria-hidden','true');open.append(view);
+ open.onclick=()=>openProductDialog(p.id);
+ card.append(open);
+ if(p.units?.[0]&&currentStore?.status==='published'){
+  const link=document.createElement('a');link.className='quick-share';link.target='_blank';link.rel='noopener noreferrer';
+  link.textContent='↗ Share on WhatsApp';link.setAttribute('aria-label','Share '+p.name+' on WhatsApp');
+  const u=p.units[0],priceText=currency(u.price)+(u.name&&u.name!=='piece'?' / '+u.name:'');
+  const photo=safeProductImage(p),message=p.name+' — '+priceText+(photo?'\nPhoto: '+photo:'')+'\nSee more: '+publicUrl();
+  link.href='https://wa.me/?text='+encodeURIComponent(message);
+  link.addEventListener('click',()=>{reportMerchantActivity('product_share');dismissRetainTip();});
+  card.append(link);
+ }
+ list.append(card);
+}
+
+/* Quick vendor catalogue: one actual image containing selected photos and prices.
+   This is a private manager feature; no product or management data is sent to another service. */
+const productShareDialog=$('product-share-dialog');
+const SHARE_LIMIT=6;
+let shareChosen=new Set(),sharePictureFile=null,sharePictureUrl=null,shareBuildSerial=0,shareBuilding=false;
+const shareableProducts=()=>products.filter(p=>p.units?.[0]);
+const selectedShareProducts=()=>shareableProducts().filter(p=>shareChosen.has(p.id));
+const safeProductImage=p=>{
+ try{const url=new URL(String(p.image_path||''));return url.protocol==='https:'?url.href:'';}
+ catch{return '';}
+};
+// Customer messages use original public photo URLs. The picture editor loads our
+// own public Supabase images from a same-origin proxy to avoid canvas/CORS errors.
+const imageForCatalogue=p=>{
+ const original=safeProductImage(p);
+ if(!original)return '';
+ try{
+  const u=new URL(original);
+  const prefix='/storage/v1/object/public/early-storefront-products/';
+  if(u.origin==='https://wsxszbdvvtowmrnxdsrp.supabase.co'&&u.pathname.startsWith(prefix)){
+   const key=u.pathname.slice(prefix.length);
+   if(/^([a-f0-9-]{36}\/){2}[a-f0-9-]{36}\.(?:jpg|jpeg|png|webp)$/.test(key))
+    return '/api/catalogue-photo?key='+encodeURIComponent(key);
+  }
+ }catch{}
+ return original;
+};
+function shareProductText(){
+ const picked=selectedShareProducts();
+ if(!picked.length)return '';
+ const lines=['Hello! Here are the products you requested from '+currentStore.name+':',''];
+ picked.forEach((p,i)=>{
+  lines.push((i+1)+'. '+p.name+' — '+currency(p.units[0].price)+(p.units[0].name&&p.units[0].name!=='piece'?' / '+p.units[0].name:''));
+  const photo=safeProductImage(p);
+  if(photo)lines.push('Photo: '+photo);
+  lines.push('');
+ });
+ if(currentStore.status==='published')lines.push('View more products: '+publicUrl());
+ lines.push('Please let us know which ones you would like.');
+ return lines.join('\n').trim();
+}
+function discardSharePicture(){
+ shareBuildSerial++;
+ sharePictureFile=null;
+ if(sharePictureUrl){URL.revokeObjectURL(sharePictureUrl);sharePictureUrl=null;}
+ $('share-picture-image').removeAttribute('src');
+ $('share-picture-image').hidden=true;
+ $('share-picture-placeholder').hidden=false;
+ $('share-native').disabled=true;$('share-download').disabled=true;
+}
+function shareStatus(message,isError=false){
+ $('share-status').textContent=message;
+ $('share-status').style.color=isError?'#a43f31':'#53765d';
+}
+function updateShareSelection(){
+ const selected=selectedShareProducts().length;
+ $('share-selection-count').textContent=selected+' of '+SHARE_LIMIT+' selected';
+ $('share-prepare').disabled=!selected||shareBuilding;
+ $('share-copy-text').disabled=!selected;
+ const whatsapp=$('share-whatsapp');
+ if(selected){whatsapp.href='https://wa.me/?text='+encodeURIComponent(shareProductText());whatsapp.setAttribute('aria-disabled','false');whatsapp.tabIndex=0;}
+ else{whatsapp.removeAttribute('href');whatsapp.setAttribute('aria-disabled','true');whatsapp.tabIndex=-1;}
+ discardSharePicture();
+ $('share-picture-placeholder').textContent=selected
+  ? 'Tap Prepare picture to make your catalogue with '+selected+' product'+(selected===1?'':'s')+'.'
+  : 'Select at least one product to make a picture catalogue.';
+ shareStatus(selected?'Ready to prepare '+selected+' product'+(selected===1?'':'s')+'.':'Select products to share.');
+}
+function renderSharePicker(){
+ const host=$('share-product-list');host.replaceChildren();
+ const search=$('share-search').value.toLowerCase().trim();
+ const matching=shareableProducts().filter(p=>[p.name,p.category,p.description].some(v=>String(v||'').toLowerCase().includes(search)));
+ if(!matching.length){const empty=node('p',products.length?'No matching products.':'Add a product first to share its photo and price.');empty.className='hint';empty.style.padding='14px';host.append(empty);return;}
+ for(const p of matching){
+  const item=node('label','');item.className='share-product-option';
+  const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.value=p.id;
+  checkbox.checked=shareChosen.has(p.id);checkbox.setAttribute('aria-label','Include '+p.name+' in customer catalogue');
+  checkbox.onchange=()=>{
+   if(checkbox.checked&&shareChosen.size>=SHARE_LIMIT){
+    checkbox.checked=false;shareStatus('Choose up to '+SHARE_LIMIT+' products per picture. Send another catalogue for more.',true);return;
+   }
+   if(checkbox.checked)shareChosen.add(p.id);else shareChosen.delete(p.id);
+   updateShareSelection();
+  };
+  item.append(checkbox);
+  const url=safeProductImage(p);
+  if(url){const image=document.createElement('img');image.src=url;image.alt='';image.loading='lazy';
+   image.onerror=()=>{const blank=node('span','No photo');blank.className='share-option-fallback';image.replaceWith(blank);};
+   item.append(image);
+  }else{const blank=node('span','No photo');blank.className='share-option-fallback';item.append(blank);}
+  const detail=node('span','');detail.className='share-option-text';
+  detail.append(node('strong',p.name),node('small',currency(p.units[0].price)));item.append(detail);host.append(item);
+ }
+}
+function openShareProducts(preselectId=null){
+ shareChosen=new Set();
+ $('share-search').value='';
+ if(preselectId&&shareableProducts().some(p=>p.id===preselectId))shareChosen.add(preselectId);
+ discardSharePicture();renderSharePicker();updateShareSelection();
+ if(!productShareDialog.open)productShareDialog.showModal();
+}
+$('share-products').onclick=()=>openShareProducts();
+$('share-one-product').onclick=()=>{
+ if(!dialogProduct)return;
+ const id=dialogProduct.id;
+ productDialog.close();
+ openShareProducts(id);
+};
+$('share-search').oninput=renderSharePicker;
+$('share-select-all').onclick=()=>{
+ const search=$('share-search').value.toLowerCase().trim();
+ const matching=shareableProducts().filter(p=>[p.name,p.category,p.description].some(v=>String(v||'').toLowerCase().includes(search)));
+ for(const p of matching){if(shareChosen.size>=SHARE_LIMIT)break;shareChosen.add(p.id);}
+ renderSharePicker();updateShareSelection();
+};
+$('share-clear').onclick=()=>{shareChosen.clear();renderSharePicker();updateShareSelection();};
+$('share-close').onclick=()=>productShareDialog.close();
+productShareDialog.addEventListener('close',()=>{shareChosen.clear();discardSharePicture();$('share-search').value='';});
+async function loadShareImage(p){
+ if(!p?.image_path)return null;
+ let temporaryUrl=null;
+ try{
+  // Product photos arrive through the authenticated same-origin proxy.
+  const result=await fetch('/api/merchant/share-image?productId='+encodeURIComponent(p.id),{
+   headers:{Authorization:'Bearer '+token},cache:'no-store'
+  });
+  if(!result.ok)throw Error('Product picture could not load');
+  const blob=await result.blob();
+  if(!['image/jpeg','image/png','image/webp'].includes(blob.type)||blob.size>5500000||blob.size<20)
+   throw Error('Unsupported image');
+  temporaryUrl=URL.createObjectURL(blob);
+  const image=new Image();
+  await new Promise((resolve,reject)=>{
+   const timer=setTimeout(()=>reject(Error('Image loading timed out')),6500);
+   image.onload=()=>{clearTimeout(timer);resolve();};
+   image.onerror=()=>{clearTimeout(timer);reject(Error('Invalid image'));};
+   image.src=temporaryUrl;
+  });
+  if(!image.naturalWidth||!image.naturalHeight)throw Error('Invalid image');
+  return {image,dispose:()=>URL.revokeObjectURL(temporaryUrl)};
+ }catch{if(temporaryUrl)URL.revokeObjectURL(temporaryUrl);return null;}
+}
+function drawRounded(ctx,x,y,w,h,r){
+ const radius=Math.min(r,w/2,h/2);
+ ctx.beginPath();ctx.moveTo(x+radius,y);ctx.arcTo(x+w,y,x+w,y+h,radius);
+ ctx.arcTo(x+w,y+h,x,y+h,radius);ctx.arcTo(x,y+h,x,y,radius);
+ ctx.arcTo(x,y,x+w,y,radius);ctx.closePath();
+}
+function drawWrapped(ctx,text,x,y,width,lineHeight,maxLines){
+ const words=String(text||'').trim().split(/\s+/);const lines=[];
+ let line='';
+ for(const word of words){
+  const next=line?line+' '+word:word;
+  if(ctx.measureText(next).width>width&&line){lines.push(line);line=word;}
+  else line=next;
+ }
+ if(line)lines.push(line);
+ for(let i=0;i<Math.min(lines.length,maxLines);i++){
+  let value=lines[i];
+  if(i===maxLines-1&&lines.length>maxLines){
+   while(value&&ctx.measureText(value+'…').width>width)value=value.slice(0,-1);
+   value+='…';
+  }
+  ctx.fillText(value,x,y+i*lineHeight,width);
+ }
+}
+async function makeSharePicture(picked){
+ const width=1080,rows=Math.ceil(picked.length/2),height=255+rows*520+(rows-1)*22+120;
+ const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+ const ctx=canvas.getContext('2d',{alpha:false});
+ if(!ctx)throw Error('This browser cannot prepare catalogue images.');
+ ctx.fillStyle='#F1F6F1';ctx.fillRect(0,0,width,height);
+ ctx.fillStyle='#15582F';ctx.fillRect(0,0,width,231);
+ ctx.fillStyle='#B8ECC8';ctx.font='700 26px Arial, sans-serif';ctx.fillText('PRODUCTS AVAILABLE',46,60);
+ ctx.fillStyle='#fff';ctx.font='bold 53px Arial, sans-serif';
+ drawWrapped(ctx,currentStore.name,44,129,990,55,2);
+ ctx.fillStyle='#E2F5E8';ctx.font='26px Arial, sans-serif';ctx.fillText('Pictures · Product names · Prices in ₦',47,209);
+ const images=await Promise.all(picked.map(p=>loadShareImage(p)));
+ let photos=0;
+ for(let i=0;i<picked.length;i++){
+  const p=picked[i],col=i%2,row=Math.floor(i/2),x=33+col*516,y=254+row*542,w=495,h=520;
+  ctx.fillStyle='#FFFFFF';drawRounded(ctx,x,y,w,h,18);ctx.fill();
+  ctx.fillStyle='#F0F5F0';drawRounded(ctx,x+15,y+15,w-30,344,12);ctx.fill();
+  const img=images[i]?.image;
+  if(img&&img.naturalWidth&&img.naturalHeight){
+   const maxW=w-58,maxH=316,scale=Math.min(maxW/img.naturalWidth,maxH/img.naturalHeight);
+   const dw=img.naturalWidth*scale,dh=img.naturalHeight*scale;
+   ctx.drawImage(img,x+(w-dw)/2,y+22+(325-dh)/2,dw,dh);photos++;
+  }else{
+   ctx.fillStyle='#7B9784';ctx.font='bold 26px Arial, sans-serif';ctx.textAlign='center';
+   ctx.fillText('Photo available on request',x+w/2,y+176,w-40);ctx.textAlign='left';
+  }
+  ctx.fillStyle='#243C2D';ctx.font='bold 27px Arial, sans-serif';
+  drawWrapped(ctx,p.name,x+26,y+390,w-52,34,2);
+  ctx.fillStyle='#168541';ctx.font='bold 39px Arial, sans-serif';
+  ctx.fillText(currency(p.units[0].price),x+26,y+486,w-52);
+ }
+ for(const loaded of images)loaded?.dispose();
+ const footerY=height-105;
+ ctx.fillStyle='#22553B';ctx.font='bold 27px Arial, sans-serif';ctx.fillText('Ask us about any item',40,footerY);
+ ctx.fillStyle='#769080';ctx.font='23px Arial, sans-serif';
+ ctx.fillText(currentStore.status==='published'?publicUrl():'Made with mySales Online Stores',40,footerY+42,1000);
+ const blob=await new Promise((resolve,reject)=>{
+  try{canvas.toBlob(b=>b?resolve(b):reject(Error('Picture creation failed.')),'image/jpeg',.86);}
+  catch(e){reject(e);}
+ });
+ return {blob,photos};
+}
+$('share-prepare').onclick=async()=>{
+ const picked=selectedShareProducts();
+ if(!picked.length||shareBuilding)return;
+ discardSharePicture();const serial=shareBuildSerial;
+ shareBuilding=true;$('share-prepare').disabled=true;$('share-select-all').disabled=true;$('share-clear').disabled=true;
+ $('share-prepare').textContent='Preparing…';shareStatus('Adding product photos and prices to your picture…');
+ try{
+  const result=await makeSharePicture(picked);
+  if(serial!==shareBuildSerial)return;
+  const safeName=String(currentStore.name||'store').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,38)||'store';
+  sharePictureFile=new File([result.blob],safeName+'-products.jpg',{type:'image/jpeg'});
+  sharePictureUrl=URL.createObjectURL(result.blob);
+  $('share-picture-image').src=sharePictureUrl;$('share-picture-image').hidden=false;
+  $('share-picture-placeholder').hidden=true;
+  $('share-native').disabled=false;$('share-download').disabled=false;
+  shareStatus(result.photos===picked.length
+   ? 'Ready! All '+result.photos+' product pictures are included. Share or download below.'
+   : 'Ready: '+result.photos+' of '+picked.length+' photos included. Missing photos are shown as placeholders; copy the product details to send photo links.');
+ }catch(err){shareStatus('Could not create the picture: '+err.message+'. You can still copy details or open WhatsApp.',true);}
+ finally{shareBuilding=false;$('share-prepare').textContent='Prepare picture';$('share-prepare').disabled=!selectedShareProducts().length;
+  $('share-select-all').disabled=false;$('share-clear').disabled=false;}
+};
+$('share-native').onclick=()=>{
+ if(!sharePictureFile)return;
+ // Prepared before the tap: native Share must be called directly from a user gesture.
+ const files=[sharePictureFile];
+ if(typeof navigator.share!=='function'||(typeof navigator.canShare==='function'&&!navigator.canShare({files}))){
+  shareStatus('Image sharing is not supported here. Download the picture and attach it in WhatsApp.',true);return;
+ }
+ try{
+  Promise.resolve(navigator.share({files}))
+   .then(()=>shareStatus('Picture handed to your phone. Choose WhatsApp and confirm before sending.'))
+   .catch(err=>{if(err?.name!=='AbortError')shareStatus('Sharing was unavailable. Download the picture and send it in WhatsApp.',true);});
+ }catch(err){shareStatus('Sharing failed. Download the picture and attach it in WhatsApp.',true);}
+};
+$('share-download').onclick=()=>{
+ if(!sharePictureUrl||!sharePictureFile)return;
+ const link=document.createElement('a');link.href=sharePictureUrl;link.download=sharePictureFile.name;
+ document.body.append(link);link.click();link.remove();
+ shareStatus('Your product picture is ready. Attach it in a WhatsApp chat if it did not download automatically.');
+};
+$('share-copy-text').onclick=async()=>{
+ const message=shareProductText();if(!message)return;
+ try{await navigator.clipboard.writeText(message);shareStatus('Copied product names, prices and photo links. Paste into WhatsApp.');}
+ catch{window.prompt('Copy these product details:',message);}
+};
+$('share-whatsapp').onclick=event=>{
+ if(!selectedShareProducts().length){event.preventDefault();return;}
+ reportMerchantActivity('product_share');
+ shareStatus('Opening WhatsApp with the selected names, prices and photo links. To send picture attachments, use Share picture.');
+};
+
+// Status images deliberately share files only, without repeated URL captions.
+void import('/status-batch.mjs').then(({setupStatusBatch})=>setupStatusBatch({
+ getProducts:()=>products,
+ getStore:()=>currentStore,
+ getPublicUrl:()=>publicUrl(),
+ loadPhoto:loadShareImage,
+ formatPrice:currency,
+ onShare:()=>reportMerchantActivity('product_share'),
+})).catch(error=>{
+ console.error('Status editor could not load',error);
+ $('status-products').disabled=true;
+ $('status-products').title='Status editor temporarily unavailable';
+});
+const productDialog=$('product-dialog'),dialogForm=$('dialog-form'),dialogSave=$('dialog-save');
+let dialogProduct=null,dialogBaseline=null,dialogPhotoFile=null,dialogPhotoUrl=null,dialogEditing=false,dialogBusy=false;
+let saleRequestKey=null;
+const detailFieldIds={name:'dialog-name',price:'dialog-edit-price',category:'dialog-edit-category',
+ description:'dialog-edit-description',stock:'dialog-edit-stock',trackStock:'dialog-track-stock',published:'dialog-edit-published'};
+function detailValues(){
+ const result={};
+ for(const [key,id] of Object.entries(detailFieldIds))result[key]=$(id).value;
+ return result;
+}
+function snapshotProduct(p){
+ return {name:String(p.name||''),price:String(Number(p.units?.[0]?.price??0)),category:String(p.category||''),
+  description:String(p.description||''),stock:String(Number(p.stock||0)),trackStock:String(p.track_stock===true),published:String(Boolean(p.published))};
+}
+function hasDetailChanges(){
+ if(!dialogBaseline)return false;
+ const now=detailValues();
+ return Boolean(dialogPhotoFile)||Object.keys(dialogBaseline).some(key=>now[key]!==dialogBaseline[key]);
+}
+function updateDetailSave(){
+ const values=detailValues();
+ const allowed=dialogForm.checkValidity()&&Boolean(values.name.trim())&&
+  /^\d+$/.test(values.price)&&(values.trackStock==='false'||/^\d+$/.test(values.stock));
+ dialogSave.disabled=!dialogEditing||dialogBusy||!hasDetailChanges()||!allowed;
+}
+function clearDialogPhotoUrl(){
+ if(dialogPhotoUrl){URL.revokeObjectURL(dialogPhotoUrl);dialogPhotoUrl=null;}
+}
+function showDetailPhoto(url){
+ const photo=$('dialog-image'),placeholder=$('dialog-image-fallback');
+ photo.onerror=()=>{photo.hidden=true;placeholder.hidden=false;};
+ if(url){photo.src=url;photo.hidden=false;placeholder.hidden=true;}
+ else{photo.removeAttribute('src');photo.hidden=true;placeholder.hidden=false;}
+}
+function populateProductDialog(product){
+ dialogProduct=product;
+ dialogEditing=false;dialogBusy=false;dialogPhotoFile=null;clearDialogPhotoUrl();
+ $('dialog-photo').value='';$('dialog-photo-label').textContent=product.image_path?'Change photo':'Add a photo';
+ $('dialog-title').textContent=product.name;$('dialog-eyebrow').textContent='Product details';
+ $('dialog-price').textContent=product.units?.[0]?currency(product.units[0].price):'Contact for price';
+ $('dialog-category').textContent=product.category||'Uncategorized';
+ $('dialog-stock').textContent=product.track_stock?(Number(product.stock)>0?Number(product.stock)+' available':'Sold out'):'Availability by enquiry';
+ $('dialog-visibility').textContent=product.published?'Visible to customers':'Hidden from customers';
+ $('dialog-unit').textContent=(product.units||[]).map(u=>u.name).join(', ')||'Piece';
+ $('dialog-description').textContent=product.description||'No description added.';
+ showDetailPhoto(product.image_path||'');
+ dialogBaseline=snapshotProduct(product);
+ for(const [key,id] of Object.entries(detailFieldIds))$(id).value=dialogBaseline[key];
+ $('dialog-read').hidden=false;dialogForm.hidden=true;$('dialog-footer').hidden=true;$('dialog-advanced').hidden=true;
+ toggleDetailStock();
+ $('dialog-photo-picker').hidden=true;$('dialog-reframe').hidden=true;$('dialog-edit').hidden=false;
+ $('dialog-error').hidden=true;$('dialog-error').textContent='';
+ $('dialog-save').textContent='Save changes';dialogSave.disabled=true;
+ $('dialog-sale-form').reset();saleRequestKey=null;
+ $('dialog-sale-form').hidden=!product.units?.length;
+}
+function openProductDialog(productId){
+ const product=products.find(p=>p.id===productId);
+ if(!product)return say('Product not found. Refresh your store.',true);
+ populateProductDialog(product);
+ if(!productDialog.open)productDialog.showModal();
+}
+function enterProductEdit(){
+ if(!dialogProduct)return;
+ if(!dialogProduct.units?.[0])return say('This product has no active selling unit to edit.',true);
+ dialogEditing=true;
+ $('dialog-eyebrow').textContent='Editing product';
+ $('dialog-edit').hidden=true;$('dialog-read').hidden=true;dialogForm.hidden=false;
+ $('dialog-photo-picker').hidden=false;$('dialog-reframe').hidden=!dialogProduct.image_path;$('dialog-footer').hidden=false;$('dialog-advanced').hidden=!dialogProduct.track_stock;
+ $('dialog-name').focus({preventScroll:true});
+ updateDetailSave();
+}
+function toggleDetailStock(){
+ const enabled=$('dialog-track-stock').value==='true';
+ $('edit-stock-count').hidden=!enabled;
+ $('dialog-edit-stock').disabled=!enabled;
+ $('dialog-edit-stock').required=enabled;
+}
+$('dialog-track-stock').addEventListener('change',()=>{toggleDetailStock();$('dialog-advanced').hidden=$('dialog-track-stock').value!=='true'||!dialogEditing;updateDetailSave();});
+$('dialog-edit').onclick=enterProductEdit;
+for(const id of Object.values(detailFieldIds)){
+ $(id).addEventListener('input',updateDetailSave);
+ $(id).addEventListener('change',updateDetailSave);
+}
+$('dialog-photo').addEventListener('change',async event=>{
+ const file=event.target.files?.[0]||null;
+ if(!file)return;
+ try{
+  const framed=await (await photoFramerPromise).open(file);
+  if(!framed){$('dialog-photo').value='';return;}
+  clearDialogPhotoUrl();dialogPhotoFile=framed;
+  dialogPhotoUrl=URL.createObjectURL(framed);showDetailPhoto(dialogPhotoUrl);
+  $('dialog-photo-label').textContent='Adjusted photo ready';
+  updateDetailSave();
+ }catch(error){$('dialog-photo').value='';say(error.message,true);}
+});
+$('dialog-reframe').onclick=async()=>{
+ if(!dialogEditing||!dialogProduct?.image_path||dialogBusy)return;
+ const button=$('dialog-reframe');button.disabled=true;button.textContent='Opening current photo…';
+ try{
+  const response=await fetch('/api/merchant/share-image?productId='+encodeURIComponent(dialogProduct.id),{
+   headers:{Authorization:'Bearer '+token},cache:'no-store'
+  });
+  if(!response.ok)throw Error('Could not load this photo. Choose a new photo instead.');
+  const blob=await response.blob();
+  if(!['image/jpeg','image/png','image/webp'].includes(blob.type)||blob.size>18000000||blob.size<20)
+   throw Error('Photo format not supported. Choose a new JPG or PNG photo.');
+  const framed=await (await photoFramerPromise).open(new File([blob],'current-photo',{type:blob.type}));
+  if(!framed)return;
+  clearDialogPhotoUrl();dialogPhotoFile=framed;
+  dialogPhotoUrl=URL.createObjectURL(framed);showDetailPhoto(dialogPhotoUrl);
+  $('dialog-photo-label').textContent='Adjusted photo ready';updateDetailSave();
+ }catch(error){say(error.message,true);}
+ finally{button.disabled=false;button.textContent='Adjust current product photo';}
+};
+function cancelProductEdit(){
+ if(!dialogProduct||dialogBusy)return;
+ populateProductDialog(dialogProduct);
+}
+$('dialog-cancel').onclick=cancelProductEdit;
+function requestCloseProductDialog(){
+ if(dialogBusy)return;
+ if(dialogEditing&&hasDetailChanges()&&!confirm('Discard unsaved product changes?'))return;
+ productDialog.close();
+}
+$('dialog-close').onclick=requestCloseProductDialog;
+productDialog.addEventListener('cancel',event=>{
+ if(dialogBusy||(dialogEditing&&hasDetailChanges()&&!confirm('Discard unsaved product changes?')))event.preventDefault();
+});
+productDialog.addEventListener('click',event=>{if(event.target===productDialog)requestCloseProductDialog();});
+productDialog.addEventListener('close',()=>{
+ clearDialogPhotoUrl();dialogPhotoFile=null;dialogProduct=null;dialogEditing=false;dialogBusy=false;
+});
+dialogForm.onsubmit=async event=>{
+ event.preventDefault();
+ if(!dialogEditing||dialogBusy||!hasDetailChanges()||!dialogForm.checkValidity())return;
+ const values=detailValues();
+ if(!values.name.trim()||!/^\d+$/.test(values.price)||(values.trackStock==='true'&&!/^\d+$/.test(values.stock))){updateDetailSave();return;}
+ const p=dialogProduct,unit=p?.units?.[0];
+ if(!p||!unit)return;
+ dialogBusy=true;dialogSave.disabled=true;dialogSave.textContent='Saving…';
+ $('dialog-error').hidden=true;
+ try{
+  // Upload before product metadata so an invalid photo cannot update other fields.
+  if(dialogPhotoFile){
+   const photo=await preparePhoto(dialogPhotoFile);
+   const fd=new FormData();fd.append('productId',p.id);fd.append('image',photo);
+   const uploaded=await api('upload-image',{method:'POST',body:fd});
+   if(!uploaded.imageUrl)throw Error('Product photo was not saved. Please retry.');
+   dialogPhotoFile=null;clearDialogPhotoUrl();$('dialog-photo').value='';
+  }
+  await post('update-product',{productId:p.id,unitId:unit.id,
+   name:values.name.trim(),price:Number(values.price),category:values.category,
+   description:values.description,trackStock:values.trackStock==='true',
+   ...(values.trackStock==='true'?{stock:Number(values.stock)}:{}),published:values.published==='true'});
+  await refresh();
+  const updated=products.find(row=>row.id===p.id);
+  if(updated)populateProductDialog(updated);else productDialog.close();
+  say('Product changes saved.');showManagerToast('Product updated');
+ }catch(error){
+  $('dialog-error').textContent='Unable to save all changes: '+error.message;
+  $('dialog-error').hidden=false;
+  say('Could not finish saving: '+error.message,true);
+ }finally{
+  dialogBusy=false;dialogSave.textContent='Save changes';updateDetailSave();
+ }
+};
+$('dialog-remove').onclick=async()=>{
+ if(!dialogProduct||dialogBusy)return;
+ const p=dialogProduct;
+ if(!confirm('Remove '+p.name+' from your store? This cannot be undone from the manager.'))return;
+ dialogBusy=true;dialogSave.disabled=true;
+ try{
+  await post('archive-product',{productId:p.id});productDialog.close();
+  await refresh();say('Product removed.');showManagerToast('Product removed');
+ }catch(error){
+  $('dialog-error').textContent=error.message;$('dialog-error').hidden=false;
+  dialogBusy=false;updateDetailSave();
+ }
+};
+$('dialog-sale-form').onsubmit=async event=>{
+ event.preventDefault();
+ if(!dialogProduct||dialogBusy)return;
+ if(hasDetailChanges()){
+  $('dialog-error').textContent='Save or discard your unsaved product edits before recording a sale.';
+  $('dialog-error').hidden=false;
+  return;
+ }
+ const p=dialogProduct,unit=p.units?.[0],quantity=Number($('dialog-sale-qty').value);
+ if(!unit||!Number.isSafeInteger(quantity)||quantity<=0||quantity>100000)return;
+ if(!confirm('Record a sale of '+quantity+' × '+p.name+' and deduct stock?'))return;
+ const button=$('dialog-sale-button');button.disabled=true;dialogBusy=true;
+ saleRequestKey||=crypto.randomUUID();
+ try{
+  await post('confirm-sale',{productId:p.id,unitId:unit.id,quantity,requestKey:saleRequestKey});
+  saleRequestKey=null;await refresh();
+  const updated=products.find(row=>row.id===p.id);
+  if(updated)populateProductDialog(updated);
+  say('Sale recorded and inventory updated.');showManagerToast('Sale recorded');
+ }catch(error){say(error.message,true);}
+ finally{dialogBusy=false;button.disabled=false;}
+};
+
+async function preparePhoto(file){
+ if(!file)throw Error('Choose a product photo first.');
+ if(file.size>18000000)throw Error('This photo is too large. Choose one smaller than 18 MB.');
+ if(file.size<=1900000&&['image/jpeg','image/png','image/webp'].includes(file.type))return file;
+ const image=await (typeof createImageBitmap==='function'?createImageBitmap(file):Promise.reject(Error('Unavailable'))).catch(async()=>{const u=URL.createObjectURL(file);try{const img=new Image();img.src=u;await img.decode();return img;}catch{throw Error('This photo cannot be opened. Try JPG or PNG.');}finally{URL.revokeObjectURL(u);}});
+ const scale=Math.min(1,1400/Math.max(image.width,image.height));
+ const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(image.width*scale));canvas.height=Math.max(1,Math.round(image.height*scale));
+ const context=canvas.getContext('2d');if(!context)throw Error('Photo processing unavailable.');
+ context.drawImage(image,0,0,canvas.width,canvas.height);image.close?.();
+ const jpg=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',.78));
+ if(!jpg||jpg.size>=2000000)throw Error('Photo is still too large. Try a smaller image.');
+ return new File([jpg],'product.jpg',{type:'image/jpeg'});
+}
+$('stock-mode').onchange=()=>{
+ const enabled=$('stock-mode').value==='true';
+ $('stock-count').hidden=!enabled;
+ $('product-stock').disabled=!enabled;
+ $('product-stock').required=enabled;
+};
+$('stock-mode').onchange();
+$('product-photo').onchange=async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ try{
+  const framed=await (await photoFramerPromise).open(file);
+  if(!framed){if(!framedNewPhoto)$('product-photo').value='';return;}
+  framedNewPhoto=framed;
+  const old=$('preview').dataset.url;if(old)URL.revokeObjectURL(old);
+  const url=URL.createObjectURL(framed);$('preview').dataset.url=url;$('preview').src=url;
+  $('preview').style.display='block';$('photo-icon').style.display='none';$('photo-label').textContent='Adjusted photo ready';
+ }catch(error){$('product-photo').value='';framedNewPhoto=null;say(error.message,true);}
+};
+$('add').onsubmit=async e=>{
+ e.preventDefault();
+ const form=e.currentTarget,button=$('add-button');
+ button.disabled=true;button.textContent='Saving your product…';
+ const data=Object.fromEntries(new FormData(form));
+ try{
+  // Process the photo before creating the product, so an unreadable image
+  // cannot create a duplicate or automatically publish a photo-less item.
+  const photo=await preparePhoto(framedNewPhoto||data.photo);
+  const result=await post('products',{
+   name:data.name,price:Number(data.price),description:data.description||'',
+   category:data.category||'',trackStock:data.trackStock==='true',baseUnit:'piece',unitName:'piece',factor:1
+  });
+  const errors=[];
+  let photoUploaded=false;
+  try{
+   const fd=new FormData();fd.append('productId',result.id);fd.append('image',photo);
+   const uploadResult=await api('upload-image',{method:'POST',body:fd});
+   if(!uploadResult.imageUrl)throw Error('The server did not return a saved photo.');
+   photoUploaded=true;
+  }catch(err){errors.push('Photo not saved: '+err.message);}
+  if(data.trackStock==='true'&&data.stock&&Number(data.stock)>0){
+   try{await post('restock',{productId:result.id,amount:Number(data.stock)});}
+   catch(err){errors.push('Stock could not update: '+err.message);}
+  }
+  if(photoUploaded){
+   let published=false;
+   try{await post('publish',{productId:result.id,published:true});published=true;}
+   catch(err){errors.push('Could not publish: '+err.message);}
+   if(published&&currentStore.status!=='published'){
+    try{
+     const updated=await post('store-settings',{
+      name:currentStore.name,whatsapp:currentStore.whatsapp,
+      description:currentStore.description||'',status:'published'
+     });
+     currentStore=updated.store;updateHero();
+    }catch(err){errors.push('Store could not go live: '+err.message);}
+   }
+  }
+  form.reset();framedNewPhoto=null;const previewUrl=$('preview').dataset.url;if(previewUrl)URL.revokeObjectURL(previewUrl);delete $('preview').dataset.url;$('extras').open=false;$('stock-count').hidden=true;$('preview').style.display='none';
+  $('photo-icon').style.display='block';$('photo-label').textContent='Choose a product photo';
+  say(errors.length?'Product saved as a draft or with an issue. '+errors.join(' ')+' Use its photo button below to retry.':
+   '🎉 Product and picture added! Share your storefront with customers.',errors.length>0);
+  if(!errors.length)showManagerToast('Product added to your shop');
+  isAdding=false;await refresh();
+ }catch(err){say('Could not add product: '+err.message,true);}
+ finally{button.disabled=false;button.textContent='Add product to my shop →';}
+};
+$('add-more').onclick=()=>{isAdding=true;showManagerView();$('add-section').scrollIntoView({behavior:'smooth'});$('product-name').focus({preventScroll:true});};
+$('cancel-add').onclick=()=>{isAdding=false;showManagerView();$('product-section').scrollIntoView({behavior:'smooth'});};
+const settingsForm=$('settings'),whatsappForm=$('whatsapp-form');
+const businessFields=['name','whatsapp','description','status'];
+let businessBaseline=null,whatsappBaseline=null;
+function businessValues(){
+ const data=Object.fromEntries(new FormData(settingsForm));
+ return Object.fromEntries(businessFields.map(key=>[key,String(data[key]??'')]));
+}
+function updateBusinessSave(){
+ const values=businessValues();
+ const modified=businessBaseline!==null&&businessFields.some(key=>values[key]!==businessBaseline[key]);
+ $('business-save').disabled=!modified||!settingsForm.checkValidity();
+ $('business-feedback').textContent=modified?'Unsaved changes':'No changes yet';
+ $('business-feedback').style.color=modified?'#16763D':'#829183';
+}
+function updateWhatsAppSave(){
+ const value=$('whatsapp-template').value;
+ const modified=whatsappBaseline!==null&&value!==whatsappBaseline;
+ $('whatsapp-save').disabled=!modified;
+ $('whatsapp-feedback').textContent=modified?'Unsaved changes':'No changes yet';
+ $('whatsapp-feedback').style.color=modified?'#16763D':'#829183';
+}
+settingsForm.addEventListener('input',updateBusinessSave);
+settingsForm.addEventListener('change',updateBusinessSave);
+$('whatsapp-template').addEventListener('input',()=>{
+ $('whatsapp-preview').hidden=true;updateWhatsAppSave();
+});
+const settingAccordions=['settings-panel','whatsapp-panel','access-panel'].map(id=>$(id));
+for(const panel of settingAccordions)panel.addEventListener('toggle',()=>{
+ if(!panel.open)return;
+ for(const other of settingAccordions)if(other!==panel)other.open=false;
+});
+
+const renderSampleMessage=()=>{
+ const template=$('whatsapp-template').value||defaultWhatsApp;
+ const values={store_name:currentStore.name,items:'1 × Sample product (piece) — ₦5,000',subtotal:'₦5,000',customer_note:''};
+ return template.replace(/\{(store_name|items|subtotal|customer_note)\}/g,(_,key)=>values[key]).trim();
+};
+$('preview-whatsapp').onclick=()=>{$('whatsapp-preview').textContent=renderSampleMessage();$('whatsapp-preview').hidden=false;};
+$('reset-whatsapp').onclick=()=>{$('whatsapp-template').value=defaultWhatsApp;$('whatsapp-preview').hidden=true;updateWhatsAppSave();};
+whatsappForm.onsubmit=async e=>{
+ e.preventDefault();
+ const template=$('whatsapp-template').value.trim();
+ if(!template.includes('{items}')){say('Include {items} so enquiries show the selected products.',true);return;}
+ const button=$('whatsapp-save');button.disabled=true;button.textContent='Saving…';
+ try{
+  const updated=await post('store-settings',{
+   name:currentStore.name,description:currentStore.description||'',whatsapp:currentStore.whatsapp,
+   status:currentStore.status,whatsapp_template:template===defaultWhatsApp?null:template
+  });
+  currentStore=updated.store;
+  $('whatsapp-template').value=currentStore.whatsapp_template||defaultWhatsApp;
+  whatsappBaseline=$('whatsapp-template').value;
+  $('whatsapp-preview').hidden=true;
+  say('WhatsApp message saved.');showManagerToast('WhatsApp message updated');
+  $('whatsapp-panel').open=false;
+ }catch(err){say(err.message,true);}
+ finally{button.textContent='Save message';updateWhatsAppSave();}
+};
+settingsForm.onsubmit=async e=>{
+ e.preventDefault();
+ if(!settingsForm.checkValidity())return;
+ const button=$('business-save');button.disabled=true;button.textContent='Saving…';
+ try{
+  const data=businessValues();
+  const updated=await post('store-settings',data);
+  currentStore=updated.store;
+  businessBaseline=businessValues();
+  updateHero();say('Business details updated.');showManagerToast('Business details saved');
+  $('settings-panel').open=false;
+ }catch(err){say(err.message,true);}
+ finally{button.textContent='Save changes';updateBusinessSave();}
+};
+$('share').onclick=()=>{
+ const url=publicUrl();
+ if(typeof navigator.share==='function'){
+  navigator.share({title:currentStore.name,text:'Browse products and prices from '+currentStore.name,url})
+   .then(()=>{reportMerchantActivity('shop_share');dismissRetainTip();})
+   .catch(err=>{if(err?.name!=='AbortError')copy(url);});
+ }else{copy(url);reportMerchantActivity('shop_share');dismissRetainTip();}
+};
+$('copy-manager').onclick=()=>copy(location.origin+'/legacy/manage/claim#token='+encodeURIComponent(token));
+$('export').onclick=async()=>{const b=$('export');b.disabled=true;try{const data=await api('export');const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='mysales-store-backup.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);say('Backup downloaded.');}catch(err){say(err.message,true);}finally{b.disabled=false;}};
+$('exit').onclick=()=>{
+ forgetManagerToken();
+ history.replaceState(null,'',location.pathname);
+ location.replace('/legacy/manage/');
+};
+function showAccessRecovery(message,{retry=false}={}){
+ $('app').hidden=true;$('exit').hidden=true;
+ $('access-recovery').hidden=false;
+ $('recovery-message').textContent=message;
+ $('retry-access').hidden=!retry;
+ notice.textContent='';
+}
+async function openManager(){
+ if(!validManagerToken(token)){
+  showAccessRecovery('Your private access is not available in this browser tab. Paste your saved private management link to reopen your store. Your products have not been removed.');
+  return;
+ }
+ notice.textContent='Opening your store…';
+ try{
+  const identity=await api('me');
+  currentStore=identity.store;
+  rememberManagerToken(token);
+  if(location.hash)history.replaceState(null,'',location.pathname+location.search);
+  const form=$('settings');
+  form.elements.namedItem('name').value=currentStore.name;
+  form.elements.namedItem('description').value=currentStore.description||'';
+  form.elements.namedItem('whatsapp').value=currentStore.whatsapp;
+  form.elements.namedItem('status').value=currentStore.status;
+  $('whatsapp-template').value=currentStore.whatsapp_template||defaultWhatsApp;
+  businessBaseline=businessValues();whatsappBaseline=$('whatsapp-template').value;
+  updateBusinessSave();updateWhatsAppSave();
+  updateHero();
+  $('access-recovery').hidden=true;$('app').hidden=false;$('exit').hidden=false;
+  say(new URLSearchParams(location.search).has('welcome')?'Welcome! Add your first product to launch your store.':'Your private store manager is ready.');
+  try{await refresh();reportMerchantActivity('dashboard_open');}catch(error){say('Your store is open, but products could not load. Refresh to try again: '+error.message,true);}
+ }catch(error){
+  if(error.status===401||error.status===403){
+   forgetManagerToken();token='';
+   showAccessRecovery('This private link is invalid or no longer active. If you have another saved management link, paste it below.');
+  }else{
+   showAccessRecovery('We could not connect to your store right now. Your access is still saved; please retry. '+error.message,{retry:true});
+  }
+ }
+}
+$('retry-access').onclick=()=>openManager();
+$('recover-form').onsubmit=async event=>{
+ event.preventDefault();
+ const candidate=parsePrivateLink($('recover-link').value);
+ if(!candidate){
+  $('recovery-message').textContent='That does not look like a valid mySales private link. Paste the complete link you saved when creating the store.';
+  return;
+ }
+ const button=$('recover-button');button.disabled=true;button.textContent='Verifying access…';
+ try{
+  // Check the capability before persisting it on this device.
+  const result=await fetch('/api/merchant/me',{headers:{Authorization:'Bearer '+candidate},cache:'no-store'});
+  if(!result.ok)throw Error(result.status===401||result.status===403?'This private link is not active. Check that you copied the complete link.':'The store could not be reached. Please try again.');
+  token=candidate;rememberManagerToken(token);
+  $('recover-link').value='';
+  history.replaceState(null,'',location.pathname+location.search);
+  await openManager();
+ }catch(error){
+  $('recovery-message').textContent=error.message;
+ }finally{button.disabled=false;button.textContent='Open my store →';}
+};
+openManager();
+</script></body></html>

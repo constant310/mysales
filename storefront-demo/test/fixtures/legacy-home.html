@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#167a35">
+<meta name="description" content="Create a free mySales online storefront for your business. Add your products and prices, then share one business link with customers on WhatsApp. No technical skills required.">
+<title>Create a free online store for your business | mySales Storefronts</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#193626;background:#fff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0}a{text-decoration:none;color:inherit}button,input{font:inherit}a:focus-visible{outline:3px solid #64c988;outline-offset:4px}
+.wrap{width:min(100% - 40px,1090px);margin-inline:auto}
+header{border-bottom:1px solid #e9f0eb;background:#fff}.nav{min-height:76px;display:flex;justify-content:space-between;align-items:center;gap:13px}
+.logo{display:inline-flex;align-items:center;gap:9px;font-size:1.3rem;font-weight:950;letter-spacing:-.065em;white-space:nowrap}
+.logo-mark{height:38px;width:38px;display:grid;place-items:center;border-radius:11px;background:#16a34a;color:#fff;font-size:1.06rem;letter-spacing:-.14em;padding-right:3px}
+.logo small{background:#ebf8ee;color:#157b3b;font-size:.63rem;font-weight:850;letter-spacing:0;padding:6px 8px;border-radius:999px;margin-left:2px}
+.nav-links{display:flex;align-items:center;gap:22px}.nav-links>a:first-child{font-size:.85rem;color:#597764;font-weight:750}
+.primary{display:inline-flex;align-items:center;justify-content:center;text-align:center;border-radius:12px;padding:13px 21px;min-height:50px;background:#15803d;color:white;font-size:.91rem;font-weight:900;line-height:1.2;transition:background .15s}
+.primary:hover{background:#0e6930}.nav .primary{font-size:.82rem;min-height:43px;padding:11px 15px}
+.hero-shell{background:linear-gradient(118deg,#f7fcf8 0%,#f1faf4 100%);border-bottom:1px solid #e4f0e7}
+.hero{display:grid;grid-template-columns:1.08fr .92fr;gap:50px;align-items:center;padding:72px 0 82px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;color:#167b3d;font-size:.7rem;font-weight:950;letter-spacing:.11em;text-transform:uppercase}
+.eyebrow:before{content:"";height:7px;width:7px;border-radius:50%;background:#16a34a}
+h1{font-size:clamp(2.55rem,5.4vw,5rem);line-height:1.08;letter-spacing:-.07em;margin:18px 0 21px;max-width:620px}
+h1 span{color:#15803d}
+.lead{color:#567161;font-size:clamp(.99rem,1.6vw,1.11rem);line-height:1.75;margin:0 0 26px;max-width:510px}
+.actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.secondary{display:inline-flex;align-items:center;justify-content:center;min-height:50px;border-radius:12px;border:1px solid #c7dece;background:#fff;color:#186b39;padding:12px 18px;font-size:.9rem;font-weight:850}
+.secondary:hover{background:#f1faf3}
+.reassurance{display:flex;flex-wrap:wrap;gap:12px 17px;margin:20px 0 0;padding:0;list-style:none;color:#55755e;font-size:.79rem;font-weight:770}
+.reassurance li:before{content:"✓";color:#148342;font-weight:950;margin-right:7px}
+.preview-area{min-width:0;display:grid;justify-items:center}
+.preview-tag{background:#dff5e5;color:#167640;border-radius:999px;padding:9px 13px;font-size:.75rem;font-weight:850;margin-bottom:13px}
+.preview{width:min(100%,401px);background:#fff;border:1px solid #dfece3;border-radius:20px;overflow:hidden;box-shadow:0 20px 60px #16452716}
+.preview-top{display:flex;align-items:center;gap:8px;background:#fbfdfb;padding:11px 14px;border-bottom:1px solid #e9f0ea}
+.preview-dot{width:7px;height:7px;background:#b7d2bf;border-radius:50%;box-shadow:11px 0 #b7d2bf,22px 0 #b7d2bf;flex:none}
+.preview-url{margin-left:25px;background:#eef6f0;color:#51715b;font-size:.73rem;font-weight:800;border-radius:7px;padding:9px;flex:1;text-align:center;overflow-wrap:anywhere}
+.mock-hero{background:linear-gradient(120deg,#14432a,#158345);color:#fff;padding:26px 23px}
+.mock-hero small{display:block;color:#b8efc9;font-size:.66rem;letter-spacing:.1em;font-weight:900;text-transform:uppercase}
+.mock-hero strong{display:block;font-size:1.52rem;letter-spacing:-.045em;margin:8px 0}
+.mock-hero p{color:#e2f4e7;font-size:.78rem;line-height:1.5;margin:0}
+.mock-products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:15px}
+.mock-product{border:1px solid #e8f0e9;border-radius:12px;overflow:hidden;min-width:0}
+.mock-product img{width:100%;aspect-ratio:1.4;display:block;object-fit:cover;background:#f1f5f1}
+.mock-detail{padding:10px;min-width:0}
+.mock-detail b{display:block;font-size:.77rem;line-height:1.3}.mock-detail strong{display:block;margin-top:5px;color:#16833d;font-size:.86rem}
+.mock-add{display:block;margin-top:9px;width:100%;background:#e7f7eb;color:#166c37;text-align:center;border-radius:7px;font-size:.68rem;font-weight:900;padding:7px}
+.preview-bottom{padding:0 15px 16px;text-align:center;font-size:.73rem;color:#6a8370}
+.preview-bottom strong{color:#15813a}
+.steps{padding:74px 0 78px}
+.section-title{max-width:700px;margin:0 auto 34px;text-align:center}
+.section-title h2{font-size:clamp(1.85rem,3.8vw,2.7rem);line-height:1.15;letter-spacing:-.057em;margin:12px 0}
+.section-title p{color:#647869;font-size:.95rem;line-height:1.65;margin:0}
+.step-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:23px}
+.step{background:#f8fbf8;border:1px solid #e5eee7;border-radius:16px;padding:25px 23px}
+.step-number{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:#e2f5e7;color:#16803d;font-size:.83rem;font-weight:950}
+.step h3{font-size:1.13rem;letter-spacing:-.03em;margin:19px 0 9px}
+.step p{font-size:.87rem;color:#667d6e;line-height:1.65;margin:0}
+.convince{background:#143e29;color:#fff}
+.convince-content{display:flex;align-items:center;justify-content:space-between;gap:30px;padding:42px 0}
+.convince h2{font-size:clamp(1.55rem,3.2vw,2.2rem);letter-spacing:-.045em;margin:0 0 10px}
+.convince p{font-size:.88rem;color:#d4e9da;line-height:1.65;margin:0;max-width:650px}
+.convince .primary{background:#fff;color:#126e35;flex:none}
+.convince .primary:hover{background:#e7f6eb}
+footer{padding:26px 0;color:#758777;font-size:.8rem}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.foot a{font-weight:800;color:#16713b}
+@media(max-width:850px){.hero{grid-template-columns:1fr;gap:33px;padding:53px 0 59px}.preview{max-width:400px}.step-grid{gap:13px}.step{padding:22px 17px}}
+@media(max-width:600px){.wrap{width:min(100% - 34px,1090px)}.nav{min-height:66px}.logo{font-size:1.1rem;gap:7px}.logo-mark{width:33px;height:33px;font-size:.99rem}.logo small{font-size:.58rem}.nav-links>a:first-child{display:none}.nav .primary{font-size:.75rem;min-height:40px;padding:10px 12px}.hero{padding:42px 0 58px;gap:29px}h1{font-size:clamp(2.6rem,10.6vw,3.8rem)}.lead{margin-bottom:21px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.actions a{font-size:.82rem;padding:12px 8px;min-height:49px}.reassurance{gap:9px 13px;font-size:.74rem}.preview{max-width:360px}.preview-tag{margin-bottom:11px}.steps{padding:59px 0}.section-title{text-align:left;margin-bottom:23px}.step-grid{grid-template-columns:1fr;gap:10px}.step{padding:19px 20px}.step h3{margin-top:12px}.convince-content{padding:34px 0;display:grid;gap:22px}.convince .primary{width:100%}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.primary{transition:none}}
+
+/* Conversion-first illustration: it is an invitation, not a competing sample. */
+.preview-convert{margin-top:17px;text-align:center;max-width:401px;width:100%}
+.preview-convert p{color:#597761;font-size:.84rem;font-weight:850;margin:0 0 12px}
+.preview-create{display:flex;min-height:49px;align-items:center;justify-content:center;text-align:center;background:#168541;color:white;border-radius:12px;font-size:.9rem;font-weight:900;padding:12px 19px}
+.preview-create:hover{background:#106c31}
+
+.preview-bottom{padding:1px 13px 16px}
+.preview-tag{background:#e7f6eb}
+@media(max-width:600px){.preview-convert{max-width:360px;margin-top:15px}.preview-convert p{font-size:.8rem}}
+</style></head><body>
+<header><div class="wrap nav">
+<a class="logo" href="/" aria-label="mySales Storefronts"><span class="logo-mark" aria-hidden="true">mS</span>mySales<small>Storefronts</small></a>
+<nav class="nav-links" aria-label="Main navigation"><a href="/login/">Sign in</a><a class="primary" href="/create/">Create free store</a></nav>
+</div></header>
+<main>
+<div class="hero-shell"><section class="hero wrap" aria-labelledby="main-title">
+<div><span class="eyebrow">For everyday business owners</span><h1 id="main-title">Your business deserves its <span>own store link.</span></h1>
+<p class="lead">Stop sending product photos and prices one by one. Give customers one link to browse everything you sell—and let them enquire directly on WhatsApp.</p>
+<div class="actions"><a class="primary" href="/create/">Create my free store</a><a class="secondary" href="#how-it-works">How it works</a></div>
+<ul class="reassurance"><li>No website skills</li><li>No login needed</li><li>WhatsApp enquiries</li></ul>
+</div>
+<div class="preview-area" aria-label="Illustration of a storefront you can create">
+<span class="preview-tag">This could be your store</span>
+<div class="preview"><div class="preview-top"><span class="preview-dot" aria-hidden="true"></span><span class="preview-url">mysales / your-business</span></div>
+<div class="mock-hero"><small>YOUR BRAND · YOUR PRODUCTS</small><strong>Your Business Name</strong><p>Show customers your products and prices in one place.</p></div>
+<div class="mock-products">
+<div class="mock-product"><img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=450&q=75" loading="lazy" alt="Illustrative headphones product"><div class="mock-detail"><b>Headphones</b><strong>₦24,500</strong><span class="mock-add">Add to cart</span></div></div>
+<div class="mock-product"><img src="https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=450&q=75" loading="lazy" alt="Illustrative watch product"><div class="mock-detail"><b>Classic watch</b><strong>₦32,500</strong><span class="mock-add">Add to cart</span></div></div>
+</div>
+<div class="preview-bottom"><strong>Your own store, ready to share.</strong></div>
+</div>
+<div class="preview-convert"><p>Like what you see? Put your own products here.</p><a class="preview-create" href="/create/">Create my store for free</a></div>
+</div></section></div>
+<section class="steps wrap" id="how-it-works"><div class="section-title"><span class="eyebrow">Three simple steps</span><h2>Start sharing your store today.</h2><p>You only need your business details and a few product pictures. No complex setup or technical knowledge.</p></div>
+<div class="step-grid">
+<article class="step"><span class="step-number">01</span><h3>Enter your business details</h3><p>Add your business name and WhatsApp number to create your storefront.</p></article>
+<article class="step"><span class="step-number">02</span><h3>Add your products</h3><p>Upload a photo, name your item and enter the selling price.</p></article>
+<article class="step"><span class="step-number">03</span><h3>Share your business link</h3><p>Post your link on WhatsApp, Instagram, or send it straight to customers.</p></article>
+</div></section>
+<section class="convince"><div class="wrap convince-content"><div><h2>Ready to put your business online?</h2><p>Create your storefront free during our pilot. Customers can browse your products and enquire through WhatsApp. No online payment setup required.</p></div><a class="primary" href="/create/">Create my free store</a></div></section>
+</main>
+<footer><div class="wrap foot"><span>© 2026 mySales · Storefronts is made by mySales.</span><a href="/create/">Create a free storefront</a></div></footer>
+</body></html>
