@@ -60,9 +60,9 @@ test('quick module and inline manager module parse as JavaScript modules',async(
 test('template is 9:16, contains branding once and fits photos without cropping',async()=>{
  const renderer=await source('status-batch.mjs');
  assert.match(renderer,/W=864,H=1536/);
- assert.match(renderer,/Math\.min\(maxW\/sourceWidth,maxH\/sourceHeight\)/);
+ assert.match(renderer,/Math\.min\(frame\.w\/naturalW,frame\.h\/naturalH\)/);
  assert.match(renderer,/canvas\.toBlob/);
- assert.match(renderer,/'image\/jpeg',\.8/);
+ assert.match(renderer,/'image\/jpeg',\.82/);
  assert.equal((renderer.match(/textFit\(ctx,visibleUrl/g)||[]).length,1);
  assert.match(renderer,/const photoX=62,photoY=269,photoW=740,photoH=816/);
  assert.match(renderer,/ctx\.clip\(\)/);
