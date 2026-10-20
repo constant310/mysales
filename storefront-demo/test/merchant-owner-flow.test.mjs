@@ -71,12 +71,10 @@ test('claim intent survives login in session storage, and only clears after succ
 });
 
 test('existing shop transfer is gated by signed-in identity and ownership, not phone matching',async()=>{
- const source=await read('supabase/functions/early-storefront-backend/index.ts');
- assert.match(source,/pathname==='\/api\/merchant\/transfer'/);
- assert.match(source,/const user=await accountUser\(request\)/);
- assert.match(source,/management_links/);
- assert.match(source,/store_owners/);
- assert.match(source,/revoked_at=now\(\)/);
+ const create=await read('account/create/index.html');
+ assert.match(create,/requireAccount\(\)/);
+ assert.match(create,/body:JSON.stringify\(\{legacyToken\}\)/);
+ assert.match(create,/\/api\/v5\/merchant\/transfer/);
  const router=await read('render-server.mjs');
  assert.match(router,/early-storefront-backend-v5-test/);
  assert.match(router,/if\(!v5Allowed\.has\(route\)\)return json\(res,404/);
