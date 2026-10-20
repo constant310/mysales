@@ -16,7 +16,7 @@ const allowed=new Set([
  '/api/merchant/archive-product','/api/merchant/store-settings','/api/merchant/upload-image','/api/merchant/share-image',
  '/api/operator/me','/api/operator/stores','/api/operator/analytics','/api/activity',
 ]);
-const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml','.ico':'image/x-icon'};
+const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml','.ico':'image/x-icon'};
 const json=(res,status,body)=>{res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(body));};
 async function edgeFetch(path,method='GET',headers={},body) {
  const target=path.startsWith('/api/signup')?edgeBase.replace('/early-storefront-backend','/early-storefront-signup'):edgeBase;
