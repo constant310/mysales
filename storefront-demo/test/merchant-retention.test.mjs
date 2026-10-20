@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
+import {spawnSync} from 'node:child_process';
 
 const read=path=>readFile(new URL('../'+path,import.meta.url),'utf8');
 
@@ -10,7 +11,10 @@ test('all changed storefront screens contain syntactically valid interactive scr
   const html=await read(file);
   const moduleScript=html.match(/<script type="module">([\s\S]*?)<\/script>/)?.[1];
   assert.ok(moduleScript,file+' must have a module');
-  assert.doesNotThrow(()=>new vm.Script(moduleScript,{filename:file}),file+' must parse');
+  if(/^\s*import\s/m.test(moduleScript)){
+   const checked=spawnSync(process.execPath,['--check','--input-type=module'],{input:moduleScript,encoding:'utf8'});
+   assert.equal(checked.status,0,file+' must parse as a module: '+checked.stderr);
+  }else assert.doesNotThrow(()=>new vm.Script(moduleScript,{filename:file}),file+' must parse');
  }
 });
 
