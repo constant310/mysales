@@ -1,7 +1,7 @@
 name: Early Storefront checks
 on:
   push:
-    branches: [feature/early-storefront-vercel, release/product-photo-framing-20261019, feature/whatsapp-status-batch-20261020]
+    branches: [feature/early-storefront-vercel, release/product-photo-framing-20261019, feature/live-v5-parallel-manager-20261020, feature/whatsapp-status-batch-20261020]
     paths:
       - 'storefront-demo/**'
       - '.github/workflows/early-storefront-checks.yml'

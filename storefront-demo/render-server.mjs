@@ -82,6 +82,61 @@ http.createServer(async(req,res)=>{
     });
    }catch(e){console.error('Supabase backend health probe failed',e?.message);return json(res,503,{ok:false,databaseConnected:false,backend:'supabase-edge'});}
   }
+  // Opt-in account experience. Keep /api/merchant and /api/signup bound to the
+  // existing private-link backend until merchants explicitly migrate accounts.
+  // JWT sessions use the separately deployed V5 functions via /api/v5 only.
+  if(path.startsWith('/api/v5/')){
+   const route=path.slice('/api/v5'.length);
+   const v5Allowed=new Set([
+    '/api/signup','/api/merchant/me','/api/merchant/transfer',
+    '/api/merchant/claim','/api/merchant/products','/api/merchant/activity',
+    '/api/merchant/restock','/api/merchant/publish','/api/merchant/confirm-sale',
+    '/api/merchant/export','/api/merchant/update-product',
+    '/api/merchant/archive-product','/api/merchant/store-settings',
+    '/api/merchant/upload-image','/api/merchant/share-image'
+   ]);
+   if(!v5Allowed.has(route))return json(res,404,{error:'Not found'});
+   if(!['GET','POST'].includes(req.method))return json(res,405,{error:'Method not allowed'});
+   if(req.method==='POST'){
+    const origin=req.headers.origin;
+    if(origin&&!allowedOrigins.has(origin))return json(res,403,{error:'Invalid origin'});
+   }
+   let body;
+   if(req.method==='POST'){
+    const max=route==='/api/merchant/upload-image'?2100000:route==='/api/signup'?6000:65536;
+    const chunks=[];let size=0;
+    for await(const chunk of req){
+     size+=chunk.length;
+     if(size>max)return json(res,413,{error:'Request too large'});
+     chunks.push(chunk);
+    }
+    body=Buffer.concat(chunks);
+   }
+   const upstream='https://wsxszbdvvtowmrnxdsrp.supabase.co/functions/v1/'+
+    (route==='/api/signup'?'early-storefront-signup-v5-test':'early-storefront-backend-v5-test');
+   const headers={};
+   if(req.headers.authorization)headers.authorization=req.headers.authorization;
+   if(req.headers['content-type'])headers['content-type']=req.headers['content-type'];
+   if(req.headers.origin)headers.origin=req.headers.origin;
+   try{
+    const result=await fetch(upstream+route+url.search,{
+     method:req.method,headers,body,redirect:'error',
+     signal:AbortSignal.timeout(route==='/api/merchant/export'?25000:12000)
+    });
+    res.statusCode=result.status;
+    res.setHeader('Cache-Control','no-store');
+    res.setHeader('Content-Type',result.headers.get('content-type')||'application/json; charset=utf-8');
+    const disposition=result.headers.get('content-disposition');
+    if(disposition)res.setHeader('Content-Disposition',disposition);
+    if(!result.body)return res.end();
+    await pipeline(Readable.fromWeb(result.body),res);
+    return;
+   }catch(error){
+    console.error('V5 account proxy failed:',error?.message);
+    if(res.headersSent){res.destroy();return;}
+    return json(res,503,{error:'Account service temporarily unavailable'});
+   }
+  }
   if(allowed.has(path)){
    const publicRead=path==='/api/store'||path==='/api/discover';
    res.setHeader('Cache-Control',publicRead?'public, max-age=6, stale-while-revalidate=15':'no-store');
@@ -146,6 +201,9 @@ http.createServer(async(req,res)=>{
   if(path==='/')staticPath='/index.html';
   if(path==='/discover'||path==='/discover/')staticPath='/discover/index.html';
   if(path==='/create'||path==='/create/')staticPath='/create/index.html';
+  if(path==='/login'||path==='/login/')staticPath='/login/index.html';
+  if(path==='/account/manage'||path==='/account/manage/')staticPath='/account/manage/index.html';
+  if(path==='/account/create'||path==='/account/create/')staticPath='/account/create/index.html';
   if(path==='/manage'||path==='/manage/')staticPath='/manage/index.html';
   if(path==='/manage/claim')staticPath='/manage/claim.html';
   if(path==='/operator'||path==='/operator/')staticPath='/operator/index.html';
@@ -166,7 +224,7 @@ http.createServer(async(req,res)=>{
    throw error;
   }
   res.setHeader('Content-Type',mime[extname(file)]);
-  if(path.startsWith('/manage')||path.startsWith('/operator'))res.setHeader('Cache-Control','no-store');
+  if(path.startsWith('/manage')||path.startsWith('/account/')||path.startsWith('/login')||path.startsWith('/operator'))res.setHeader('Cache-Control','no-store');
   return res.end(bytes);
  }catch(error){
   console.error('Request failed',error?.message);

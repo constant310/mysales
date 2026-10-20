@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer"><meta name="theme-color" content="#1C8220"><meta name="robots" content="noindex,nofollow">
+<title>Sign in or create account | mySales</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#F5FAFD;color:#27372D}
+*{box-sizing:border-box}body{margin:0;min-height:100svh}a{color:#1C8220;text-decoration:none;font-weight:800}
+header{max-width:1100px;margin:auto;padding:22px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.logo{font-size:1.35rem;font-weight:950;color:#203C2B;letter-spacing:-.065em}.logo b{color:#1C8220}
+header>a:last-child{font-size:.85rem}
+main{max-width:485px;margin:5vh auto 30px;padding:0 16px}
+.panel{background:#fff;border:1px solid #DCECE1;box-shadow:0 18px 60px #155B2620;border-radius:22px;padding:30px}
+.kicker{font-weight:900;font-size:.76rem;letter-spacing:.075em;color:#15803D;text-transform:uppercase}
+h1{font-size:clamp(1.9rem,6vw,2.35rem);letter-spacing:-.065em;line-height:1.13;margin:10px 0 11px}
+p{font-size:.92rem;color:#64766B;line-height:1.65;margin:0 0 17px}
+button,input{font:inherit}button{cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}
+.google{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;border:1px solid #C9D7CD;border-radius:12px;background:white;padding:14px;min-height:52px;color:#263B2D;font-weight:800}
+.google:hover{background:#F2FAF4}.gicon{font-family:Arial,sans-serif;font-size:1.2rem;font-weight:950;color:#4285F4}
+.or{display:flex;align-items:center;gap:11px;color:#84988A;font-size:.75rem;text-transform:uppercase;margin:23px 0}
+.or:before,.or:after{content:"";height:1px;flex:1;background:#E4ECE5}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:5px;background:#EFF6F0;border-radius:12px;padding:5px;margin:12px 0 20px}
+.tab{border:0;background:transparent;color:#68796D;border-radius:9px;min-height:42px;font-weight:800}
+.tab[aria-selected="true"]{background:#fff;box-shadow:0 2px 8px #234D3118;color:#1C8220}
+label{display:block;font-size:.88rem;font-weight:800;margin:17px 0 8px}
+input{width:100%;border:1px solid #CDDFD2;background:#FCFEFC;border-radius:12px;padding:13px 15px;min-height:53px;font-size:1rem;color:#263C2C}
+input:focus{outline:3px solid #BBECC8;border-color:#16A34A}
+.primary{display:block;width:100%;border:0;background:#1C8220;border-radius:12px;color:white;padding:14px 18px;min-height:51px;font-weight:850;margin:22px 0 4px}
+.primary:hover{background:#15803D}
+.hint{font-size:.78rem;color:#708476;line-height:1.6;margin:8px 0 0}
+#status{min-height:30px;font-size:.86rem;margin:14px 0 0;color:#177A36}
+#status[data-error="true"]{color:#AD3A31}
+.note{font-size:.79rem;color:#718477;line-height:1.7;border-top:1px solid #EDF2EE;padding-top:15px;margin:19px 0 0}
+[hidden]{display:none!important}
+@media(max-width:540px){main{margin:28px auto}.panel{padding:23px;border-radius:18px}header{padding:18px 16px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style></head><body>
+<header><a class="logo" href="/">my<b>Sales</b></a><a href="/">Back to mySales</a></header>
+<main><section class="panel" aria-labelledby="title">
+<div class="kicker">Free online store</div>
+<h1 id="title">Welcome to mySales</h1>
+<p>Sign in to manage your store, or create a new seller account. Customers can browse stores without logging in.</p>
+<button class="google" id="google" type="button"><span class="gicon" aria-hidden="true">G</span> Continue with Google</button>
+<div class="or">or use your email</div>
+<div class="tabs" role="tablist" aria-label="Email account options">
+<button class="tab" type="button" id="tab-signin" role="tab" aria-selected="true">Sign in</button>
+<button class="tab" type="button" id="tab-signup" role="tab" aria-selected="false">Create account</button>
+</div>
+<form id="password-form">
+<label for="email">Email address</label>
+<input id="email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
+<label for="password">Password</label>
+<input id="password" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required>
+<div id="confirm-wrap" hidden>
+<label for="confirm-password">Confirm password</label>
+<input id="confirm-password" name="confirm-password" type="password" autocomplete="new-password" minlength="8" maxlength="128">
+</div>
+<p class="hint" id="password-hint">Sign in using your mySales password. No OTP or email code needed.</p>
+<button class="primary" id="submit-password" type="submit">Sign in</button>
+</form>
+<p id="status" role="status" aria-live="polite"></p>
+<p class="note">By continuing, you agree to use your account only to manage stores you own. Keep your password private. Password recovery by email will require an email sender to be configured later.</p>
+</section></main>
+<script type="module">
+import {signInWithPassword,signUpWithPassword,beginGoogleSignIn,consumeEmailLink,ownerDestination,signedIn} from '/auth/client.mjs';
+const $=id=>document.getElementById(id);
+let mode='signin',busy=false;
+function say(message,error=false){$('status').textContent=message;$('status').dataset.error=String(error);}
+function setMode(next){
+ if(busy)return;
+ mode=next;
+ $('tab-signin').setAttribute('aria-selected',String(next==='signin'));
+ $('tab-signup').setAttribute('aria-selected',String(next==='signup'));
+ $('confirm-wrap').hidden=next!=='signup';
+ $('confirm-password').required=next==='signup';
+ $('password').autocomplete=next==='signup'?'new-password':'current-password';
+ $('password-hint').textContent=next==='signup'
+  ?'Choose a password of at least 8 characters. If email verification is enabled, check your inbox to activate your account.'
+  :'Sign in using your mySales password. No OTP or email code needed.';
+ $('submit-password').textContent=next==='signup'?'Create my account':'Sign in';
+ $('password').value='';$('confirm-password').value='';
+ say('');
+}
+async function go(){say('Opening your store…');location.replace(await ownerDestination());}
+(async()=>{
+ try{if(await consumeEmailLink()||signedIn())await go();}
+ catch(error){say(error.message,true);}
+})();
+$('tab-signin').addEventListener('click',()=>setMode('signin'));
+$('tab-signup').addEventListener('click',()=>setMode('signup'));
+$('google').addEventListener('click',()=>{
+ if(busy)return;
+ busy=true;$('google').disabled=true;
+ say('Taking you to Google…');
+ try{beginGoogleSignIn();}catch(error){busy=false;$('google').disabled=false;say(error.message,true);}
+});
+$('password-form').addEventListener('submit',async(event)=>{
+ event.preventDefault();if(busy)return;
+ const email=$('email').value, password=$('password').value;
+ if(mode==='signup'&&password!==$('confirm-password').value){say('Passwords do not match.',true);return;}
+ busy=true;$('submit-password').disabled=true;$('google').disabled=true;
+ say(mode==='signup'?'Creating your account…':'Signing in…');
+ try{
+  if(mode==='signup'){
+   const signup=await signUpWithPassword(email,password);
+   if(signup.emailConfirmationRequired){
+    $('password').value='';$('confirm-password').value='';
+    say('Account created. Check your email and confirm your address, then sign in.');
+    return;
+   }
+  }else await signInWithPassword(email,password);
+  $('password').value='';$('confirm-password').value='';
+  await go();
+ }catch(error){say(error.message,true);}
+ finally{busy=false;$('submit-password').disabled=false;$('google').disabled=false;}
+});
+</script></body></html>
