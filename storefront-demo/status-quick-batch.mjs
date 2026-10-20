@@ -63,8 +63,9 @@ export function setupQuickStatusBatch({getStore,getShopUrl,formatPrice,saveToSho
  }
  function refreshControls(){
   const valid=items.length&&items.every(item=>item.name.trim()&&(!showPrice.checked||validStatusPrice(item.price)!==null));
+  const canSave=items.length&&items.every(item=>item.name.trim()&&validStatusPrice(item.price)!==null);
   prepare.disabled=busy||!valid;
-  save.disabled=busy||!valid||!items.some(item=>!item.published);
+  save.disabled=busy||!canSave||!items.some(item=>!item.published);
   share.disabled=busy||!prepared.length;
   input.disabled=busy;
   showPrice.disabled=busy;
@@ -168,14 +169,20 @@ export function setupQuickStatusBatch({getStore,getShopUrl,formatPrice,saveToSho
   // Saving is intentionally separate so sharing locally never waits for Supabase.
   busy=true;refreshControls();let done=0;const failures=[];
   try{
-   for(let i=0;i<pending.length;i++){
-    const item=pending[i];
-    info('Saving product '+(i+1)+' of '+pending.length+' to your shop…');
-    try{await saveToShop(item);done++;}
-    catch(err){failures.push(item.name+': '+(err.message||'Could not save'));}
-   }
+   // Two network workers reduce wait time without overwhelming the store backend.
+   let next=0;
+   const worker=async()=>{
+    while(next<pending.length){
+     const index=next++;
+     const item=pending[index];
+     info('Saving product '+(index+1)+' of '+pending.length+' to your shop…');
+     try{await saveToShop(item);done++;}
+     catch(err){failures.push(item.name+': '+(err.message||'Could not save'));}
+    }
+   };
+   await Promise.all([worker(),worker()]);
    renderRows();
-   if(done)await onSaved?.();
+   if(done){try{await onSaved?.();}catch(err){failures.push('Shop refresh: '+(err.message||'Try refreshing'));}}
    info(done+' saved to your shop.'+(failures.length?' '+failures.length+' need attention: '+failures.slice(0,2).join('; '):'')+(prepared.length?' Your Status designs remain ready.':''),Boolean(failures.length));
   }finally{busy=false;refreshControls();}
  };
