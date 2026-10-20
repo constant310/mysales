@@ -63,5 +63,9 @@ test('template is 9:16, contains branding once and fits photos without cropping'
  assert.match(renderer,/Math\.min\(maxW\/sourceWidth,maxH\/sourceHeight\)/);
  assert.match(renderer,/canvas\.toBlob/);
  assert.match(renderer,/'image\/jpeg',\.8/);
- assert.equal((renderer.match(/textFit\(ctx,shopUrl/g)||[]).length,1);
+ assert.equal((renderer.match(/textFit\(ctx,visibleUrl/g)||[]).length,1);
+ assert.match(renderer,/const photoX=62,photoY=269,photoW=740,photoH=816/);
+ assert.match(renderer,/ctx\.clip\(\)/);
+ assert.match(renderer,/ctx\.fillText\('AVAILABLE IN OUR STORE'/);
+ assert.match(renderer,/rounded\(ctx,48,1281,768,116,30\)/);
 });
