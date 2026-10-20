@@ -53,14 +53,14 @@ async function enter(){
   // which is never sent in the HTTP request.
   if(persisted){
    history.replaceState(null,'',location.pathname);
-   location.replace('/manage/');
-  }else location.replace('/manage/#token='+encodeURIComponent(token));
+   location.replace('/legacy/manage/');
+  }else location.replace('/legacy/manage/#token='+encodeURIComponent(token));
  }catch(e){
   spinner.hidden=true;
   status.textContent=e.message+' You can retry without losing your private link.';
   button.hidden=false;button.disabled=false;button.textContent='Try again';
  }
 }
-button.addEventListener('click',()=>{if(!valid(token))location.assign('/manage/');else enter();});
+button.addEventListener('click',()=>{if(!valid(token))location.assign('/legacy/manage/');else enter();});
 enter();
 </script></body></html>
