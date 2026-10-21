@@ -117,3 +117,57 @@ test('customer HTML modules and helper modules pass syntax verification',async()
   assert.equal(check.status,0,check.stderr);
  }
 });
+
+
+test('five JPEG exports each print the seller store link and leave a sixth picture out',async()=>{
+ const original={fetch:globalThis.fetch,document:globalThis.document,Image:globalThis.Image,File:globalThis.File,
+  createObjectURL:URL.createObjectURL,revokeObjectURL:URL.revokeObjectURL};
+ const urls=[];
+ const photoTexts=[];
+ globalThis.fetch=async()=>({
+  ok:true,headers:{get:()=> 'image/jpeg'},blob:async()=>new Blob(['x'.repeat(180)],{type:'image/jpeg'})
+ });
+ URL.createObjectURL=()=> 'blob:mock-'+Math.random();
+ URL.revokeObjectURL=()=>{};
+ globalThis.Image=class{
+  naturalWidth=800;naturalHeight=600;
+  set src(value){queueMicrotask(()=>this.onload?.());}
+ };
+ if(!globalThis.File)globalThis.File=class extends Blob {
+  constructor(parts,name,options){super(parts,options);this.name=name;}
+ };
+ globalThis.document={
+  createElement(name){
+   assert.equal(name,'canvas');
+   const calls=[];
+   const ctx={fillRect(){},drawImage(){},fillText(value){calls.push(String(value));},
+    measureText(value){return {width:String(value).length*19}},
+    textAlign:'left'};
+   photoTexts.push(calls);
+   return {width:0,height:0,getContext:()=>ctx,
+    toBlob(callback){callback(new Blob(['fake JPEG'],{type:'image/jpeg'}));}};
+  }
+ };
+ try{
+  const base='https://wsxszbdvvtowmrnxdsrp.supabase.co/storage/v1/object/public/early-storefront-products/';
+  const items=Array.from({length:6},(_,i)=>{
+   const key=sampleId.slice(0,-1)+String(i);
+   return {productId:String(i),name:'Product '+i,price:15000,quantity:1,unit:'piece',
+    image_path:base+key+'/'+key+'/'+key+'.jpg'};
+  });
+  // Distinct URL, and an extra duplicate image, must never produce more than 5 files.
+  items.push({...items[0],productId:'duplicate'});
+  const shop='https://store.mysalesofficial.com/safe-minds';
+  const files=await prepareEnquiryPictures('Safe Minds',items,shop);
+  assert.equal(files.length,5);
+  assert.equal(photoTexts.length,5);
+  for(const texts of photoTexts){
+   assert.equal(texts.filter(line=>line==='store.mysalesofficial.com/safe-minds').length,1);
+   assert.ok(texts.includes('Powered by mySales'));
+  }
+ }finally{
+  globalThis.fetch=original.fetch;globalThis.document=original.document;
+  globalThis.Image=original.Image;globalThis.File=original.File;
+  URL.createObjectURL=original.createObjectURL;URL.revokeObjectURL=original.revokeObjectURL;
+ }
+});
