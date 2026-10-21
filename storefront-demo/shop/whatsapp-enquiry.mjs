@@ -13,7 +13,24 @@ export function photoProxyPath(url){
   return IMAGE_KEY.test(key)?'/api/catalogue-photo?key='+encodeURIComponent(key):'';
  }catch{return '';}
 }
-export const MAX_ENQUIRY_IMAGES=10;
+export const MAX_ENQUIRY_IMAGES=5;
+
+// Canonical shop addresses are always generated from a vetted public handle.
+export function merchantStoreUrl(store) {
+ const handle=String(store?.public_handle||store?.slug||'').trim().toLowerCase();
+ if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(handle))return '';
+ return 'https://store.mysalesofficial.com/'+encodeURIComponent(handle);
+}
+export function whatsappSellerLink(rawNumber,message) {
+ const phone=String(rawNumber||'').replace(/\D/g,'');
+ if(!/^[1-9]\d{7,14}$/.test(phone))return '';
+ return 'https://wa.me/'+phone+'?text='+encodeURIComponent(String(message||''));
+}
+export function withStoreLink(message,shopUrl) {
+ const text=String(message||'').trim();
+ const link=String(shopUrl||'').trim();
+ return link&&!text.includes(link)?text+'\n\nShop here: '+link:text;
+}
 export function canShareEnquiryFiles(files,device=typeof navigator==='undefined'?null:navigator){
  if(!Array.isArray(files)||!files.length||typeof device?.share!=='function'||typeof device?.canShare!=='function')return false;
  try{return device.canShare({files})===true;}catch{return false;}
@@ -28,8 +45,8 @@ export function enquiryItemsFromCart(cart,products){
   return {...item,image_path:found?.image_path||''};
  });
 }
-export function photoSignature(storeName,items){
- return JSON.stringify([storeName,items.map(item=>[item.productId,item.name,item.quantity,item.price,item.unit,item.image_path])]);
+export function photoSignature(storeName,items,shopUrl=''){
+ return JSON.stringify([storeName,shopUrl,items.map(item=>[item.productId,item.name,item.quantity,item.price,item.unit,item.image_path])]);
 }
 function fitLines(ctx,text,x,y,width,step,maxLines){
  const words=String(text||'').trim().split(/\s+/);const lines=[];let line='';
@@ -76,7 +93,7 @@ async function imageForEnquiry(raw){
 }
 /** Portrait-oriented layout; centre a single card or an incomplete last row. */
 export function enquiryPortraitLayout(count,variant='enquiry'){
- const total=Math.max(1,Math.min(6,Math.floor(Number(count)||1)));
+ const total=Math.max(1,Math.min(MAX_ENQUIRY_IMAGES,Math.floor(Number(count)||1)));
  const width=1080,header=230,footer=125,gap=24,side=44,rows=Math.ceil(total/2);
  const single=total===1,cardHeight=single?900:575;
  const cardWidth=single?820:(width-2*side-gap)/2;
@@ -96,7 +113,7 @@ export function enquiryPortraitLayout(count,variant='enquiry'){
      This never combines multiple product photos into a collage. */
 export async function prepareEnquiryPicture(storeName,items,{variant='enquiry',shopUrl='',showPrice=true}={}){
  if(items.length!==1)return null;
- const selected=items.slice(0,6),loaded=await Promise.all(selected.map(p=>imageForEnquiry(p.image_path)));
+ const selected=items.slice(0,MAX_ENQUIRY_IMAGES),loaded=await Promise.all(selected.map(p=>imageForEnquiry(p.image_path)));
  const imageCount=loaded.filter(Boolean).length;
  if(!imageCount)return null;
  const isStatus=variant==='status';
@@ -154,8 +171,17 @@ export async function prepareEnquiryPicture(storeName,items,{variant='enquiry',s
    ctx.textAlign='left';ctx.font='bold 54px Arial,sans-serif';
    ctx.fillText('mySales',logoX+114,logoY+66,510);
   }else{
-   ctx.fillStyle='#244D31';ctx.font='bold 23px Arial,sans-serif';
-   ctx.fillText('Made with mySales',30,height-45,920);
+   // Visible link on every forwarded product image (image text is not tappable).
+   ctx.fillStyle='#E3F2E7';ctx.fillRect(0,height-125,width,125);
+   const visibleUrl=String(shopUrl||'').replace(/^https?:\/\//,'');
+   if(visibleUrl){
+    ctx.fillStyle='#0B5E36';ctx.font='bold 22px Arial,sans-serif';
+    ctx.fillText('SHOP HERE',32,height-86);
+    ctx.fillStyle='#154D32';ctx.font='bold 28px Arial,sans-serif';
+    ctx.fillText(visibleUrl,32,height-46,width-64);
+   }
+   ctx.fillStyle='#276646';ctx.font='bold 20px Arial,sans-serif';
+   ctx.fillText('Powered by mySales',32,height-16,width-64);
   }
   const blob=await new Promise((resolve,reject)=>{
    try{canvas.toBlob(b=>b?resolve(b):reject(Error('Unable to create picture')),'image/jpeg',.84);}
@@ -174,25 +200,26 @@ export async function prepareEnquiryPicture(storeName,items,{variant='enquiry',s
  * with random stock images. The WhatsApp text continues to describe all items.
  * Process sequentially to avoid many large canvases in memory at once.
  */
-export async function prepareEnquiryPictures(storeName,items){
- const result=[];
+export async function prepareEnquiryPictures(storeName,items,shopUrl=''){
+ const result=[],seen=new Set();
  if(!Array.isArray(items)||!items.length)return result;
- for(const [index,item] of items.slice(0,MAX_ENQUIRY_IMAGES).entries()){
+ for(const item of items){
+  if(result.length>=MAX_ENQUIRY_IMAGES)break;
   try{
-   if(!photoProxyPath(item.image_path))continue;
-   const file=await prepareEnquiryPicture(storeName,[item]);
+   if(!photoProxyPath(item.image_path)||seen.has(item.image_path))continue;
+   seen.add(item.image_path);
+   const file=await prepareEnquiryPicture(storeName,[item],{shopUrl});
    if(!file)continue;
    const safeName=String(item.name||'product').toLowerCase()
     .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,36)||'product';
-   const name='mysales-'+String(index+1).padStart(2,'0')+'-'+safeName+'.jpg';
+   const name='mysales-'+String(result.length+1).padStart(2,'0')+'-'+safeName+'.jpg';
    result.push(new File([file],name,{type:'image/jpeg'}));
   }catch{
-   // An individual broken photo must not block the rest of the basket.
+   // Failed photos do not prevent sending the full text enquiry.
   }
  }
  return result;
 }
-
 
 /** Each WhatsApp Status file is a standalone 9:16 picture that never displays
  * inventory quantities. Customer enquiry files retain their quantities.
