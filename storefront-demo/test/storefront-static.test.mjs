@@ -453,8 +453,10 @@ test('shopping buttons are legible without decorative cart and WhatsApp icons',a
  assert.doesNotMatch(catalogue,/const CART_SVG=/);
  assert.match(catalogue,/id="sheet-add" type="button">Add to cart<\/button>/);
  assert.match(catalogue,/id="sheet-enquire" type="button">View basket<\/button>/);
- assert.match(catalogue,/id="sheet-ask">Ask seller with product photo<\/button>/);
- assert.match(catalogue,/id="send-label">Send WhatsApp enquiry<\/span>/);
+ assert.match(catalogue,/id="sheet-ask">Ask seller on WhatsApp<\/button>/);
+ assert.match(catalogue,/id="sheet-share-photo" disabled>Share product photo<\/button>/);
+ assert.match(catalogue,/id="send-label">Chat with seller on WhatsApp<\/span>/);
+ assert.match(catalogue,/id="send-photos" disabled>/);
  assert.match(catalogue,/id="filter-home"/);
  assert.match(catalogue,/id="home-cart"/);
 });
