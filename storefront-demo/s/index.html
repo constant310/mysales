@@ -182,6 +182,12 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 .enquiry-save-list:empty{display:none}
 .enquiry-save-list a{display:grid;place-items:center;min-height:43px;border-radius:10px;background:#EFF7F0;color:#175F33;border:1px solid #CFE8D6;font-weight:800;padding:9px 12px;text-align:center}
 .enquiry-save-list a:hover{background:#E4F4E8}
+#send-photos,#sheet-share-photo{display:block;width:100%;min-height:44px;padding:11px;margin-top:9px;border:1px solid #AED8BC;background:#F1FAF3;color:#135D36;font-weight:850;font-size:.83rem;border-radius:11px}
+#send-photos:disabled,#sheet-share-photo:disabled{opacity:.55;cursor:wait}
+.enquiry-photo-hint{margin:7px 1px 0;color:#66816C;font-size:.73rem;line-height:1.55}
+.enquiry-fallback-actions #enquiry-open-chat{background:#16833F}
+.enquiry-fallback-actions .share-steps{color:#5C7665;font-size:.78rem;line-height:1.6;margin:0 0 5px}
+
 
 /* Product thumbnails must not stretch the CSS Grid track or crop the source photo. */
 .grid-media{position:relative;display:block;min-width:0;aspect-ratio:1;overflow:hidden;background:#f5f9f6}
@@ -229,8 +235,9 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 <div class="drawer-header"><h2 id="drawer-title">Your enquiry basket <span id="cart-title-count"></span></h2><button id="close-cart" class="close-button" type="button" aria-label="Close basket">×</button></div>
 <div class="drawer-body"><div id="cart-lines"></div><div class="total"><span>Estimated subtotal</span><strong id="cart-total">₦0</strong></div>
 <label class="drawer-label" for="customer-note">Message to seller (optional)</label><textarea id="customer-note" maxlength="300" placeholder="Questions or delivery details…"></textarea>
-<button type="button" id="send" class="checkout"><span id="send-label">Send WhatsApp enquiry</span></button>
-<p id="checkout-help" class="help">The seller confirms availability and final prices. No payment is collected here.</p><a id="demo-signup" href="/login/" hidden>Create your own free store →</a>
+<button type="button" id="send" class="checkout"><span id="send-label">Chat with seller on WhatsApp</span></button>
+<button type="button" id="send-photos" disabled>Share up to 5 product photos</button>
+<p id="checkout-help" class="help">Chat opens directly with the seller, your basket, and shop link. Photos are optional and must be shared separately. No payment is collected here.</p><a id="demo-signup" href="/login/" hidden>Create your own free store →</a>
 </div></aside>
 <dialog id="photo-viewer" class="photo-viewer" aria-labelledby="viewer-title">
  <div class="viewer-head"><strong id="viewer-title">Product photo</strong><button type="button" class="viewer-close" id="viewer-close" aria-label="Close photo">×</button></div>
@@ -243,7 +250,8 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 <p id="sheet-description" class="sheet-description" hidden></p>
 <div class="qty-row"><label>Quantity</label><div class="counter"><button id="minus" type="button" aria-label="Decrease quantity">−</button><span id="qty" aria-live="polite">1</span><button id="plus" type="button" aria-label="Increase quantity">+</button></div></div>
 <div class="sheet-actions"><button id="sheet-add" type="button">Add to cart</button><button id="sheet-enquire" type="button">View basket</button></div>
-<button type="button" id="sheet-ask">Ask seller with product photo</button>
+<button type="button" id="sheet-ask">Ask seller on WhatsApp</button>
+<button type="button" id="sheet-share-photo" disabled>Share product photo</button>
 <p class="sheet-help">This is an enquiry, not an online payment. The seller confirms availability.</p>
 </section>
 <dialog id="filter-dialog" class="filter-dialog" aria-labelledby="filter-title">
@@ -254,8 +262,8 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 <div id="add-toast" class="toast" role="status" aria-live="polite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg><span id="toast-message">Added to basket</span><button type="button" id="toast-basket">View basket</button></div>
 <div id="status" class="status" role="alert" hidden></div>
 <dialog id="enquiry-fallback" class="enquiry-fallback" aria-labelledby="enquiry-fallback-title">
- <h2 id="enquiry-fallback-title">Send your product picture</h2>
- <p id="enquiry-fallback-info">Save the product photos individually, then attach them in the seller’s WhatsApp chat.</p>
+ <h2 id="enquiry-fallback-title">Continue to the seller’s WhatsApp</h2>
+ <p id="enquiry-fallback-info">Share or save your product photos, then open the seller’s chat to send your enquiry.</p>
  <p id="enquiry-seller-number" class="enquiry-seller-number"></p>
  <div class="enquiry-fallback-actions">
   <div id="enquiry-save-list" class="enquiry-save-list"></div>
@@ -265,7 +273,7 @@ svg{display:block;flex:none}button{touch-action:manipulation}
 </dialog>
 <script type="module">
 import {canManagePublicStore} from '/auth/owner-nav.mjs';
-import {canShareEnquiryFiles,enquiryItemsFromCart,photoSignature,prepareEnquiryPictures,MAX_ENQUIRY_IMAGES} from '/shop/whatsapp-enquiry.mjs';
+import {canShareEnquiryFiles,enquiryItemsFromCart,photoSignature,prepareEnquiryPictures,MAX_ENQUIRY_IMAGES,merchantStoreUrl,whatsappSellerLink,withStoreLink} from '/shop/whatsapp-enquiry.mjs';
 function exampleImage(name){
  // Only fictional demo catalogues receive illustrative visuals. Never substitute
  // a stock photo for a real merchant's missing product photo.
@@ -310,15 +318,18 @@ const cart=new Map();
 const photoCache=new Map();
 let fallbackPhotoUrls=[];
 function enquiryCartItems(){return enquiryItemsFromCart(cart,products);}
+function shopUrl(){return merchantStoreUrl(store);}
+function sellerNumber(){return String(store?.whatsapp||'').replace(/\D/g,'');}
 function photoState(items){
  if(!store||!items.length)return {ready:true,files:[]};
- const signature=photoSignature(store.name,items);
+ const link=shopUrl();
+ const signature=photoSignature(store.name,items,link);
  let state=photoCache.get(signature);
  if(state)return state;
  state={ready:false,files:[]};
  photoCache.set(signature,state);
  if(photoCache.size>14)photoCache.delete(photoCache.keys().next().value);
- state.promise=prepareEnquiryPictures(store.name,items)
+ state.promise=prepareEnquiryPictures(store.name,items,link)
   .then(files=>{state.files=files;state.ready=true;})
   .catch(()=>{state.files=[];state.ready=true;});
  return state;
@@ -328,38 +339,65 @@ function prewarmPhoto(items,callback){
  if(!state.ready&&state.promise)void state.promise.then(callback);
  return state;
 }
+function chatWithSeller(message,number){
+ const url=whatsappSellerLink(number,message);
+ if(!url){notify('This seller has no valid WhatsApp number.');return;}
+ trackActivity('whatsapp_click');
+ // This navigation happens synchronously on the customer's tap. It is not
+ // blocked by image rendering or an Android share-sheet choice.
+ window.location.assign(url);
+}
+function basketMessage(items){
+ const lines=items.map(item=>item.quantity+' × '+item.name+' ('+item.unit+') — '+currency(item.price*item.quantity)).join('\n');
+ const subtotal=items.reduce((sum,item)=>sum+item.quantity*item.price,0);
+ const note=$('customer-note').value.trim();
+ const replacement={store_name:store.name,items:lines,subtotal:currency(subtotal),customer_note:note?'Customer note: '+note:''};
+ const template=typeof store.whatsapp_template==='string'&&store.whatsapp_template.trim()?store.whatsapp_template:defaultWhatsApp;
+ const message=template.replace(/\{(store_name|items|subtotal|customer_note)\}/g,(_,key)=>replacement[key]).trim();
+ return withStoreLink(message,shopUrl());
+}
+function selectedProductMessage(){
+ const p=selectedProduct,u=unitOf(p);
+ if(!p||!u)return '';
+ return withStoreLink('Hello '+store.name+', I want to ask about '+selectedQuantity+' × '+p.name+
+  ' ('+currency(Number(u.price||0)*selectedQuantity)+'). Is it available?',shopUrl());
+}
 function clearFallbackPhotos(){
  for(const url of fallbackPhotoUrls)URL.revokeObjectURL(url);
  fallbackPhotoUrls=[];
  $('enquiry-save-list').replaceChildren();
 }
-function showEnquiryFallback(files,message,number){
+function showEnquiryFallback(files,message,number,shared=false){
  clearFallbackPhotos();
  const photos=Array.isArray(files)?files:[];
- $('enquiry-fallback-info').textContent=photos.length
-  ?'Your phone cannot share all these pictures together. Save the photos below individually, then open the seller’s WhatsApp chat and attach them.'
-  :'The product photos could not be prepared on this device. You can still send the enquiry text to the seller.';
+ $('enquiry-fallback-title').textContent=shared?'Continue your WhatsApp enquiry':'Send pictures to the seller';
+ $('enquiry-fallback-info').textContent=shared
+  ?'Photo sharing has finished. If you have not sent the enquiry message yet, open the seller’s chat below. The images and message are two separate WhatsApp steps.'
+  :photos.length
+   ?'Your phone cannot share all five photos together. Save the photos below individually, then open the seller’s WhatsApp chat and attach them there.'
+   :'Photos were unavailable. You can still chat with the seller directly.';
  $('enquiry-seller-number').textContent='Seller WhatsApp: +'+number;
  const list=$('enquiry-save-list');
  photos.forEach((file,index)=>{
   const url=URL.createObjectURL(file);fallbackPhotoUrls.push(url);
-  const link=document.createElement('a');
-  link.href=url;link.download=file.name;
-  link.textContent='Save photo '+(index+1)+' of '+photos.length;
-  list.append(link);
+  const link=document.createElement('a');link.href=url;link.download=file.name;
+  link.textContent='Save photo '+(index+1)+' of '+photos.length;list.append(link);
  });
- $('enquiry-open-chat').href='https://wa.me/'+number+'?text='+encodeURIComponent(message);
+ $('enquiry-open-chat').href=whatsappSellerLink(number,message);
  if(!$('enquiry-fallback').open)$('enquiry-fallback').showModal();
 }
 $('enquiry-fallback-close').onclick=()=>$('enquiry-fallback').close();
 $('enquiry-fallback').addEventListener('close',clearFallbackPhotos);
 function sendPhotoEnquiry(files,message,number){
- // Native sharing begins directly inside the click gesture. The buyer chooses
- // WhatsApp and the recipient; web pages cannot send silently to a contact.
- const photos=Array.isArray(files)?files:[];
+ // The buyer chooses WhatsApp AND the destination chat in the native share
+ // sheet. Websites cannot attach files directly to a preselected wa.me chat.
+ const photos=Array.isArray(files)?files.slice(0,MAX_ENQUIRY_IMAGES):[];
  if(photos.length&&canShareEnquiryFiles(photos)){
   try{
-   void navigator.share({files:photos,title:'Product enquiry from '+store.name,text:message})
+   // Files only: text captions often repeat once for every photo on WhatsApp.
+   // Each generated JPG already visibly includes this merchant's shop link.
+   void navigator.share({files:photos})
+    .then(()=>showEnquiryFallback([],message,number,true))
     .catch(error=>{if(error?.name!=='AbortError')showEnquiryFallback(photos,message,number);});
   }catch{showEnquiryFallback(photos,message,number);}
  }else showEnquiryFallback(photos,message,number);
@@ -527,11 +565,13 @@ function updateSheet(){
  $('plus').disabled=!p||selectedQuantity>=Math.min(99,remaining(p));
  const enable=!!p&&!!unitOf(p)&&selectedQuantity<=remaining(p);
  $('sheet-add').disabled=!enable;$('sheet-enquire').disabled=!enable;
- const allowed=!isDemo&&/^[1-9]\d{7,14}$/.test(String(store?.whatsapp||'').replace(/\D/g,''));
+ const allowed=!isDemo&&!!whatsappSellerLink(sellerNumber(),'hello')&&!!shopUrl();
  const items=p&&unitOf(p)?[{productId:p.id,name:p.name,quantity:selectedQuantity,unit:unitOf(p).name,price:Number(unitOf(p).price),image_path:p.image_path||''}]:[];
  const state=allowed&&items.length?prewarmPhoto(items,()=>{if(selectedProduct===p)updateSheet();}):{ready:true,files:[]};
- $('sheet-ask').disabled=!allowed||!state.ready;
- $('sheet-ask').textContent=!state.ready?'Preparing photo…':state.files.length?'Ask seller with photo':'Ask seller on WhatsApp';
+ $('sheet-ask').disabled=!allowed;
+ $('sheet-ask').textContent='Ask seller on WhatsApp';
+ $('sheet-share-photo').disabled=!allowed||!state.ready||!state.files.length;
+ $('sheet-share-photo').textContent=!state.ready?'Preparing photo…':'Share product photo';
  $('sheet-add').textContent=p?.track_stock&&remaining(p)<1?'Sold out':'Add to cart';
 }
 function openSheet(p,source){
@@ -561,8 +601,11 @@ $('minus').onclick=()=>{selectedQuantity=Math.max(1,selectedQuantity-1);updateSh
 $('plus').onclick=()=>{selectedQuantity=Math.min(99,remaining(selectedProduct),selectedQuantity+1);updateSheet();};
 function refreshCartShareLabel(){
  const items=enquiryCartItems(),state=photoState(items);
- $('send').disabled=!cart.size||isDemo||!state.ready;
- $('send-label').textContent=isDemo?'Demo only · Enquiries disabled':!state.ready?'Preparing product photos…':state.files.length?'Share '+state.files.length+' photos & enquiry':'Send WhatsApp enquiry';
+ const allowed=!isDemo&&!!whatsappSellerLink(sellerNumber(),'hello')&&!!shopUrl();
+ $('send').disabled=!cart.size||!allowed;
+ $('send-label').textContent=isDemo?'Demo only · Enquiries disabled':'Chat with seller on WhatsApp';
+ $('send-photos').disabled=!cart.size||!allowed||!state.ready||!state.files.length;
+ $('send-photos').textContent=!state.ready?'Preparing up to 5 photos…':state.files.length?'Share '+state.files.length+' product photo'+(state.files.length===1?'':'s'):'No photos available';
 }
 function renderCart(){
  const host=$('cart-lines');host.replaceChildren();let qty=0,total=0;
@@ -584,10 +627,13 @@ function renderCart(){
  const state=qty&&!isDemo?prewarmPhoto(items,()=>{
   if(photoSignature(store?.name,enquiryCartItems())===photoSignature(store?.name,items))refreshCartShareLabel();
  }):{ready:true,files:[]};
- $('send').disabled=!qty||isDemo||!state.ready;
- $('send-label').textContent=isDemo?'Demo only · Enquiries disabled':!state.ready?'Preparing product photos…':state.files.length?'Share '+state.files.length+' photos & enquiry':'Send WhatsApp enquiry';
+ const allowed=!isDemo&&!!whatsappSellerLink(sellerNumber(),'hello')&&!!shopUrl();
+ $('send').disabled=!qty||!allowed;
+ $('send-label').textContent=isDemo?'Demo only · Enquiries disabled':'Chat with seller on WhatsApp';
+ $('send-photos').disabled=!qty||!allowed||!state.ready||!state.files.length;
+ $('send-photos').textContent=!state.ready?'Preparing up to 5 photos…':state.files.length?'Share '+state.files.length+' product photo'+(state.files.length===1?'':'s'):'No photos available';
  $('demo-signup').hidden=!isDemo;
- $('checkout-help').textContent=isDemo?'This is a sample shop. Orders and enquiries are disabled. Create a store to receive customers.':'Share up to '+MAX_ENQUIRY_IMAGES+' separate product photos. Choose WhatsApp and the seller’s chat. Your full basket remains in the message. No payment is collected here.';
+ $('checkout-help').textContent=isDemo?'This is a sample shop. Orders and enquiries are disabled. Create a store to receive customers.':'Chat opens the seller’s number directly with your full basket and shop link. Photos are optional: use the separate Share photos button to choose WhatsApp and a chat. No payment is collected here.';
 }
 function addSelected(openBasket=false){
  const p=selectedProduct,u=unitOf(p);
@@ -603,15 +649,16 @@ $('sheet-add').onclick=()=>addSelected(false);
 $('sheet-enquire').onclick=()=>addSelected(true);
 $('sheet-ask').onclick=()=>{
  if(!selectedProduct||isDemo)return;
- const number=String(store?.whatsapp||'').replace(/\D/g,'');
- if(!/^[1-9]\d{7,14}$/.test(number)){notify('This seller is not available on WhatsApp.');return;}
+ chatWithSeller(selectedProductMessage(),sellerNumber());
+};
+$('sheet-share-photo').onclick=()=>{
+ if(!selectedProduct||isDemo)return;
  const p=selectedProduct,u=unitOf(p);
- const items=[{productId:p.id,name:p.name,quantity:selectedQuantity,unit:u?.name||'piece',price:Number(u?.price||0),image_path:p.image_path||''}];
+ if(!u)return;
+ const items=[{productId:p.id,name:p.name,quantity:selectedQuantity,unit:u.name,price:Number(u.price),image_path:p.image_path||''}];
  const state=photoState(items);
- if(!state.ready){notify('Preparing your product picture. Please tap again in a moment.');return;}
- const message='Hello '+store.name+', I want to ask about '+selectedQuantity+' × '+p.name+' ('+currency(Number(u?.price||0)*selectedQuantity)+'). Is it available?';
- trackActivity('whatsapp_click');
- sendPhotoEnquiry(state.files,message,number);
+ if(!state.ready){notify('Preparing the product photo. Please tap again shortly.');return;}
+ sendPhotoEnquiry(state.files,selectedProductMessage(),sellerNumber());
 };
 function openCart(){
  closeSheet(false);$('overlay').classList.add('open');$('drawer').classList.add('open');
@@ -633,18 +680,13 @@ document.addEventListener('keydown',event=>{
 });
 $('send').onclick=()=>{
  if(isDemo||!cart.size)return;
- const number=String(store?.whatsapp||'').replace(/\D/g,'');
- if(!/^[1-9]\d{7,14}$/.test(number)){notify('The seller has no valid WhatsApp number.');return;}
+ chatWithSeller(basketMessage(enquiryCartItems()),sellerNumber());
+};
+$('send-photos').onclick=()=>{
+ if(isDemo||!cart.size)return;
  const selected=enquiryCartItems(),photo=photoState(selected);
- if(!photo.ready){notify('Preparing product photos. Please tap again in a moment.');return;}
- const items=selected.map(item=>item.quantity+' × '+item.name+' ('+item.unit+') — '+currency(item.price*item.quantity)).join('\n');
- const subtotal=selected.reduce((sum,item)=>sum+item.quantity*item.price,0);
- const note=$('customer-note').value.trim();
- const replacement={store_name:store.name,items,subtotal:currency(subtotal),customer_note:note?'Customer note: '+note:''};
- const template=typeof store.whatsapp_template==='string'&&store.whatsapp_template.trim()?store.whatsapp_template:defaultWhatsApp;
- const message=template.replace(/\{(store_name|items|subtotal|customer_note)\}/g,(_,key)=>replacement[key]).trim();
- trackActivity('whatsapp_click');
- sendPhotoEnquiry(photo.files,message,number);
+ if(!photo.ready){notify('Preparing pictures. Please tap again shortly.');return;}
+ sendPhotoEnquiry(photo.files,basketMessage(selected),sellerNumber());
 };
 (async()=>{
  try{
