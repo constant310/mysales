@@ -28,7 +28,7 @@ test('original product image is fitted, never cropped or synthesized, and URL is
  const ctx={
   fillRect(){},beginPath(){},moveTo(){},arcTo(){},quadraticCurveTo(){},bezierCurveTo(){},lineTo(){},closePath(){},fill(){},stroke(){},save(){},restore(){},translate(){},rotate(){},arc(){},
   createLinearGradient(){return {addColorStop(){}};},
-  measureText(t){return {width:String(t).length*18};},
+  measureText(t){return {width:String(t).length*10};},
   fillText(t){calls.text.push(String(t));},
   drawImage(...args){calls.draw.push(args);},
  };
