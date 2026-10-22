@@ -26,7 +26,7 @@ test('native share passes only prepared files, never a repeated URL caption',()=
 test('original product image is fitted, never cropped or synthesized, and URL is drawn once',async()=>{
  const calls={text:[],draw:[],disposals:0};
  const ctx={
-  fillRect(){},beginPath(){},moveTo(){},arcTo(){},closePath(){},fill(){},
+  fillRect(){},beginPath(){},moveTo(){},arcTo(){},quadraticCurveTo(){},bezierCurveTo(){},lineTo(){},closePath(){},fill(){},stroke(){},save(){},restore(){},translate(){},rotate(){},arc(){},
   createLinearGradient(){return {addColorStop(){}};},
   measureText(t){return {width:String(t).length*18};},
   fillText(t){calls.text.push(String(t));},
@@ -44,12 +44,12 @@ test('original product image is fitted, never cropped or synthesized, and URL is
    }),formatPrice:()=> '₦7,000'
   });
   assert.equal(blob.type,'image/jpeg');
-  assert.equal(canvas.width,1080);
-  assert.equal(canvas.height,1920);
+  assert.equal(canvas.width,864);
+  assert.equal(canvas.height,1536);
   assert.equal(calls.draw.length,1);
   assert.equal(calls.draw[0][0],image);
   assert.equal(calls.draw[0].length,5); // Canvas drawImage(image,dx,dy,dw,dh), not the 9-arg crop form
-  assert.equal(calls.text.filter(t=>t===url).length,1);
+  assert.equal(calls.text.filter(t=>t==='store.mysalesofficial.com/safe-minds').length,1);
   assert.equal(calls.text.includes('₦7,000'),false);
   assert.equal(calls.disposals,1);
  }finally{globalThis.document=previousDocument;}
