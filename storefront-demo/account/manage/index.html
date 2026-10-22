@@ -319,6 +319,37 @@ main{max-width:870px;padding-top:19px}
 #business-other-country[hidden]{display:none!important}
 @media(max-width:380px){.manager-phone-row{grid-template-columns:1fr}}
 
+/* Direct-from-phone Status batch; status-only images never require a server upload. */
+.status-quick{background:linear-gradient(145deg,#F0FBF3,#fff 48%);border:1px solid #B9E2C6;border-radius:18px;padding:19px;margin:16px 0 23px}
+.status-quick h3{font-size:1.13rem;margin:5px 0 7px;color:#144F30}
+.status-quick>p{font-size:.8rem;line-height:1.6;color:#65796A;margin:0 0 13px}
+.status-quick .quick-tag{font-size:.65rem;letter-spacing:.1em;color:#148345;font-weight:950}
+.status-quick-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:22px 13px;border:2px dashed #85C99A;border-radius:13px;background:#fff;cursor:pointer;text-align:center;color:#166B39;font-size:.88rem;font-weight:900}
+.status-quick-drop small{font-size:.72rem;font-weight:500;color:#6C8774}
+.status-quick-drop input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.status-quick-drop:focus-within{outline:3px solid #9DD5AC;outline-offset:2px}
+.status-quick-count{display:block;margin:11px 0 8px;font-size:.74rem;font-weight:900;color:#24774A}
+.quick-status-row{display:grid;grid-template-columns:105px minmax(0,1fr);gap:12px;background:#fff;border:1px solid #D8E9DD;border-radius:12px;padding:11px;margin:9px 0;align-items:start}
+.quick-status-row>img{width:105px;height:125px;object-fit:contain;border-radius:9px;background:#F1F6F2}
+.quick-status-fields{display:grid;grid-template-columns:1fr 1fr;gap:5px 9px;min-width:0}
+.quick-status-fields label{display:block;color:#436950;font-size:.72rem;font-weight:850;margin:0}
+.quick-status-fields input{width:100%;min-width:0;padding:9px;border:1px solid #CFE1D3;border-radius:8px;font-size:16px;color:#233B2B}
+.quick-status-save-state{grid-column:1/-1;color:#6F8473;font-size:.68rem}
+.quick-status-remove{justify-self:start;border:0;background:#F9EBEA;color:#A13E35;padding:7px 11px;border-radius:7px;font-weight:850;font-size:.72rem}
+.status-quick-options{display:flex;gap:9px;align-items:center;margin:12px 0;font-size:.79rem;font-weight:800;color:#385C45}
+.status-quick-options input{width:19px;height:19px;accent-color:#168541}
+.status-quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.status-quick-actions #status-quick-prepare{grid-column:1/-1}
+.status-quick-actions .btn{font-size:.78rem;min-height:47px;white-space:normal}
+#status-quick-save{width:100%;margin-top:8px;background:#fff}
+#status-quick-feedback{font-size:.76rem;line-height:1.55;margin:11px 0 0;color:#52765D}
+#status-quick-previews{margin-top:11px}
+.status-quick-tip{font-size:.72rem;color:#698270;line-height:1.6;margin-top:11px}
+.status-quick-empty[hidden]{display:none}
+.status-shop-picker-heading{font-size:1rem;margin:24px 0 8px;padding-top:18px;border-top:1px solid #E0EAE3;color:#195C35}
+@media(max-width:500px){.status-quick{padding:14px}.quick-status-row{grid-template-columns:85px minmax(0,1fr);gap:8px;padding:8px}.quick-status-row>img{width:85px;height:104px}.quick-status-fields{grid-template-columns:1fr}.quick-status-fields input{min-height:39px}.status-quick-actions{grid-template-columns:1fr 1fr}.status-quick-actions .btn{font-size:.74rem}}
+
+
 /* WhatsApp Status publisher inside the owner's manager, never shown to visitors. */
 #status-section{max-width:760px;margin:18px auto 0}
 #status-section[hidden]{display:none!important}
@@ -405,7 +436,32 @@ main{max-width:870px;padding-top:19px}
 <section class="panel" id="status-section" aria-labelledby="status-heading" hidden>
  <div class="status-intro"><span class="pill">FREE MARKETING TOOL</span><h2 id="status-heading">Post products to WhatsApp Status</h2>
  <p>Choose products and create a separate portrait Status picture for each. Each image includes the product photo, name, shop link and mySales logo. Choose whether to show the price — <strong>never stock or order quantity.</strong></p></div>
- <label class="status-price-toggle" for="status-show-price"><input type="checkbox" id="status-show-price" checked><span><strong>Show prices</strong><small>Turn off to share photos without prices</small></span></label>
+ <div class="status-quick" id="status-quick-upload">
+ <span class="quick-tag">FASTEST WAY TO POST</span>
+ <h3>Quick batch: add photos and prices</h3>
+ <p>Choose several pictures directly from your phone. Enter each name and price, then create one Safe Minds-style Status design per photo. You can share straight away without uploading your products to the shop first.</p>
+ <label class="status-quick-drop" for="status-quick-input">
+  <span>＋ Choose photos from your phone</span>
+  <small>Up to 12 JPG, PNG or WebP pictures · 18 MB each</small>
+  <input id="status-quick-input" type="file" accept="image/jpeg,image/png,image/webp" multiple aria-label="Choose product pictures for WhatsApp Status">
+ </label>
+ <span class="status-quick-count" id="status-quick-count">0 / 12 photos</span>
+ <p class="status-quick-empty" id="status-quick-empty">Your pictures will appear here. Enter a name and price beside each one.</p>
+ <div id="status-quick-list" aria-live="polite"></div>
+ <label class="status-quick-options" for="status-quick-show-price">
+  <input id="status-quick-show-price" type="checkbox" checked> Show prices on Status pictures
+ </label>
+ <div class="status-quick-actions">
+  <button class="btn" id="status-quick-prepare" type="button" disabled>Generate portrait Status pictures</button>
+  <button class="btn btn-outline" id="status-quick-share" type="button" disabled>Share to WhatsApp Status</button>
+  <button class="btn btn-outline" id="status-quick-save" type="button" disabled>Save batch to my shop</button>
+ </div>
+ <p id="status-quick-feedback" role="status" aria-live="polite">Choose photos to start. Status images are created on your phone for speed.</p>
+ <div id="status-quick-previews" class="status-previews" aria-label="Quick batch generated portraits"></div>
+ <p class="status-quick-tip">The printed store link appears once per image. For a tappable link, add a WhatsApp Status link sticker after sharing. WhatsApp requires confirmation before posting. Saving products to your shop is optional.</p>
+</div>
+<h3 class="status-shop-picker-heading">Or use products already in your shop</h3>
+<label class="status-price-toggle" for="status-show-price"><input type="checkbox" id="status-show-price" checked><span><strong>Show prices</strong><small>Turn off to share photos without prices</small></span></label>
  <div class="status-toolbar"><span id="status-selection-count">0 selected</span><button id="status-select-all" type="button">Select first 12</button><button id="status-clear" type="button">Clear</button></div>
  <div id="status-products" class="status-grid" role="group" aria-label="Choose products for WhatsApp Status"></div>
  <div class="status-actions"><button type="button" class="btn" id="status-prepare" disabled>Prepare Status pictures</button><button type="button" class="btn btn-outline" id="status-share" disabled>Share to WhatsApp Status</button></div>
@@ -569,6 +625,7 @@ import {accessToken,requireAccount,logout} from '/auth/client.mjs';
 import {fillCountryCodes,showOtherCountryCode,internationalWhatsApp,splitInternationalWhatsApp} from '/auth/phone.mjs';
 import {photoProxyPath,canShareEnquiryFiles,MAX_ENQUIRY_IMAGES} from '/shop/whatsapp-enquiry.mjs';
 import {renderStatusImage,MAX_STATUS_ITEMS} from '/status-batch.mjs';
+import {setupQuickStatusBatch,validStatusPrice} from '/status-quick-batch.mjs';
 import {createPhotoFramer} from '/photo-framing.mjs';
 const $=id=>document.getElementById(id),notice=$('notice'),list=$('products');
 const photoFramer=createPhotoFramer($('photo-framer'));
@@ -643,8 +700,8 @@ function showManagerView(){
  const adding=isAdding||!hasProducts;
  $('add-section').hidden=!adding;
  $('product-section').hidden=adding;
- $('status-section').hidden=adding;
- $('status-open').hidden=!hasProducts;
+ $('status-section').hidden=false;
+ $('status-open').hidden=false;
  $('cancel-add').hidden=!hasProducts;
  $('add-more').hidden=!hasProducts;
  let alreadyShown=false;
@@ -884,6 +941,51 @@ $('status-share').onclick=()=>{
    .catch(error=>{if(error?.name!=='AbortError')setStatusFeedback('Sharing could not start. Download the pictures above and post through WhatsApp Status.',true);});
  }catch{setStatusFeedback('This browser cannot share photos. Download and post them in WhatsApp Status.',true);}
 };
+
+setupQuickStatusBatch({
+ getStore:()=>currentStore,
+ getShopUrl:statusShopUrl,
+ formatPrice:currency,
+ onShared:()=>reportMerchantActivity('product_share'),
+ saveToShop:async item=>{
+  const name=String(item.name||'').trim();
+  const price=validStatusPrice(item.price);
+  if(!name||price===null)throw Error('Enter a name and valid price.');
+  // Keep the created product ID to prevent duplicate products on upload retries.
+  const photo=await preparePhoto(item.file);
+  if(!item.savedId){
+   const created=await post('products',{
+    name,price,description:'',category:'',trackStock:false,
+    baseUnit:'piece',unitName:'piece',factor:1
+   });
+   if(!created?.id)throw Error('The store did not return a product ID.');
+   item.savedId=created.id;
+  }
+  if(!item.photoSaved){
+   const data=new FormData();data.append('productId',item.savedId);
+   data.append('image',photo);
+   const result=await api('upload-image',{method:'POST',body:data});
+   if(!result?.imageUrl)throw Error('Photo upload failed; tap Save again to retry.');
+   item.photoSaved=true;
+  }
+  if(!item.published){
+   await post('publish',{productId:item.savedId,published:true});
+   item.published=true;
+  }
+ },
+ onSaved:async()=>{
+  // Update store visibility once after both upload workers finish.
+  if(currentStore?.status!=='published'){
+   const updated=await post('store-settings',{
+    name:currentStore.name,whatsapp:currentStore.whatsapp,
+    description:currentStore.description||'',status:'published'
+   });
+   currentStore=updated.store;updateHero();
+  }
+  await refresh();say('Quick batch products saved to your shop.');
+ }
+});
+
 
 /* Quick vendor catalogue: one actual image containing selected photos and prices.
    This is a private manager feature; no product or management data is sent to another service. */
