@@ -15,11 +15,22 @@ export function statusSharePayload(files) {
  return {files};
 }
 
-function rounded(ctx,x,y,w,h,r){
- const d=Math.min(r,w/2,h/2);
- ctx.beginPath();ctx.moveTo(x+d,y);ctx.arcTo(x+w,y,x+w,y+h,d);
- ctx.arcTo(x+w,y+h,x,y+h,d);ctx.arcTo(x,y,x+w,y,d);
- ctx.arcTo(x,y,x+w,y,d);ctx.closePath();
+export function rounded(ctx,x,y,w,h,r){
+ // Use a closed, clockwise rounded rectangle. The previous arcTo path
+ // skipped the bottom-left corner and doubled the top-left segment,
+ // creating giant diagonal white wedges over the product photograph.
+ const d=Math.min(Math.max(0,r),w/2,h/2);
+ ctx.beginPath();
+ ctx.moveTo(x+d,y);
+ ctx.lineTo(x+w-d,y);
+ ctx.quadraticCurveTo(x+w,y,x+w,y+d);
+ ctx.lineTo(x+w,y+h-d);
+ ctx.quadraticCurveTo(x+w,y+h,x+w-d,y+h);
+ ctx.lineTo(x+d,y+h);
+ ctx.quadraticCurveTo(x,y+h,x,y+h-d);
+ ctx.lineTo(x,y+d);
+ ctx.quadraticCurveTo(x,y,x+d,y);
+ ctx.closePath();
 }
 function textFit(ctx,text,x,y,width,size=60,min=26) {
  let fontSize=size;
@@ -44,58 +55,170 @@ function wrapProductName(ctx,text,width,maxLines=2){
  return lines;
 }
 
+/**
+ * Original Safe Minds-inspired mySales Status template, 864x1536 (9:16).
+ * Draw each layer in a fixed order: background -> product card -> genuine
+ * product photo -> editable details -> shop CTA -> mySales footer.
+ * Product photos are always contained; never stretched or cropped.
+ */
 export async function renderStatusImage(product,{storeName,shopUrl,showPrice,loadPhoto,formatPrice}) {
  const loaded=await loadPhoto(product);
- if(!loaded?.image?.naturalWidth||!loaded?.image?.naturalHeight){
+ const photo=loaded?.image;
+ const naturalW=photo?.naturalWidth||photo?.width||0;
+ const naturalH=photo?.naturalHeight||photo?.height||0;
+ if(!naturalW||!naturalH){
   loaded?.dispose?.();
-  throw Error('Original product image unavailable for '+product.name);
+  throw Error('Product photo unavailable for '+(product?.name||'this item'));
  }
- try{
-  const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1920;
+ try {
+  const W=864,H=1536;
+  const canvas=document.createElement('canvas');
+  canvas.width=W;canvas.height=H;
   const ctx=canvas.getContext('2d',{alpha:false});
-  if(!ctx)throw Error('Your phone cannot prepare WhatsApp Status pictures.');
-  const width=1080;
-  ctx.fillStyle='#F1F7F1';ctx.fillRect(0,0,width,1920);
-  const gradient=ctx.createLinearGradient(0,0,1080,400);
-  gradient.addColorStop(0,'#104A30');gradient.addColorStop(1,'#14663F');
-  ctx.fillStyle=gradient;ctx.fillRect(0,0,width,350);
-  ctx.fillStyle='#DCF4E3';ctx.font='700 29px Arial, sans-serif';ctx.fillText('AVAILABLE IN OUR STORE',60,76);
-  ctx.fillStyle='#FFFFFF';
-  textFit(ctx,storeName||'Our store',59,177,965,77,34);
-  ctx.font='32px Arial, sans-serif';ctx.fillStyle='#DDF4E4';ctx.fillText('Discover something you will love',60,248);
+  if(!ctx)throw Error('Your phone cannot prepare this Status design.');
+  const circle=(x,y,r,color)=>{
+   ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+   ctx.fillStyle=color;ctx.fill();
+  };
+  const pill=(x,y,w,h,r,color)=>{
+   rounded(ctx,x,y,w,h,r);
+   ctx.fillStyle=color;ctx.fill();
+  };
+  const titleLines=(value,maxWidth,maxLines=2)=>{
+   const parts=String(value||'Product').trim().split(/\s+/);
+   const lines=[];let current='';
+   for(const word of parts){
+    const candidate=current?current+' '+word:word;
+    if(current&&ctx.measureText(candidate).width>maxWidth){
+     lines.push(current);current=word;
+    }else current=candidate;
+   }
+   if(current)lines.push(current);
+   if(lines.length>maxLines){
+    lines.length=maxLines;
+    let last=lines[maxLines-1]||'';
+    while(last.length>1&&ctx.measureText(last+'…').width>maxWidth)last=last.slice(0,-1);
+    lines[maxLines-1]=last+'…';
+   }
+   return lines.map(line=>{
+    while(line.length>1&&ctx.measureText(line).width>maxWidth)line=line.slice(0,-2)+'…';
+    return line;
+   });
+  };
 
-  // Light product card, with an image-fit region. Never crop, invent or retouch photos.
-  ctx.fillStyle='#FFFFFF';rounded(ctx,36,322,1008,1262,38);ctx.fill();
-  ctx.fillStyle='#F5F9F5';rounded(ctx,58,349,964,1010,24);ctx.fill();
-  const img=loaded.image;
-  const maxW=922,maxH=980,scale=Math.min(maxW/img.naturalWidth,maxH/img.naturalHeight);
-  const drawW=img.naturalWidth*scale,drawH=img.naturalHeight*scale;
+  // Soft green and white backdrop from the supplied Safe Minds poster.
+  ctx.fillStyle='#F0F7F2';ctx.fillRect(0,0,W,H);
+  const head=ctx.createLinearGradient(0,0,W,525);
+  head.addColorStop(0,'#125E3C');
+  head.addColorStop(.6,'#075534');
+  head.addColorStop(1,'#06502F');
+  ctx.fillStyle=head;ctx.fillRect(0,0,W,565);
+  ctx.strokeStyle='#287D4E';ctx.lineWidth=80;
+  ctx.beginPath();ctx.arc(938,-50,207,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle='#F0F7F2';
+  ctx.beginPath();ctx.moveTo(0,392);
+  ctx.bezierCurveTo(140,560,330,504,510,492);
+  ctx.bezierCurveTo(675,485,780,590,864,550);
+  ctx.lineTo(864,1412);ctx.lineTo(0,1412);ctx.closePath();ctx.fill();
+
+  // Hero text. Keep product title and price out of this area.
+  pill(48,49,314,44,16,'#167047');
+  ctx.font='700 22px Arial, sans-serif';ctx.fillStyle='#FFFFFF';
+  ctx.fillText('AVAILABLE IN OUR STORE',69,80,285);
+  ctx.fillStyle='#FFFFFF';
+  textFit(ctx,String(storeName||'Our Store'),60,172,748,78,37);
+  ctx.fillStyle='#E6F4EB';ctx.font='29px Arial, sans-serif';
+  ctx.fillText('Discover something you will love',61,220,724);
+  ctx.save();ctx.translate(710,204);ctx.rotate(.34);pill(0,0,14,49,7,'#70B68C');ctx.restore();
+  ctx.save();ctx.translate(748,222);ctx.rotate(.8);pill(0,0,14,48,7,'#70B68C');ctx.restore();
+
+  // Clean, floating white product card matching the reference layout.
+  ctx.save();ctx.shadowColor='rgba(7,60,35,0.13)';
+  ctx.shadowBlur=25;ctx.shadowOffsetY=10;
+  pill(47,253,770,1005,37,'#FFFFFF');
+  ctx.restore();
+  // The photo area is gently tinted; no overlay ever covers the actual photo.
+  pill(62,268,740,816,27,'#F8FBF9');
+  const surface=ctx.createLinearGradient(62,268,802,1084);
+  surface.addColorStop(0,'#FFFFFF');
+  surface.addColorStop(.62,'#F7FAF8');
+  surface.addColorStop(1,'#EDF6F2');
+  pill(62,268,740,816,27,surface);
+
+  // Contain-fit: every pixel of each real product photo remains visible.
+  // For horizontal items this intentionally allows breathing room above/below.
+  const frame={x:73,y:279,w:718,h:792};
+  const scale=Math.min(frame.w/naturalW,frame.h/naturalH);
+  const dw=naturalW*scale,dh=naturalH*scale;
+  const px=frame.x+(frame.w-dw)/2,py=frame.y+(frame.h-dh)/2;
   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-  ctx.drawImage(img,(width-drawW)/2,364+(976-drawH)/2,drawW,drawH);
-  ctx.fillStyle='#E4EEE6';ctx.fillRect(68,1381,944,2);
-  ctx.fillStyle='#203E2B';ctx.font='800 57px Arial, sans-serif';
-  const lines=wrapProductName(ctx,product.name,936,2);
-  lines.forEach((line,index)=>ctx.fillText(line,74,1450+index*61,936));
-  if(showPrice){
-   ctx.fillStyle='#148044';textFit(ctx,formatPrice(product.units[0].price),74,1555,923,53,35);
+  ctx.drawImage(photo,px,py,dw,dh);
+
+  // Product details: original reference uses dark green type, NOT a price pill.
+  ctx.fillStyle='#E4ECE6';ctx.fillRect(80,1097,704,2);
+  ctx.fillStyle='#0A4930';
+  const name=String(product?.name||'Product').trim();
+  const nameFont=name.length>40?42:name.length>28?46:56;
+  ctx.font='800 '+nameFont+'px Arial, sans-serif';
+  const names=titleLines(name,704,2);
+  const firstY=names.length>1?1147:1166;
+  names.forEach((line,i)=>ctx.fillText(line,81,firstY+i*47,704));
+  if(showPrice!==false){
+   const unitPrice=product?.units?.[0]?.price;
+   if(unitPrice!==undefined&&unitPrice!==null){
+    ctx.fillStyle='#08613D';
+    const priceText=formatPrice(unitPrice);
+    textFit(ctx,priceText,81,names.length>1?1236:1223,694,55,31);
+   }
   }
 
-  ctx.fillStyle='#E1F0E7';rounded(ctx,46,1610,988,166,27);ctx.fill();
-  ctx.fillStyle='#0B5733';ctx.font='800 36px Arial, sans-serif';ctx.fillText('SHOP HERE',78,1669);
-  ctx.font='32px Arial, sans-serif';
-  // Exactly ONE link occurrence, in the picture footer, never in native share text.
-  textFit(ctx,shopUrl,78,1733,920,34,20);
+  // Soft mint, full-width shop bar with one shop link, no duplicate captions.
+  pill(48,1282,768,111,36,'#E3F1E9');
+  circle(121,1339,37,'#075C3A');
+  ctx.strokeStyle='#FFFFFF';ctx.lineWidth=3.4;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(104,1325);ctx.lineTo(110,1325);
+  ctx.lineTo(115,1347);ctx.lineTo(139,1347);
+  ctx.lineTo(147,1330);ctx.lineTo(113,1330);ctx.stroke();
+  for(const cx of [118,139]){
+   ctx.beginPath();ctx.arc(cx,1354,2.7,0,Math.PI*2);ctx.fillStyle='#FFFFFF';ctx.fill();
+  }
+  ctx.fillStyle='#17583A';ctx.font='26px Arial, sans-serif';
+  ctx.fillText('Shop here:',190,1327);
+  const readableLink=String(shopUrl||'').replace(/^https?:\/\//i,'').replace(/\/$/,'');
+  ctx.fillStyle='#0B4F34';
+  // Display the complete canonical URL whenever possible.
+  textFit(ctx,readableLink,189,1364,523,25,15);
+  circle(755,1339,37,'#087546');
+  ctx.lineWidth=4;ctx.strokeStyle='#FFFFFF';
+  ctx.beginPath();ctx.moveTo(744,1322);ctx.lineTo(761,1339);
+  ctx.lineTo(744,1356);ctx.stroke();
 
-  ctx.fillStyle='#0C5734';ctx.fillRect(0,1800,width,120);
-  ctx.fillStyle='#1CA34B';rounded(ctx,360,1826,75,68,8);ctx.fill();
-  ctx.fillStyle='#FFFFFF';ctx.font='800 34px Arial, sans-serif';ctx.fillText('mS',377,1874);
-  ctx.fillStyle='#FFFFFF';ctx.font='800 47px Arial, sans-serif';ctx.fillText('mySales',450,1874);
+  // White-to-green bottom sweep and centred mySales wordmark.
+  ctx.fillStyle='#FFFFFF';ctx.beginPath();
+  ctx.moveTo(0,1400);
+  ctx.quadraticCurveTo(180,1433,439,1405);
+  ctx.quadraticCurveTo(690,1395,864,1413);
+  ctx.lineTo(864,1536);ctx.lineTo(0,1536);
+  ctx.closePath();ctx.fill();
+  const foot=ctx.createLinearGradient(0,1436,864,1536);
+  foot.addColorStop(0,'#005633');foot.addColorStop(1,'#08462E');
+  ctx.fillStyle=foot;ctx.beginPath();
+  ctx.moveTo(0,1450);
+  ctx.quadraticCurveTo(353,1379,864,1445);
+  ctx.lineTo(864,1536);ctx.lineTo(0,1536);ctx.closePath();ctx.fill();
+  pill(312,1435,68,69,8,'#14A354');
+  ctx.fillStyle='#FFFFFF';ctx.font='800 32px Arial, sans-serif';
+  ctx.fillText('mS',321,1481);
+  ctx.fillStyle='#FFFFFF';ctx.font='800 45px Arial, sans-serif';
+  ctx.fillText('mySales',396,1487);
 
-  const blob=await new Promise((resolve,reject)=>canvas.toBlob(
-   image=>image?resolve(image):reject(Error('Unable to export this status picture.')),
-   'image/jpeg',.86));
+  const blob=await new Promise((resolve,reject)=>{
+   canvas.toBlob(value=>value?resolve(value):reject(Error('Unable to export Status picture.')),'image/jpeg',.82);
+  });
   return blob;
- }finally{loaded.dispose();}
+ }finally{
+  loaded?.dispose?.();
+ }
 }
 
 export function setupStatusBatch({getProducts,getStore,getPublicUrl,loadPhoto,formatPrice,onShare}) {
