@@ -85,7 +85,7 @@ test('original product is never cropped in Status; the price is optional',async(
  const calls={texts:[],draws:[],disposed:0};
  const ctx={beginPath(){},moveTo(){},arcTo(){},quadraticCurveTo(){},bezierCurveTo(){},lineTo(){},closePath(){},fill(){},fillRect(){},stroke(){},save(){},restore(){},translate(){},rotate(){},arc(){},
  fillText(s){calls.texts.push(String(s))},drawImage(...args){calls.draws.push(args)},
- measureText(s){return {width:String(s).length*16}},createLinearGradient(){return {addColorStop(){}}}};
+ measureText(s){return {width:String(s).length*10}},createLinearGradient(){return {addColorStop(){}}}};
  const documentBefore=globalThis.document;
  globalThis.document={createElement(tag){assert.equal(tag,'canvas');return{
   width:0,height:0,getContext(){return ctx},
