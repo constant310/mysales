@@ -29,7 +29,7 @@ export function whatsappSellerLink(rawNumber,message) {
 export function withStoreLink(message,shopUrl) {
  const text=String(message||'').trim();
  const link=String(shopUrl||'').trim();
- return link&&!text.includes(link)?text+'\n\nShop here: '+link:text;
+ return link&&!text.includes(link)?text+'\n\nShop: '+link:text;
 }
 export function canShareEnquiryFiles(files,device=typeof navigator==='undefined'?null:navigator){
  if(!Array.isArray(files)||!files.length||typeof device?.share!=='function'||typeof device?.canShare!=='function')return false;
@@ -176,7 +176,7 @@ export async function prepareEnquiryPicture(storeName,items,{variant='enquiry',s
    const visibleUrl=String(shopUrl||'').replace(/^https?:\/\//,'');
    if(visibleUrl){
     ctx.fillStyle='#0B5E36';ctx.font='bold 22px Arial,sans-serif';
-    ctx.fillText('SHOP HERE',32,height-86);
+    ctx.fillText('SHOP:',32,height-86);
     ctx.fillStyle='#154D32';ctx.font='bold 28px Arial,sans-serif';
     ctx.fillText(visibleUrl,32,height-46,width-64);
    }
