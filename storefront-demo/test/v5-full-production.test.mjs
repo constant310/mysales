@@ -83,7 +83,7 @@ test('V5 merchant Status batches use same mySales green template and exactly one
 
 test('original product is never cropped in Status; the price is optional',async()=>{
  const calls={texts:[],draws:[],disposed:0};
- const ctx={beginPath(){},moveTo(){},arcTo(){},closePath(){},fill(){},fillRect(){},
+ const ctx={beginPath(){},moveTo(){},arcTo(){},quadraticCurveTo(){},bezierCurveTo(){},lineTo(){},closePath(){},fill(){},fillRect(){},stroke(){},save(){},restore(){},translate(){},rotate(){},arc(){},
  fillText(s){calls.texts.push(String(s))},drawImage(...args){calls.draws.push(args)},
  measureText(s){return {width:String(s).length*16}},createLinearGradient(){return {addColorStop(){}}}};
  const documentBefore=globalThis.document;
@@ -101,7 +101,7 @@ test('original product is never cropped in Status; the price is optional',async(
  assert.equal(calls.draws.length,1);
  assert.equal(calls.draws[0][0],image);
  assert.equal(calls.draws[0].length,5);
- assert.equal(calls.texts.filter(s=>s===shopUrl).length,1);
+ assert.equal(calls.texts.filter(s=>s==='store.mysalesofficial.com/safe-minds').length,1);
  assert.equal(calls.texts.includes('₦18,000'),false);
  assert.equal(calls.disposed,1);
  }finally{globalThis.document=documentBefore}
